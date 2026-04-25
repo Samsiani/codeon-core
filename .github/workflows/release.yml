@@ -1,17 +1,17 @@
 name: Release CodeOn Core
 
 # Triggers on any pushed tag matching v*. Builds an installable ZIP
-# from the repo's already-committed source (vendor/ included) and
-# attaches it to the GitHub Release.
+# and attaches it to the GitHub Release. workflow_dispatch from a
+# branch is also supported for validation — in that case the publish
+# step is skipped (no tag context).
 #
-# WHY VENDOR IS COMMITTED FOR THIS PLUGIN (and not for other CodeOn
-# plugins): codeon-core is the public WordPress.org plugin. The .org
-# SVN distribution requires vendor/ inside the package anyway, so
-# committing it removes the cross-repo Composer auth dance that would
-# otherwise need a PAT with read access to the private framework repo
-# Samsiani/codeon-plugin-basic-architecture. To bump the framework
-# version: locally `composer update codeon/framework`, commit the
-# regenerated vendor/, then tag.
+# WHY VENDOR IS COMMITTED FOR THIS PLUGIN: codeon-core is the public
+# WordPress.org plugin. The .org SVN distribution requires vendor/
+# inside the package anyway, so committing vendor here removes the
+# cross-repo Composer auth dependency that would otherwise need a PAT
+# with read access to Samsiani/codeon-plugin-basic-architecture. To
+# bump the framework version: locally `composer update
+# codeon/framework`, commit the regenerated vendor/, then tag.
 
 on:
   push:
@@ -69,6 +69,7 @@ jobs:
           ls -la "${OUT}"
 
       - name: Extract release notes from readme.txt
+        if: startsWith(github.ref, 'refs/tags/')
         env:
           TAG: ${{ steps.tag.outputs.name }}
         run: |
@@ -92,8 +93,14 @@ jobs:
           echo "::endgroup::"
 
       - name: Publish Release
+        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
           files: codeon-core-*.zip
           body_path: release-notes.md
           draft: false
+
+      - name: Dispatch summary
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        run: |
+          echo "::notice::Manual run on a branch — built ZIP successfully but skipped Publish Release (no tag context). Push a tag like \`git tag v0.1.1 && git push origin v0.1.1\` to publish a real release."
