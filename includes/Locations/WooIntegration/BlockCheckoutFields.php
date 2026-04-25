@@ -114,6 +114,9 @@ final class BlockCheckoutFields
             'sanitize_callback' => static fn(string $v): string => sanitize_key($v),
         ]);
 
+        // WC Blocks rejects most HTML attributes for security. `list` and
+        // `placeholder` are NOT in its allowlist as of WC 10.x — instead
+        // we attach those via JS after render (see assets/js/blocks-cascade.js).
         woocommerce_register_additional_checkout_field([
             'id'         => self::FIELD_SET,
             'label'      => __('Settlement (city / town / village)', 'codeon-core'),
@@ -121,10 +124,8 @@ final class BlockCheckoutFields
             'type'       => 'text',
             'required'   => $setRequired,
             'attributes' => [
-                'autocomplete'   => 'address-level2',
-                'list'           => 'codeon-geo-settlements',
-                'data-codeon-geo'=> 'settlement',
-                'placeholder'    => __('Start typing the name…', 'codeon-core'),
+                'autocomplete'    => 'address-level2',
+                'data-codeon-geo' => 'settlement',
             ],
             'validate_callback' => [$this, 'validateSettlement'],
             'sanitize_callback' => static fn(string $v): string => sanitize_text_field($v),

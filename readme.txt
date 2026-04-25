@@ -5,7 +5,7 @@ Requires at least: 6.2
 Tested up to: 6.7
 Requires PHP: 8.1
 Requires Plugins: woocommerce
-Stable tag: 0.1.4
+Stable tag: 0.1.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,9 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 3. CodeOn hub menu with installed plugins listed underneath.
 
 == Changelog ==
+
+= 0.1.5 — 2026-04-25 =
+* Block-checkout settlement field: removed `list` and `placeholder` from server-side attributes (WC Blocks rejects them as invalid). Now attached client-side via `assets/js/blocks-cascade.js` after WC renders the input.
 
 = 0.1.4 — 2026-04-25 =
 * **Critical fix:** "Security check failed" on settings save when CodeOn Core is co-installed with another framework consumer (e.g. fina-sync). Fixed via framework v0.3.4 which adds a slug discriminator to the global admin-post save handler.

@@ -24,13 +24,18 @@
     // the input name attribute, so target by data-codeon-geo attribute we
     // set in PHP.
     function findFields(scope) {
+        const set = scope.querySelector('[data-codeon-geo="settlement"]');
+        // Attach datalist binding + placeholder via JS (WC Blocks strips
+        // these attributes server-side for security; we add them client-
+        // side once the input is rendered).
+        if (set && !set.getAttribute('list')) {
+            set.setAttribute('list', 'codeon-geo-settlements');
+            set.setAttribute('placeholder', 'Start typing the name…');
+        }
         return {
             mun: scope.querySelector('[data-codeon-geo="municipality"]'),
-            set: scope.querySelector('[data-codeon-geo="settlement"]'),
+            set: set,
             datalist: document.getElementById('codeon-geo-settlements'),
-            // WC Blocks renders state as a select with id ending in `-state`
-            // for billing/shipping. There may be 0, 1, or 2 of these (cart
-            // shows shipping only; checkout has both billing+shipping).
             states: Array.from(scope.querySelectorAll('select[id$="-state"], select[autocomplete="address-level1"]')),
         };
     }
