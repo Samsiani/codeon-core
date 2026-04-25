@@ -5,7 +5,7 @@ Requires at least: 6.2
 Tested up to: 6.7
 Requires PHP: 8.1
 Requires Plugins: woocommerce
-Stable tag: 0.1.8
+Stable tag: 0.1.9
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,9 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 3. CodeOn hub menu with installed plugins listed underneath.
 
 == Changelog ==
+
+= 0.1.9 — 2026-04-25 =
+* **Critical UX fix:** field render order on classic checkout. WooCommerce's default state-field priority is 80 (after city which is 70). With our cascade that meant users saw Settlement and Municipality dropdowns BEFORE the Region dropdown — both empty and waiting on Region. The fields now render top-to-bottom in cascade order: Country → Region → Municipality → Settlement → Address → Postcode.
 
 = 0.1.8 — 2026-04-25 =
 * **UX:** clearer placeholder text in dependent dropdowns. Before: an empty Municipality dropdown looked broken. Now: it shows "— pick a Region first —" and is disabled, so users immediately see what unblocks them.

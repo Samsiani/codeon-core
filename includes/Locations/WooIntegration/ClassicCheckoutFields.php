@@ -49,9 +49,8 @@ final class ClassicCheckoutFields
      */
     public function extendDefaultFields(array $fields): array
     {
-        // Convert city to a select. The actual options are populated by
-        // checkout-cascade.js based on the chosen state+municipality, so
-        // the static option list is just the empty placeholder.
+        // Convert city to a select. Options are populated by
+        // checkout-cascade.js based on the chosen state+municipality.
         if (isset($fields['city'])) {
             $fields['city']['type']    = 'select';
             $fields['city']['options'] = ['' => __('Select…', 'codeon-core')];
@@ -59,11 +58,26 @@ final class ClassicCheckoutFields
                 (array) ($fields['city']['class'] ?? []),
                 ['codeon-geo-field', 'codeon-geo-city']
             );
+            // Priority 47 puts City (Settlement) RIGHT after Municipality (46),
+            // before address_1 (default 50). Keeps the geographic cascade
+            // visually grouped at the top of the form.
+            $fields['city']['priority'] = 47;
         }
 
-        // Insert municipality right after state. PHP arrays preserve
-        // insertion order, so we rebuild the array to put municipality
-        // immediately after the state key.
+        // Move state up too. WC default priority is 80 — way below city.
+        // For the cascade to read top-to-bottom (Region → Municipality →
+        // Settlement → Address) we need state right under country (40).
+        if (isset($fields['state'])) {
+            $fields['state']['priority'] = 45;
+            $fields['state']['class']    = array_merge(
+                (array) ($fields['state']['class'] ?? []),
+                ['codeon-geo-field', 'codeon-geo-state']
+            );
+        }
+
+        // Insert municipality right after state. The priority chain is
+        // country(40) → state(45) → municipality(46) → city(47) →
+        // address_1(50) → address_2(60) → postcode(90).
         $rebuilt = [];
         foreach ($fields as $key => $cfg) {
             $rebuilt[$key] = $cfg;
@@ -71,10 +85,10 @@ final class ClassicCheckoutFields
                 $rebuilt['municipality'] = [
                     'label'    => __('Municipality', 'codeon-core'),
                     'type'     => 'select',
-                    'required' => false,                  // overridden per country in locale filter
+                    'required' => false,
                     'class'    => ['form-row-wide', 'codeon-geo-field', 'codeon-geo-municipality'],
                     'options'  => ['' => __('Select…', 'codeon-core')],
-                    'priority' => 75,                     // state is 70, city is 80 in WC core
+                    'priority' => 46,
                 ];
             }
         }
@@ -140,13 +154,25 @@ final class ClassicCheckoutFields
      */
     private function ensureMunicipalityField(array $fields, string $prefix): array
     {
-        $key = $prefix . 'municipality';
+        $key      = $prefix . 'municipality';
+        $stateKey = $prefix . 'state';
+        $cityKey  = $prefix . 'city';
+
+        // Apply the same priority overrides on the prefixed copies of state
+        // and city so billing/shipping fields match.
+        if (isset($fields[$stateKey])) {
+            $fields[$stateKey]['priority'] = 45;
+        }
+        if (isset($fields[$cityKey])) {
+            $fields[$cityKey]['priority'] = 47;
+        }
+
         if (isset($fields[$key])) {
+            $fields[$key]['priority'] = 46;
             return $fields;
         }
-        // Place it right after $prefix . 'state'.
-        $stateKey = $prefix . 'state';
-        $rebuilt  = [];
+
+        $rebuilt = [];
         foreach ($fields as $k => $cfg) {
             $rebuilt[$k] = $cfg;
             if ($k === $stateKey) {
@@ -156,7 +182,7 @@ final class ClassicCheckoutFields
                     'required' => false,
                     'class'    => ['form-row-wide', 'codeon-geo-field', 'codeon-geo-municipality'],
                     'options'  => ['' => __('Select…', 'codeon-core')],
-                    'priority' => 75,
+                    'priority' => 46,
                 ];
             }
         }
