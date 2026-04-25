@@ -190,9 +190,11 @@ final class ClassicCheckoutFields
             'restUrl' => esc_url_raw(rest_url('codeon-geo/v1/')),
             'nonce'   => wp_create_nonce('wp_rest'),
             'i18n'    => [
-                'select'        => __('Select…', 'codeon-core'),
-                'loading'       => __('Loading…', 'codeon-core'),
-                'noResults'     => __('No matches', 'codeon-core'),
+                'select'           => __('Select…', 'codeon-core'),
+                'loading'          => __('Loading…', 'codeon-core'),
+                'noResults'        => __('No matches', 'codeon-core'),
+                'pickRegionFirst'  => __('— pick a Region first —', 'codeon-core'),
+                'pickMuniFirst'    => __('— pick a Municipality first —', 'codeon-core'),
             ],
         ]);
     }

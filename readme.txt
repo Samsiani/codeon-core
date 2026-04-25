@@ -5,7 +5,7 @@ Requires at least: 6.2
 Tested up to: 6.7
 Requires PHP: 8.1
 Requires Plugins: woocommerce
-Stable tag: 0.1.7
+Stable tag: 0.1.8
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,11 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 3. CodeOn hub menu with installed plugins listed underneath.
 
 == Changelog ==
+
+= 0.1.8 — 2026-04-25 =
+* **UX:** clearer placeholder text in dependent dropdowns. Before: an empty Municipality dropdown looked broken. Now: it shows "— pick a Region first —" and is disabled, so users immediately see what unblocks them.
+* Same hint cascades to Settlement: shows "— pick a Region first —" when Region is empty, "— pick a Municipality first —" when Region is set but Municipality isn't.
+* Disabled state on dependent dropdowns until prerequisites are met (visual cue).
 
 = 0.1.7 — 2026-04-25 =
 * **Critical fix #1:** classic-checkout cascade was triggering an infinite loop. After populating the municipality/city dropdowns, `fillSelect` called `$select.trigger('change')` to notify Select2/WC. WC's `update_checkout` handler then re-fired our cascade, which called `fillSelect` again — tight loop, dozens of "Forced reflow" warnings per second, page essentially unusable. Removed the `trigger('change')` and the `updated_checkout` listener; cascade is now purely user-driven (state change → muni populate, muni change → city populate) plus a one-shot population on page load.

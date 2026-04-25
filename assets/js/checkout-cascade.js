@@ -44,15 +44,19 @@
      * change event — the previous version's trigger('change') fired
      * WC's update_checkout, which re-rendered the form, which re-ran
      * the cascade, which called fillSelect again. Tight infinite loop.
+     *
+     * `placeholderText` allows showing a contextual hint when there are no
+     * options ("Select region first…" instead of just "Select…"). Also
+     * disables the select when there are no real options, since clicking
+     * an empty dropdown is a confusing dead-end.
      */
-    function fillSelect($select, items, currentValue) {
-        $select.prop('disabled', false);
+    function fillSelect($select, items, currentValue, placeholderText) {
         const dom = $select[0];
         while (dom.firstChild) dom.removeChild(dom.firstChild);
 
         const placeholder = document.createElement('option');
         placeholder.value = '';
-        placeholder.textContent = cfg.i18n.select;
+        placeholder.textContent = placeholderText || cfg.i18n.select;
         dom.appendChild(placeholder);
 
         let matched = false;
@@ -67,10 +71,11 @@
             dom.appendChild(opt);
         });
 
-        // If the saved value isn't in the new list, reset to placeholder.
         if (!matched) dom.selectedIndex = 0;
 
-        // NO trigger('change') — that's what caused the loop.
+        // Disable when there are no real options — gives the user a visual
+        // cue that something else needs to be filled in first.
+        $select.prop('disabled', items.length === 0);
     }
 
     function gatherContext(prefix) {
@@ -87,7 +92,10 @@
         const $mun = $('#' + prefix + 'municipality');
         if (!$mun.length) return;
         if (ctx.country !== 'GE' || !ctx.state) {
-            fillSelect($mun, [], '');
+            fillSelect($mun, [], '', cfg.i18n.pickRegionFirst);
+            // Cascade clear settlements too — stale options confuse.
+            const $city = $('#' + prefix + 'city');
+            if ($city.length) fillSelect($city, [], '', cfg.i18n.pickMuniFirst);
             return;
         }
         try {
@@ -104,7 +112,7 @@
         const $city = $('#' + prefix + 'city');
         if (!$city.length) return;
         if (ctx.country !== 'GE' || !ctx.municipality) {
-            fillSelect($city, [], '');
+            fillSelect($city, [], '', cfg.i18n.pickMuniFirst);
             return;
         }
         try {
@@ -134,11 +142,20 @@
                 refreshSettlements(prefix);
             });
 
-        // One-shot population on page load if country=GE & state already set.
+        // Initial state on page load: cascade to fill if state is already
+        // chosen, OR show the helpful "Pick region first" placeholder so
+        // users know what to do instead of staring at an empty dropdown.
         ['billing_', 'shipping_'].forEach(function (prefix) {
             const ctx = gatherContext(prefix);
             if (ctx.country === 'GE' && ctx.state) {
                 refreshMunicipalities(prefix);
+            } else if (ctx.country === 'GE') {
+                // Country is GE but state isn't — set the helpful placeholder
+                // on muni + city so the user knows what blocks them.
+                const $mun = $('#' + prefix + 'municipality');
+                const $city = $('#' + prefix + 'city');
+                if ($mun.length) fillSelect($mun, [], '', cfg.i18n.pickRegionFirst);
+                if ($city.length) fillSelect($city, [], '', cfg.i18n.pickRegionFirst);
             }
         });
     }
