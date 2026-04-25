@@ -5,7 +5,7 @@ Requires at least: 6.2
 Tested up to: 6.7
 Requires PHP: 8.1
 Requires Plugins: woocommerce
-Stable tag: 0.1.1
+Stable tag: 0.1.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -72,6 +72,13 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 
 == Changelog ==
 
+= 0.1.2 — 2026-04-25 =
+* **Block checkout support** (M2). Registers Municipality (select) + Settlement (text + autocomplete via HTML5 datalist) as additional checkout fields via `woocommerce_register_additional_checkout_field` (WC 8.6+). Cascade JS narrows the settlement autocomplete by chosen municipality.
+* WC Blocks compatibility now declared as supported.
+* Branded icons + banner per the CodeOn Plugin Icon System (deep-blue gradient, location-pin glyph, CodeOn corner mark).
+* Defensive `Cache-Control: no-store` headers on Codeon admin pages — protects nonces from being recycled by aggressive page caches like LiteSpeed Cache.
+* Diagnostics tab gains a "Save-flow diagnostics" panel showing the current nonce action, capability check, and a fresh nonce — helps debug "Security check failed" reports.
+
 = 0.1.1 — 2026-04-25 =
 * Bump bundled `codeon/framework` to v0.3.3 (re-licensed from proprietary to GPL-2.0-or-later — required for WordPress.org distribution).
 * No functional changes; release infrastructure improvement only.
@@ -86,6 +93,9 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 * CodeOn hub claim.
 
 == Upgrade Notice ==
+
+= 0.1.2 =
+Adds block-checkout support and a defensive cache-control fix. Recommended for anyone on WC 8.3+.
 
 = 0.1.1 =
 Framework re-license. No action required.

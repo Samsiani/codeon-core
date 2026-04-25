@@ -1,13 +1,48 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%"  stop-color="#1a2747"/>
-      <stop offset="100%" stop-color="#2a4080"/>
+    <!-- §2 background gradient — invariant across all CodeOn plugins -->
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"  stop-color="#1e3a8a"/>
+      <stop offset="100%" stop-color="#2563eb"/>
+    </linearGradient>
+    <!-- §3 central glyph fill — white → light-indigo vertical -->
+    <linearGradient id="pin" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"  stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#e0e7ff"/>
     </linearGradient>
   </defs>
-  <rect width="256" height="256" rx="48" fill="url(#g)"/>
-  <!-- Pin silhouette -->
-  <path d="M128 48c-32 0-58 24.5-58 54.7 0 41 58 121.3 58 121.3s58-80.3 58-121.3c0-30.2-26-54.7-58-54.7zm0 82.5c-13.4 0-24.3-10.6-24.3-23.7s10.9-23.7 24.3-23.7 24.3 10.6 24.3 23.7-10.9 23.7-24.3 23.7z" fill="#fff"/>
-  <!-- "C" corner mark for CodeOn -->
-  <path d="M222 222c-5.5 5.5-13 8.8-21 8.8-16.5 0-30-13.5-30-30s13.5-30 30-30c8 0 15.5 3.3 21 8.8" stroke="#f5a623" stroke-width="6" fill="none" stroke-linecap="round"/>
+
+  <!-- §1 canvas: rounded square, rx=48 (iOS app-icon grid) -->
+  <rect width="256" height="256" rx="48" fill="url(#bg)"/>
+
+  <!-- §3 soft under-shadow grounding the glyph -->
+  <ellipse cx="128" cy="200" rx="70" ry="8" fill="#000000" opacity="0.18"/>
+
+  <!-- §3 central glyph: stylized location pin within 192×192 safe zone
+       (32 ≤ x,y ≤ 224). One idea, no composition. The hollow circle in the
+       pin reads cleanly at 40px and ties to the cascade UX (the "selected"
+       point). -->
+  <g>
+    <!-- Pin body -->
+    <path d="M 128 36
+             C 88 36, 56 68, 56 108
+             C 56 156, 128 220, 128 220
+             C 128 220, 200 156, 200 108
+             C 200 68, 168 36, 128 36 Z"
+          fill="url(#pin)"/>
+    <!-- Inner hole — the "selected location" tap target. Brand-blue
+         accent (§3 says #2563eb / #1e40af for accents). -->
+    <circle cx="128" cy="108" r="26" fill="#1e40af"/>
+    <circle cx="128" cy="108" r="14" fill="#ffffff"/>
+  </g>
+
+  <!-- §4 CodeOn corner mark — mandatory, never alter proportions/colours -->
+  <g transform="translate(196 196)" opacity="0.9">
+    <rect x="-18" y="-18" width="36" height="36" rx="10" ry="10"
+          fill="none" stroke="#ffffff" stroke-width="3"/>
+    <path d="M -6 -7 L -11 0 L -6 7"
+          fill="none" stroke="#ffffff" stroke-width="3"
+          stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="6" cy="0" r="3" fill="#ffffff"/>
+  </g>
 </svg>

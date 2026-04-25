@@ -15,6 +15,7 @@ namespace CodeOn\Core\Locations;
 
 use CodeOn\Core\Locations\Rest\Controller as RestController;
 use CodeOn\Core\Locations\WooIntegration\AddressFormat;
+use CodeOn\Core\Locations\WooIntegration\BlockCheckoutFields;
 use CodeOn\Core\Locations\WooIntegration\ClassicCheckoutFields;
 use CodeOn\Core\Locations\WooIntegration\OrderMeta;
 use CodeOn\Core\Locations\WooIntegration\States;
@@ -26,6 +27,7 @@ final class Boot
     {
         (new States($settings))->register();
         (new ClassicCheckoutFields($settings))->register();
+        (new BlockCheckoutFields())->register();
         (new AddressFormat())->register();
         (new OrderMeta())->register();
         (new RestController($settings))->register();

@@ -46,6 +46,31 @@ final class CoreHubBoot
 
         // 4) Optional: layer Core brand assets on every codeon admin page.
         //    No-op until we ship the polish CSS in M3.
+
+        // 5) Defensive: send aggressive no-cache headers on every codeon admin
+        //    page render. Some WP hosts (CyberPanel/LSCache, Wordfence) ignore
+        //    WP core's nocache_headers and serve stale HTML containing dead
+        //    nonces, causing the framework's admin-post handler to wp_die with
+        //    "Security check failed" on Save. WordPress core sends nocache
+        //    headers but only on /wp-admin URLs that include `Cache-Control:
+        //    no-cache`. Re-asserting `no-store` is a stronger hint that
+        //    front-edge caches honour.
+        add_action('admin_init', [self::class, 'sendNoCacheHeaders']);
+    }
+
+    /**
+     * Force aggressive no-cache headers on every WP-Admin page where our
+     * plugin's UI participates. Idempotent + cheap; runs only in admin.
+     */
+    public static function sendNoCacheHeaders(): void
+    {
+        if (headers_sent()) return;
+        nocache_headers();
+        // Stronger directive than nocache_headers() — `no-store` tells edge
+        // caches (LiteSpeed/Cloudflare) not to retain the response at all,
+        // which is what protects nonces from being recycled.
+        header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0', true);
+        header('Pragma: no-cache', true);
     }
 
     /**

@@ -75,6 +75,32 @@ final class DiagnosticsTab extends Tab
                 </tbody>
             </table>
 
+            <h3 style="margin-top:24px;"><?php esc_html_e('Save-flow diagnostics', 'codeon-core'); ?></h3>
+            <p class="description"><?php esc_html_e('If you got "Security check failed" when saving the General tab, compare the nonce action below against what the form expects. Most often the cause is an aggressive page cache (LiteSpeed Cache, Cloudflare APO) caching the admin page HTML — exclude /wp-admin/ from caching to fix.', 'codeon-core'); ?></p>
+            <table class="widefat striped" style="max-width:600px;">
+                <tbody>
+                    <tr>
+                        <th><?php esc_html_e('Expected nonce action', 'codeon-core'); ?></th>
+                        <td><code>codeon_admin_codeon-core</code></td>
+                    </tr>
+                    <tr>
+                        <th><?php esc_html_e('Required capability', 'codeon-core'); ?></th>
+                        <td><code>manage_woocommerce</code> — <?php
+                            echo current_user_can('manage_woocommerce')
+                                ? '<span style="color:#1d7e1d">✓ you have it</span>'
+                                : '<span style="color:#d04a4a">✗ you do NOT have it</span>'; ?></td>
+                    </tr>
+                    <tr>
+                        <th><?php esc_html_e('Current user ID', 'codeon-core'); ?></th>
+                        <td><code><?php echo (int) get_current_user_id(); ?></code></td>
+                    </tr>
+                    <tr>
+                        <th><?php esc_html_e('Test nonce (now)', 'codeon-core'); ?></th>
+                        <td><code><?php echo esc_html(wp_create_nonce('codeon_admin_codeon-core')); ?></code></td>
+                    </tr>
+                </tbody>
+            </table>
+
             <h3 style="margin-top:24px;"><?php esc_html_e('REST endpoints', 'codeon-core'); ?></h3>
             <ul>
                 <?php

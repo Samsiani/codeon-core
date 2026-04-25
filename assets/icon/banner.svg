@@ -1,19 +1,63 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1544 500" width="1544" height="500">
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%"  stop-color="#1a2747"/>
-      <stop offset="100%" stop-color="#2a4080"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"  stop-color="#1e3a8a"/>
+      <stop offset="100%" stop-color="#2563eb"/>
+    </linearGradient>
+    <linearGradient id="pin" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"  stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#e0e7ff"/>
     </linearGradient>
   </defs>
-  <rect width="1544" height="500" fill="url(#g)"/>
-  <!-- Logo pin -->
-  <g transform="translate(140, 130)">
-    <path d="M120 0C53.7 0 0 50.7 0 113.3 0 198.5 120 365 120 365s120-166.5 120-251.7C240 50.7 186.3 0 120 0zm0 170.6c-27.7 0-50.2-22-50.2-49.1 0-27.1 22.5-49.1 50.2-49.1s50.2 22 50.2 49.1c0 27.1-22.5 49.1-50.2 49.1z" fill="#fff"/>
+
+  <!-- Background — same gradient as icon -->
+  <rect width="1544" height="500" fill="url(#bg)"/>
+
+  <!-- Subtle decorative grid lines, 6% opacity, suggesting "structured data".
+       Kept under 20% intensity per spec rule "background is invariant" — these
+       are texture, not branding. -->
+  <g opacity="0.06" stroke="#ffffff" stroke-width="1" fill="none">
+    <line x1="0" y1="125" x2="1544" y2="125"/>
+    <line x1="0" y1="250" x2="1544" y2="250"/>
+    <line x1="0" y1="375" x2="1544" y2="375"/>
   </g>
-  <!-- Title -->
-  <g transform="translate(450, 200)">
-    <text x="0" y="0" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="80" font-weight="700">CodeOn Core</text>
-    <text x="0" y="60" fill="#a8b3d0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="34" font-weight="400">Georgian Locations for WooCommerce</text>
-    <text x="0" y="120" fill="#f5a623" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="24" font-weight="500">13 regions · 77 municipalities · 4,394 settlements</text>
+
+  <!-- LEFT 55%: text block. Padding from the left edge = 110.
+       All text stays within left 50% per spec to avoid modal clipping. -->
+  <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif" fill="#ffffff">
+    <!-- Wordmark: 700 / 84px -->
+    <text x="110" y="180" font-size="84" font-weight="700" letter-spacing="-2">CodeOn Core</text>
+    <!-- Subtitle: 500 / 48px, slightly muted -->
+    <text x="110" y="248" font-size="42" font-weight="500" fill="#c7d2fe">Georgian Locations for WooCommerce</text>
+    <!-- Feature strip: 500 / 22px ALL-CAPS, accent color -->
+    <text x="110" y="320" font-size="22" font-weight="500" letter-spacing="3" fill="#fbbf24">13 REGIONS · 77 MUNICIPALITIES · 4,394 SETTLEMENTS</text>
+  </g>
+
+  <!-- RIGHT ~35%: oversized version of the central glyph.
+       Centered around x=1240, scaled ~2.4x. Kept ≥48px from every edge. -->
+  <g transform="translate(1240 250) scale(2.4)">
+    <ellipse cx="0" cy="100" rx="70" ry="8" fill="#000000" opacity="0.18"/>
+    <path d="M 0 -64
+             C -40 -64, -72 -32, -72 8
+             C -72 56, 0 120, 0 120
+             C 0 120, 72 56, 72 8
+             C 72 -32, 40 -64, 0 -64 Z"
+          fill="url(#pin)"/>
+    <circle cx="0" cy="8" r="26" fill="#1e40af"/>
+    <circle cx="0" cy="8" r="14" fill="#ffffff"/>
+  </g>
+
+  <!-- BOTTOM-LEFT: codeon.ge wordmark + CodeOn corner mark, 88% opacity -->
+  <g transform="translate(110 440)" opacity="0.88">
+    <text font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif"
+          font-size="22" font-weight="500" fill="#ffffff" letter-spacing="0.5">codeon.ge</text>
+    <g transform="translate(160 -10)">
+      <rect x="-18" y="-18" width="36" height="36" rx="10" ry="10"
+            fill="none" stroke="#ffffff" stroke-width="3"/>
+      <path d="M -6 -7 L -11 0 L -6 7"
+            fill="none" stroke="#ffffff" stroke-width="3"
+            stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="6" cy="0" r="3" fill="#ffffff"/>
+    </g>
   </g>
 </svg>
