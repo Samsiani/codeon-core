@@ -34,13 +34,72 @@ final class ClassicCheckoutFields
         // Per-country locale: mark fields required only when country=GE.
         add_filter('woocommerce_get_country_locale', [$this, 'extendGeorgiaLocale']);
 
-        // Order field priority — keep municipality sandwiched between
-        // state and city.
+        // Per-context billing/shipping filters at default priority — early
+        // pass, in case nothing later overrides us.
         add_filter('woocommerce_billing_fields',  [$this, 'extendBillingFields'], 20);
         add_filter('woocommerce_shipping_fields', [$this, 'extendShippingFields'], 20);
 
+        // Final-pass override on woocommerce_checkout_fields. Woodmart's
+        // checkout-fields-manager hooks the SAME filter at priority 99999
+        // and rewrites the entire field array — overwriting our priorities
+        // and stripping our municipality field. We re-apply at priority
+        // 100000 so our tweaks always win the last-writer race regardless
+        // of what theme/plugin is installed.
+        add_filter('woocommerce_checkout_fields', [$this, 'enforceFinalFieldSetup'], 100000);
+
         // Enqueue cascade JS only on checkout / account edit-address pages.
         add_action('wp_enqueue_scripts', [$this, 'enqueue']);
+    }
+
+    /**
+     * Last-writer-wins enforcement of our field tweaks. Runs AFTER every
+     * other plugin and theme has had a chance to mangle the checkout
+     * fields, then re-applies our specific changes:
+     *   - state field at priority 45 (Region label)
+     *   - municipality field inserted at priority 46
+     *   - city field at priority 47 (Settlement label, select type)
+     *
+     * Only touches the billing + shipping groups; leaves account and
+     * order groups alone.
+     *
+     * @param array<string, array<string, array<string,mixed>>> $checkoutFields
+     * @return array<string, array<string, array<string,mixed>>>
+     */
+    public function enforceFinalFieldSetup(array $checkoutFields): array
+    {
+        foreach (['billing', 'shipping'] as $group) {
+            if (!isset($checkoutFields[$group]) || !is_array($checkoutFields[$group])) {
+                continue;
+            }
+            $checkoutFields[$group] = $this->ensureMunicipalityField($checkoutFields[$group], $group . '_');
+
+            $stateKey = $group . '_state';
+            $munKey   = $group . '_municipality';
+            $cityKey  = $group . '_city';
+
+            if (isset($checkoutFields[$group][$stateKey])) {
+                $checkoutFields[$group][$stateKey]['priority'] = 45;
+                $checkoutFields[$group][$stateKey]['label']    = __('Region', 'codeon-core');
+                $checkoutFields[$group][$stateKey]['required'] = true;
+            }
+            if (isset($checkoutFields[$group][$munKey])) {
+                $checkoutFields[$group][$munKey]['priority'] = 46;
+                $checkoutFields[$group][$munKey]['label']    = __('Municipality', 'codeon-core');
+                $checkoutFields[$group][$munKey]['type']     = 'select';
+                if (empty($checkoutFields[$group][$munKey]['options'])) {
+                    $checkoutFields[$group][$munKey]['options'] = ['' => __('Select…', 'codeon-core')];
+                }
+            }
+            if (isset($checkoutFields[$group][$cityKey])) {
+                $checkoutFields[$group][$cityKey]['priority'] = 47;
+                $checkoutFields[$group][$cityKey]['label']    = __('Settlement', 'codeon-core');
+                $checkoutFields[$group][$cityKey]['type']     = 'select';
+                if (empty($checkoutFields[$group][$cityKey]['options'])) {
+                    $checkoutFields[$group][$cityKey]['options'] = ['' => __('Select…', 'codeon-core')];
+                }
+            }
+        }
+        return $checkoutFields;
     }
 
     /**

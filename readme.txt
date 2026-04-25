@@ -5,7 +5,7 @@ Requires at least: 6.2
 Tested up to: 6.7
 Requires PHP: 8.1
 Requires Plugins: woocommerce
-Stable tag: 0.1.9
+Stable tag: 0.1.10
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,9 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 3. CodeOn hub menu with installed plugins listed underneath.
 
 == Changelog ==
+
+= 0.1.10 — 2026-04-25 =
+* **Theme override resistance:** Woodmart's "Checkout fields manager" hooks `woocommerce_checkout_fields` at priority 99999 and rewrites the entire field array, undoing our priority/label/type tweaks. Added a final-pass enforcement at priority 100000 that re-applies our changes AFTER any theme/plugin meddling. Works with Woodmart out-of-the-box; same defense applies to any other plugin/theme that touches checkout fields.
 
 = 0.1.9 — 2026-04-25 =
 * **Critical UX fix:** field render order on classic checkout. WooCommerce's default state-field priority is 80 (after city which is 70). With our cascade that meant users saw Settlement and Municipality dropdowns BEFORE the Region dropdown — both empty and waiting on Region. The fields now render top-to-bottom in cascade order: Country → Region → Municipality → Settlement → Address → Postcode.
