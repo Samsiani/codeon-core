@@ -6,12 +6,12 @@
  *   2. state changes → fetch municipalities for that region, populate select
  *   3. municipality changes → fetch settlements, populate the city select
  *
- * Block checkout uses an entirely different machinery (M2). This script
- * targets WC's classic shortcode-based checkout (and the My Account
- * edit-address page).
- *
- * Built with vanilla JS + jQuery (because WC's update_checkout event
- * fires via jQuery and we need to listen to it).
+ * v0.1.7 fixes the infinite loop that v0.1.5/0.1.6 had: fillSelect used
+ * to call $select.trigger('change') which fired WC's update_checkout
+ * handler, which in turn re-ran our refreshMunicipalities, which called
+ * fillSelect again — a tight loop that froze the page. Now fillSelect
+ * is silent; we drive the cascade only off user-initiated change events
+ * + a one-shot population on page load.
  */
 (function ($) {
     'use strict';
@@ -20,15 +20,12 @@
     if (!cfg || !cfg.restUrl) return;
 
     const SELECTORS = {
-        country:     '#billing_country, #shipping_country',
-        state:       '#billing_state, #shipping_state',
-        municipality:'#billing_municipality, #shipping_municipality',
-        city:        '#billing_city, #shipping_city',
+        state:        '#billing_state, #shipping_state',
+        municipality: '#billing_municipality, #shipping_municipality',
+        city:         '#billing_city, #shipping_city',
     };
 
-    // Cache REST responses for the lifetime of the page — the dataset
-    // doesn't change between page loads, so re-fetching the same region's
-    // muns when the customer toggles billing/shipping is wasteful.
+    // Cache REST responses for the lifetime of the page.
     const cache = new Map();
 
     async function fetchJson(path) {
@@ -42,9 +39,13 @@
         return data;
     }
 
+    /**
+     * Populate a <select> with new options. Crucially does NOT trigger a
+     * change event — the previous version's trigger('change') fired
+     * WC's update_checkout, which re-rendered the form, which re-ran
+     * the cascade, which called fillSelect again. Tight infinite loop.
+     */
     function fillSelect($select, items, currentValue) {
-        // WC's checkout JS may have set `disabled` on the select while a
-        // refresh was in flight — re-enable.
         $select.prop('disabled', false);
         const dom = $select[0];
         while (dom.firstChild) dom.removeChild(dom.firstChild);
@@ -54,28 +55,22 @@
         placeholder.textContent = cfg.i18n.select;
         dom.appendChild(placeholder);
 
+        let matched = false;
         items.forEach(function (it) {
             const opt = document.createElement('option');
             opt.value = it.id;
             opt.textContent = it.name;
-            if (currentValue && String(currentValue) === String(it.id)) {
+            if (currentValue && (String(currentValue) === String(it.id) || currentValue === it.name)) {
                 opt.selected = true;
+                matched = true;
             }
             dom.appendChild(opt);
         });
 
-        // For city, customers may have placed an order earlier and the
-        // saved value is the settlement NAME (we use name as the city
-        // field value, not the id). Mark it selected if it matches.
-        if (currentValue && !$select.find('option[selected]').length) {
-            const matched = $select.find('option').filter(function () {
-                return $(this).text() === currentValue || $(this).val() === currentValue;
-            });
-            if (matched.length) matched.prop('selected', true);
-        }
+        // If the saved value isn't in the new list, reset to placeholder.
+        if (!matched) dom.selectedIndex = 0;
 
-        // Re-trigger Select2 if WC enhanced this select.
-        $select.trigger('change');
+        // NO trigger('change') — that's what caused the loop.
     }
 
     function gatherContext(prefix) {
@@ -96,14 +91,10 @@
             return;
         }
         try {
-            // ctx.state can be either a region slug ("kakheti") or a WC
-            // state code ("KA"). The REST controller accepts both.
             const muns = await fetchJson('regions/' + encodeURIComponent(ctx.state) + '/municipalities');
             fillSelect($mun, muns, ctx.municipality);
             await refreshSettlements(prefix);
         } catch (e) {
-            // Soft fail — keep the existing options so the form is still
-            // submittable. Console-log for debugging.
             console.warn('CodeOnGeo: failed to load municipalities', e);
         }
     }
@@ -118,8 +109,8 @@
         }
         try {
             const settles = await fetchJson('municipalities/' + encodeURIComponent(ctx.municipality) + '/settlements');
-            // City field stores the settlement NAME (not id) so existing
-            // WC reports / customer addresses keep working with text values.
+            // City field stores the settlement NAME (not id) — keeps WC
+            // reports / customer addresses working with text values.
             const items = settles.map(function (s) {
                 return { id: s.name_ka, name: s.name };
             });
@@ -130,31 +121,26 @@
     }
 
     function bind() {
-        // Fire when country, state, or municipality changes — for both
-        // billing and shipping. Use delegated handlers so WC's checkout
-        // re-renders (via update_checkout) don't drop our bindings.
-        const onStateChange = function () {
-            const prefix = $(this).attr('id').replace('state', '');
-            refreshMunicipalities(prefix);
-        };
-        const onMunChange = function () {
-            const prefix = $(this).attr('id').replace('municipality', '');
-            refreshSettlements(prefix);
-        };
-
+        // User-initiated changes only — no listener on updated_checkout
+        // (that was the loop trigger).
         $(document.body)
-            .on('change', SELECTORS.state, onStateChange)
-            .on('change', SELECTORS.municipality, onMunChange)
-            // When WC re-renders the checkout (shipping calculator, coupon,
-            // address change), re-populate the dependent dropdowns from
-            // current values.
-            .on('updated_checkout', function () {
-                ['billing_', 'shipping_'].forEach(refreshMunicipalities);
+            .off('change.codeonGeo')
+            .on('change.codeonGeo', SELECTORS.state, function () {
+                const prefix = $(this).attr('id').replace('state', '');
+                refreshMunicipalities(prefix);
+            })
+            .on('change.codeonGeo', SELECTORS.municipality, function () {
+                const prefix = $(this).attr('id').replace('municipality', '');
+                refreshSettlements(prefix);
             });
 
-        // Initial population on page load — covers the My Account edit-address
-        // page where there's no update_checkout event.
-        ['billing_', 'shipping_'].forEach(refreshMunicipalities);
+        // One-shot population on page load if country=GE & state already set.
+        ['billing_', 'shipping_'].forEach(function (prefix) {
+            const ctx = gatherContext(prefix);
+            if (ctx.country === 'GE' && ctx.state) {
+                refreshMunicipalities(prefix);
+            }
+        });
     }
 
     if (document.readyState === 'loading') {

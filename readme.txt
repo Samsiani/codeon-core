@@ -5,7 +5,7 @@ Requires at least: 6.2
 Tested up to: 6.7
 Requires PHP: 8.1
 Requires Plugins: woocommerce
-Stable tag: 0.1.6
+Stable tag: 0.1.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,10 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 3. CodeOn hub menu with installed plugins listed underneath.
 
 == Changelog ==
+
+= 0.1.7 — 2026-04-25 =
+* **Critical fix #1:** classic-checkout cascade was triggering an infinite loop. After populating the municipality/city dropdowns, `fillSelect` called `$select.trigger('change')` to notify Select2/WC. WC's `update_checkout` handler then re-fired our cascade, which called `fillSelect` again — tight loop, dozens of "Forced reflow" warnings per second, page essentially unusable. Removed the `trigger('change')` and the `updated_checkout` listener; cascade is now purely user-driven (state change → muni populate, muni change → city populate) plus a one-shot population on page load.
+* **Critical fix #2:** block-checkout JS was setting attributes on React-controlled inputs in a setInterval, which combined with React's reconciliation caused continuous reflows. Replaced with two delegated event listeners (focus + change) that don't pre-emptively mutate the DOM — `list="codeon-geo-settlements"` is bound the first time the user focuses the settlement input, by which time React has fully rendered and won't re-render on a non-tracked attribute change.
 
 = 0.1.6 — 2026-04-25 =
 * **Critical fix:** block-checkout JS no longer infinite-loops. The previous version's `MutationObserver` on document.body fired on every DOM change in the WC checkout — combined with React's frequent re-renders, this caused continuous reflows and made it impossible to select municipality/settlement. Replaced with one-shot scan + per-element `data-codeon-bound` flag + 1-second poll fallback.
