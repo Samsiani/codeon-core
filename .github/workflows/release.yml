@@ -62,8 +62,8 @@ jobs:
             --exclude "*.zip" \
             --exclude ".gitignore" \
             --exclude ".DS_Store" \
-            --exclude "composer.lock" \
-            --exclude "composer.json" \
+            --exclude "/composer.lock" --exclude "codeon-core/composer.lock" \
+            --exclude "/composer.json" --exclude "codeon-core/composer.json" \
             ./ "build/${STAGE}/"
           (cd build && zip -rq "../${OUT}" "${STAGE}")
           ls -la "${OUT}"

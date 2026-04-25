@@ -5,7 +5,7 @@ Requires at least: 6.2
 Tested up to: 6.7
 Requires PHP: 8.1
 Requires Plugins: woocommerce
-Stable tag: 0.1.5
+Stable tag: 0.1.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,10 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 3. CodeOn hub menu with installed plugins listed underneath.
 
 == Changelog ==
+
+= 0.1.6 — 2026-04-25 =
+* **Critical fix:** block-checkout JS no longer infinite-loops. The previous version's `MutationObserver` on document.body fired on every DOM change in the WC checkout — combined with React's frequent re-renders, this caused continuous reflows and made it impossible to select municipality/settlement. Replaced with one-shot scan + per-element `data-codeon-bound` flag + 1-second poll fallback.
+* Release workflow: stop excluding nested vendor `composer.json` files from the ZIP — only the top-level plugin composer.json should be excluded.
 
 = 0.1.5 — 2026-04-25 =
 * Block-checkout settlement field: removed `list` and `placeholder` from server-side attributes (WC Blocks rejects them as invalid). Now attached client-side via `assets/js/blocks-cascade.js` after WC renders the input.

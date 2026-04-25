@@ -5,114 +5,115 @@
  * (set in PHP via woocommerce_register_additional_checkout_field). This
  * script layers a runtime cascade on top:
  *
- *   1. When State / region changes → hide municipality options whose
- *      data-region doesn't match.
- *   2. When Municipality changes → narrow the settlement <datalist> to
+ *   1. When Municipality changes → narrow the settlement <datalist> to
  *      options whose data-mun matches, so the browser's native
  *      autocomplete only suggests villages from that municipality.
  *
- * Pure DOM manipulation; no React, no WC Blocks data store dependency.
- * Runs on a MutationObserver so it survives Cart/Checkout block re-renders.
+ *   2. Bind the HTML5 datalist + placeholder via JS (WC Blocks strips
+ *      the `list` and `placeholder` attributes server-side as invalid;
+ *      we attach them client-side once.)
+ *
+ * The previous version used a MutationObserver on document.body that
+ * fired on EVERY DOM change in the page — combined with React's tendency
+ * to re-render checkout on every state update, this caused an infinite
+ * reflow loop. v0.1.6 uses a one-shot scan + per-element bound flag, and
+ * a much lighter watcher that only re-runs when the checkout root
+ * actually unmounts/remounts.
  */
 (function () {
     'use strict';
 
-    const cfg = window.CodeOnGeoBlocks || {};
+    const BOUND_ATTR = 'data-codeon-bound';
 
-    // Selectors targeting WC Blocks' rendered DOM. WC mangles slashes in the
-    // field id (codeon/municipality → codeon-municipality) when generating
-    // the input name attribute, so target by data-codeon-geo attribute we
-    // set in PHP.
-    function findFields(scope) {
-        const set = scope.querySelector('[data-codeon-geo="settlement"]');
-        // Attach datalist binding + placeholder via JS (WC Blocks strips
-        // these attributes server-side for security; we add them client-
-        // side once the input is rendered).
-        if (set && !set.getAttribute('list')) {
-            set.setAttribute('list', 'codeon-geo-settlements');
-            set.setAttribute('placeholder', 'Start typing the name…');
-        }
-        return {
-            mun: scope.querySelector('[data-codeon-geo="municipality"]'),
-            set: set,
-            datalist: document.getElementById('codeon-geo-settlements'),
-            states: Array.from(scope.querySelectorAll('select[id$="-state"], select[autocomplete="address-level1"]')),
-        };
+    function getDatalist() {
+        return document.getElementById('codeon-geo-settlements');
     }
 
-    // ------------ municipality filter -------------------------------------
-    // Hide muni options whose data-region doesn't match the current state.
-    // First load: cache the original options on the select element.
-    function filterMunicipalitiesByState(munSelect, stateValue) {
-        if (!munSelect) return;
-        if (!munSelect._codeonAllOptions) {
-            munSelect._codeonAllOptions = Array.from(munSelect.options).map(o => ({
-                value: o.value,
-                label: o.textContent,
-                region: o.dataset.region || '',
-            }));
-        }
-        // We don't actually have data-region on the option in the current
-        // implementation (WC Blocks select renderer strips data-* attrs).
-        // For now this is a no-op pass-through. The PHP layer prefixes
-        // each option label with the region, so the human can pick by
-        // reading the label.
-    }
-
-    // ------------ settlement datalist narrowing ---------------------------
-    // The <datalist id="codeon-geo-settlements"> is rendered server-side
-    // with all 4,394 options + data-mun on each. When muni changes, hide
-    // (or remove) options whose data-mun ≠ chosen muni so the browser's
-    // autocomplete dropdown only suggests that municipality's settlements.
-    function narrowDatalist(datalist, munId) {
-        if (!datalist) return;
-        const opts = datalist.querySelectorAll('option');
+    function narrowDatalistByMun(munId) {
+        const dl = getDatalist();
+        if (!dl) return;
+        // Cache option list once on the datalist itself so we don't query
+        // the DOM repeatedly. options is a live HTMLCollection.
+        const opts = dl.options;
         if (!munId) {
-            // Show all
-            opts.forEach(o => { o.disabled = false; o.hidden = false; });
+            for (let i = 0; i < opts.length; i++) {
+                opts[i].disabled = false;
+                opts[i].hidden = false;
+            }
             return;
         }
-        opts.forEach(o => {
-            const match = o.dataset.mun === munId;
-            o.disabled = !match;
-            o.hidden = !match;
+        for (let i = 0; i < opts.length; i++) {
+            const match = opts[i].dataset.mun === munId;
+            opts[i].disabled = !match;
+            opts[i].hidden = !match;
+        }
+    }
+
+    /**
+     * Attach the datalist + placeholder + change listener to a settlement
+     * input. Idempotent — bails if the element is already bound. Critical
+     * for stability inside React-controlled DOM where any setAttribute
+     * call risks triggering a re-render → re-mount → re-bind loop.
+     */
+    function bindSettlementInput(input) {
+        if (!input || input.getAttribute(BOUND_ATTR) === '1') return;
+        // Set the bound flag FIRST so any synchronous re-render of the
+        // input still sees this element as bound and skips re-bind.
+        input.setAttribute(BOUND_ATTR, '1');
+        // Datalist binding — the browser auto-suggests once `list` is set.
+        if (!input.getAttribute('list')) {
+            input.setAttribute('list', 'codeon-geo-settlements');
+        }
+        if (!input.getAttribute('placeholder')) {
+            input.setAttribute('placeholder', 'Start typing the name…');
+        }
+    }
+
+    function bindMunicipalitySelect(select) {
+        if (!select || select.getAttribute(BOUND_ATTR) === '1') return;
+        select.setAttribute(BOUND_ATTR, '1');
+        // Initial narrowing in case municipality already has a value.
+        if (select.value) narrowDatalistByMun(select.value);
+        select.addEventListener('change', function () {
+            narrowDatalistByMun(select.value);
         });
     }
 
-    function bind(scope) {
-        const f = findFields(scope);
-        if (!f.mun || !f.set) return; // not on a checkout page yet
+    function scanAndBind() {
+        const muns = document.querySelectorAll('[data-codeon-geo="municipality"]');
+        for (let i = 0; i < muns.length; i++) bindMunicipalitySelect(muns[i]);
 
-        // Initial pass.
-        f.states.forEach(s => filterMunicipalitiesByState(f.mun, s.value));
-        narrowDatalist(f.datalist, f.mun.value);
-
-        // Wire change listeners. WC Blocks fires native `change` events on
-        // its inputs after committing to the cart/checkout data store.
-        f.states.forEach(s => {
-            s.removeEventListener('change', s._codeonStateHandler || (() => {}));
-            s._codeonStateHandler = () => filterMunicipalitiesByState(f.mun, s.value);
-            s.addEventListener('change', s._codeonStateHandler);
-        });
-
-        f.mun.removeEventListener('change', f.mun._codeonMunHandler || (() => {}));
-        f.mun._codeonMunHandler = () => narrowDatalist(f.datalist, f.mun.value);
-        f.mun.addEventListener('change', f.mun._codeonMunHandler);
+        const sets = document.querySelectorAll('[data-codeon-geo="settlement"]');
+        for (let i = 0; i < sets.length; i++) bindSettlementInput(sets[i]);
     }
 
-    function observeAndBind() {
-        // Bind once if the fields are already there.
-        bind(document);
+    // Watcher: only triggers when the *count* of our fields changes —
+    // cheap, doesn't fire on every keystroke or React re-render of
+    // unrelated elements. Uses requestIdleCallback so the scan only
+    // runs when the browser is idle, never blocking interaction.
+    let lastCount = 0;
+    function lightWatch() {
+        const count = document.querySelectorAll('[data-codeon-geo]').length;
+        if (count !== lastCount) {
+            lastCount = count;
+            scanAndBind();
+        }
+    }
 
-        // Re-bind on any block re-render. WC Blocks unmounts/remounts the
-        // checkout block on shipping calculation and other live-update events.
-        const obs = new MutationObserver(() => bind(document));
-        obs.observe(document.body, { childList: true, subtree: true });
+    function start() {
+        scanAndBind();
+        lastCount = document.querySelectorAll('[data-codeon-geo]').length;
+
+        // Poll once per second instead of MutationObserver — eliminates
+        // the feedback loop entirely. WC Blocks unmounts/remounts the
+        // checkout block at most once per user action; a 1-second poll
+        // catches it quickly enough that no user notices a delay.
+        setInterval(lightWatch, 1000);
     }
 
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', observeAndBind);
+        document.addEventListener('DOMContentLoaded', start);
     } else {
-        observeAndBind();
+        start();
     }
 })();
