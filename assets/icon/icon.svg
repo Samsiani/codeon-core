@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"  stop-color="#1a2747"/>
+      <stop offset="100%" stop-color="#2a4080"/>
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="48" fill="url(#g)"/>
+  <!-- Pin silhouette -->
+  <path d="M128 48c-32 0-58 24.5-58 54.7 0 41 58 121.3 58 121.3s58-80.3 58-121.3c0-30.2-26-54.7-58-54.7zm0 82.5c-13.4 0-24.3-10.6-24.3-23.7s10.9-23.7 24.3-23.7 24.3 10.6 24.3 23.7-10.9 23.7-24.3 23.7z" fill="#fff"/>
+  <!-- "C" corner mark for CodeOn -->
+  <path d="M222 222c-5.5 5.5-13 8.8-21 8.8-16.5 0-30-13.5-30-30s13.5-30 30-30c8 0 15.5 3.3 21 8.8" stroke="#f5a623" stroke-width="6" fill="none" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,35 @@
+{
+    "name": "codeon/codeon-core",
+    "description": "Free CodeOn Core plugin for WordPress.org — Georgian Locations cascade for WooCommerce + canonical hub owner for the CodeOn plugin family.",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "homepage": "https://wordpress.org/plugins/codeon-core/",
+    "require": {
+        "php": ">=8.1",
+        "automattic/jetpack-autoloader": "^5.0",
+        "codeon/framework": "^0.3.2"
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/Samsiani/codeon-plugin-basic-architecture.git"
+        }
+    ],
+    "autoload": {
+        "psr-4": { "CodeOn\\Core\\": "includes/" }
+    },
+    "extra": {
+        "jetpack-autoloader": {
+            "classmap-authoritative": false
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "automattic/jetpack-autoloader": true
+        },
+        "platform": {
+            "php": "8.1"
+        }
+    }
+}

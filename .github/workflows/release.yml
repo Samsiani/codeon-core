@@ -1,0 +1,116 @@
+name: Release CodeOn Core
+
+# Triggers on any pushed tag matching v*. Builds an installable ZIP
+# that includes vendor/ (Composer + Jetpack-Autoloader-installed
+# framework code) and attaches it to the GitHub Release.
+#
+# Composer cross-repo auth: codeon/framework lives in the private
+# repo Samsiani/codeon-plugin-basic-architecture. Composer needs a
+# GitHub token with read access to that repo. We expect a repository
+# secret named COMPOSER_GITHUB_TOKEN containing a fine-grained PAT
+# with `Contents: Read` on Samsiani/codeon-plugin-basic-architecture.
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build + publish release ZIP
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve tag
+        id: tag
+        run: echo "name=${GITHUB_REF##*/}" >> "$GITHUB_OUTPUT"
+
+      - name: Setup PHP 8.1
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: composer:v2
+          coverage: none
+
+      - name: Configure Composer GitHub auth
+        env:
+          GH_PAT: ${{ secrets.COMPOSER_GITHUB_TOKEN }}
+        run: |
+          if [ -z "$GH_PAT" ]; then
+            echo "::error::COMPOSER_GITHUB_TOKEN secret is missing. Composer cannot reach codeon/framework without it." >&2
+            exit 1
+          fi
+          composer config --global --auth github-oauth.github.com "$GH_PAT"
+
+      - name: Composer install (production)
+        run: composer install --no-dev --optimize-autoloader --no-interaction --no-progress --prefer-dist
+
+      - name: Smoke check data bundle
+        run: |
+          php -l data/locations.php
+          test -s data/locations.min.json
+
+      - name: Build ZIP
+        env:
+          TAG: ${{ steps.tag.outputs.name }}
+        run: |
+          set -euo pipefail
+          STAGE="codeon-core"
+          OUT="codeon-core-${TAG}.zip"
+          mkdir -p build
+          rm -rf "build/${STAGE}"
+          mkdir -p "build/${STAGE}"
+          rsync -a \
+            --exclude ".git" \
+            --exclude ".github" \
+            --exclude "build" \
+            --exclude "dist" \
+            --exclude "node_modules" \
+            --exclude "tests" \
+            --exclude "*.md" \
+            --exclude "*.zip" \
+            --exclude ".gitignore" \
+            --exclude ".DS_Store" \
+            --exclude "composer.lock" \
+            ./ "build/${STAGE}/"
+          (cd build && zip -rq "../${OUT}" "${STAGE}")
+          ls -la "${OUT}"
+
+      - name: Extract release notes from readme.txt
+        env:
+          TAG: ${{ steps.tag.outputs.name }}
+        run: |
+          set -euo pipefail
+          VERSION="${TAG#v}"
+          awk -v v="$VERSION" '
+            $0 ~ ("^= " v " ") { flag=1; next }
+            flag && /^= [0-9]/ { exit }
+            flag && /^== / { exit }
+            flag { print }
+          ' readme.txt > release-notes.raw
+          awk 'NF {n++; nonblank[n]=NR} {line[NR]=$0} END {
+            if (n==0) exit;
+            for (i=nonblank[1]; i<=nonblank[n]; i++) print line[i]
+          }' release-notes.raw > release-notes.md
+          if [ ! -s release-notes.md ]; then
+            echo "Release ${TAG}." > release-notes.md
+          fi
+          echo "::group::release-notes.md"
+          cat release-notes.md
+          echo "::endgroup::"
+
+      - name: Publish Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: codeon-core-*.zip
+          body_path: release-notes.md
+          draft: false

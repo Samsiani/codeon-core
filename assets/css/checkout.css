@@ -1,0 +1,35 @@
+/**
+ * CodeOn Core — checkout cascade styling.
+ * Keeps the inserted Municipality field visually consistent with WC's
+ * native State/City fields without overriding theme styles.
+ */
+
+.woocommerce form .form-row.codeon-geo-field select,
+.woocommerce-page form .form-row.codeon-geo-field select {
+    width: 100%;
+}
+
+/* Loading state: the cascade JS adds .codeon-loading to the row while a
+   REST call is in flight. */
+.codeon-geo-field.codeon-loading::after {
+    content: "";
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-left: 8px;
+    border: 2px solid #ccc;
+    border-top-color: #1a2747;
+    border-radius: 50%;
+    animation: codeon-spin 0.7s linear infinite;
+    vertical-align: middle;
+}
+
+@keyframes codeon-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* My Account edit-address page — narrower form, ensure muns dropdown
+   stretches like sibling fields. */
+.woocommerce-MyAccount-content .codeon-geo-field {
+    margin-bottom: 1em;
+}

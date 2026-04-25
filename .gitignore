@@ -1,0 +1,7 @@
+/vendor/
+/node_modules/
+/build/codeon-core-*.zip
+.DS_Store
+*.log
+.idea/
+.vscode/
