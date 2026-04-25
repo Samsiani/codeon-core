@@ -70,17 +70,17 @@
         },
         {
             "name": "codeon/framework",
-            "version": "0.3.2",
-            "version_normalized": "0.3.2.0",
+            "version": "0.3.3",
+            "version_normalized": "0.3.3.0",
             "source": {
                 "type": "git",
                 "url": "git@github.com:Samsiani/codeon-plugin-basic-architecture.git",
-                "reference": "ed8c8f02164cdfa0b8453e13f66b61dfa6e6359c"
+                "reference": "8b3131981e17fdbfea900ad191c9b464300bd37c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Samsiani/codeon-plugin-basic-architecture/zipball/ed8c8f02164cdfa0b8453e13f66b61dfa6e6359c",
-                "reference": "ed8c8f02164cdfa0b8453e13f66b61dfa6e6359c",
+                "url": "https://api.github.com/repos/Samsiani/codeon-plugin-basic-architecture/zipball/8b3131981e17fdbfea900ad191c9b464300bd37c",
+                "reference": "8b3131981e17fdbfea900ad191c9b464300bd37c",
                 "shasum": ""
             },
             "require": {
@@ -90,7 +90,7 @@
                 "phpstan/phpstan": "^1.11",
                 "phpunit/phpunit": "^10.5"
             },
-            "time": "2026-04-25T13:28:11+00:00",
+            "time": "2026-04-25T15:23:40+00:00",
             "type": "library",
             "installation-source": "source",
             "autoload": {
@@ -112,7 +112,7 @@
                 ]
             },
             "license": [
-                "proprietary"
+                "GPL-2.0-or-later"
             ],
             "description": "Shared admin UI + chrome + hub menu + license/update plumbing for CodeOn WooCommerce plugins (codeon.ge).",
             "homepage": "https://github.com/Samsiani/codeon-plugin-basic-architecture",

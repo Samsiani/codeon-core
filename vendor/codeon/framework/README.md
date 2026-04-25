@@ -19,7 +19,12 @@ Shared admin UI + chrome framework for [codeon.ge](https://codeon.ge) WordPress 
 
 ```bash
 composer require codeon/framework:^0.1
+composer require automattic/jetpack-autoloader
 ```
+
+> **Mandatory: use the Jetpack autoloader, not Composer's default.** Multiple CodeOn plugins commonly run side-by-side on the same WordPress install, and each ships its own `vendor/codeon/framework/`. Composer's `vendor/autoload.php` has no concept of "another plugin already loaded a different copy of the same package", so whichever plugin loads first wins and the others get the wrong version under the same FQCN.
+>
+> `automattic/jetpack-autoloader` solves this by registering classes under a versioned key in a shared global registry — the highest-versioned copy of each package wins for every consumer regardless of plugin load order. Add the package, set `"extra": { "jetpack-autoloader": { "classmap-authoritative": false } }` in your `composer.json`, and `require __DIR__ . '/vendor/autoload_packages.php';` in the main plugin file (NOT `vendor/autoload.php`). See [`docs/SCAFFOLDING.md` §2](docs/SCAFFOLDING.md) for the full recipe.
 
 This package ships PHP source + CSS/JS under `assets/`. Your plugin's release script must keep `vendor/codeon/framework/assets/` inside the production ZIP — the framework's `Assets` class resolves URLs relative to its own location at runtime.
 
@@ -78,4 +83,6 @@ Strict [SemVer](https://semver.org/). Plugins should pin to a minor range (`"^0.
 
 ## License
 
-Proprietary. See [LICENSE](LICENSE). Copyright © 2026 CodeOn.
+GPL-2.0-or-later. See [LICENSE](LICENSE). Copyright © 2026 CodeOn.
+
+Re-licensed from proprietary in v0.3.3 to enable bundling inside `codeon-core` (the free WordPress.org plugin). The framework is now safe to ship inside any GPL-compatible WordPress plugin.

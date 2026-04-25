@@ -5,7 +5,7 @@ Requires at least: 6.2
 Tested up to: 6.7
 Requires PHP: 8.1
 Requires Plugins: woocommerce
-Stable tag: 0.1.0
+Stable tag: 0.1.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -72,6 +72,10 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 
 == Changelog ==
 
+= 0.1.1 — 2026-04-25 =
+* Bump bundled `codeon/framework` to v0.3.3 (re-licensed from proprietary to GPL-2.0-or-later — required for WordPress.org distribution).
+* No functional changes; release infrastructure improvement only.
+
 = 0.1.0 — 2026-04-25 =
 * Initial release.
 * Classic checkout cascade (Region → Municipality → Settlement) for Georgia.
@@ -82,6 +86,9 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 * CodeOn hub claim.
 
 == Upgrade Notice ==
+
+= 0.1.1 =
+Framework re-license. No action required.
 
 = 0.1.0 =
 First public release.

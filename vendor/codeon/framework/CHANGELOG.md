@@ -4,6 +4,22 @@ All notable changes to the CodeOn Plugin Framework. Format: [Keep a Changelog](h
 
 ---
 
+## [0.3.3] — 2026-04-25
+
+### Changed — License
+
+- **Re-licensed from `proprietary` to `GPL-2.0-or-later`**. Previous releases shipped under a proprietary license that restricted use to CodeOn-owned plugins distributed via codeon.ge. That model conflicts with the new free `codeon-core` plugin shipping on WordPress.org, which requires every bundled library to be GPL-2.0-compatible. Re-licensing has zero downside: the framework was already de-facto public the moment Core's first ZIP shipped, and the watermarked-build-id mechanism that protects paid plugins is independent of the framework's license.
+- `LICENSE` file replaced with the full GPL-2.0 text.
+- `composer.json` `license` field updated.
+- `README.md` and `docs/SCAFFOLDING.md` example updated to reflect the new license.
+
+### Notes for downstream paid plugins (Flitt, TBC, BOG, etc.)
+
+- Update your plugin's `composer.json` `license` field to `GPL-2.0-or-later` — bundling a GPL library makes the combined work GPL. This is the same license model WordPress itself, Yoast Premium, ACF Pro, and every other "paid" WordPress plugin uses. Your commercial moat is the license-key gate + signed updates from codeon.ge, not source ownership.
+- No code changes required.
+
+---
+
 ## [0.1.3] — 2026-04-25
 
 ### Added

@@ -44,21 +44,73 @@ readme.txt                    # WP-format readme for the install screen
 
 ---
 
-## 2. composer.json
+## 2. ⚠️ Mandatory: Jetpack Autoloader
+
+> **Read this before writing any composer.json. It is not optional.**
+
+CodeOn plugins are independent ZIPs that merchants install side-by-side. Without coordination, two CodeOn plugins that each ship `vendor/codeon/framework/` will fight at load time: whichever plugin loads first wins, and any subsequent plugin that requires a newer minor version of the framework gets the OLDER classes loaded under the same FQCN. This is "Dependency Hell" for WordPress plugins, and Composer's stock `vendor/autoload.php` cannot solve it (it only knows about its own plugin's `vendor/`).
+
+Every CodeOn plugin **MUST** use [`automattic/jetpack-autoloader`](https://packagist.org/packages/automattic/jetpack-autoloader). It registers each plugin's classes under a versioned key in a shared global registry; when multiple plugins ship the same package, the highest-versioned copy wins for every consumer, regardless of plugin load order.
+
+### Three things you MUST do
+
+1. **Add it to composer.json**:
+
+    ```bash
+    composer require automattic/jetpack-autoloader
+    ```
+
+2. **Configure non-authoritative classmaps** in `composer.json` so the autoloader resolves classes dynamically rather than baking a frozen list at install time:
+
+    ```json
+    "extra": {
+        "jetpack-autoloader": {
+            "classmap-authoritative": false
+        }
+    }
+    ```
+
+    Authoritative classmaps would fail any class added after `composer install` ran — fine on a build machine, broken on merchant sites that pull the ZIP and never run Composer themselves.
+
+3. **Require the Jetpack autoloader bootstrap** in the main plugin file, **NOT** Composer's default:
+
+    ```php
+    // CORRECT — Jetpack autoloader, version-aware across co-installed plugins
+    require __DIR__ . '/vendor/autoload_packages.php';
+    ```
+
+    NOT:
+
+    ```php
+    // WRONG — clobbers any other CodeOn plugin's framework copy
+    require __DIR__ . '/vendor/autoload.php';
+    ```
+
+The full composer.json + main file examples in §3 and §4 below already reflect this. Don't strip it.
+
+---
+
+## 3. composer.json
 
 ```json
 {
     "name": "codeon/<your-plugin-slug>",
     "type": "wordpress-plugin",
-    "license": "proprietary",
+    "license": "GPL-2.0-or-later",
     "require": {
         "php": ">=8.1",
-        "codeon/framework": "^0.1"
+        "codeon/framework": "^0.3",
+        "automattic/jetpack-autoloader": "^5.0"
     },
     "autoload": {
         "psr-4": { "CodeOn\\YourPlugin\\": "includes/" }
     },
-    "config": { "sort-packages": true }
+    "config": { "sort-packages": true },
+    "extra": {
+        "jetpack-autoloader": {
+            "classmap-authoritative": false
+        }
+    }
 }
 ```
 
@@ -68,9 +120,17 @@ Run:
 composer install
 ```
 
+After the install, verify the Jetpack bootstrap exists:
+
+```bash
+ls vendor/autoload_packages.php   # must exist; this is what your main file requires
+```
+
+If that file is missing the autoloader didn't install — re-check the `automattic/jetpack-autoloader` require line and the `extra` block.
+
 ---
 
-## 3. Main plugin file
+## 4. Main plugin file
 
 `your-plugin-slug.php`:
 
@@ -94,7 +154,9 @@ define('YOUR_PLUGIN_DIR', plugin_dir_path(__FILE__));
 // Watermark scatter site #1 of 3 — codeon.ge replaces at delivery time.
 define('CODEON_BUILD_ID', '__CODEON_BUILD_ID__');
 
-require __DIR__ . '/vendor/autoload.php';
+// Jetpack autoloader — version-aware across co-installed CodeOn plugins.
+// See §2 of this guide. Do NOT swap this for `vendor/autoload.php`.
+require __DIR__ . '/vendor/autoload_packages.php';
 
 add_action('woocommerce_loaded', static function (): void {
     \CodeOn\YourPlugin\Plugin::instance()->boot();
@@ -103,7 +165,7 @@ add_action('woocommerce_loaded', static function (): void {
 
 ---
 
-## 4. Boot file
+## 5. Boot file
 
 `includes/Plugin.php`:
 
@@ -145,7 +207,7 @@ final class Plugin
 
 ---
 
-## 5. First tab
+## 6. First tab
 
 `includes/Admin/GeneralTab.php`:
 
@@ -180,7 +242,7 @@ That's it for a minimum viable plugin shell. From here the [`docs/FIELD_SCHEMA.m
 
 ---
 
-## 6. Watermark scatter sites
+## 7. Watermark scatter sites
 
 See [`docs/WATERMARK.md`](WATERMARK.md) for the full pre-release checklist. In short:
 
@@ -192,7 +254,7 @@ See [`docs/WATERMARK.md`](WATERMARK.md) for the full pre-release checklist. In s
 
 ---
 
-## 7. Smoke test before first release
+## 8. Smoke test before first release
 
 - `Plugins → Add New → Upload`, install your built ZIP, activate.
 - Open the admin page → standard chrome renders, tab nav works, footer shows build identifier.
