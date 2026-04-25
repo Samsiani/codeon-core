@@ -2,12 +2,24 @@
 /**
  * CodeOn Core — singleton bootstrap.
  *
- * Two responsibilities, in order:
- *   1. Claim the shared CodeOn admin hub (filter `codeon/hub/toplevel_config`).
- *      Runs at plugins_loaded(5) so paid CodeOn plugins booting later pick up
- *      our toplevel identity instead of falling back to the framework defaults.
- *   2. Wire up the Locations feature (states, checkout fields, REST, settings)
- *      — only when WooCommerce is active.
+ * Three responsibilities, in order:
+ *
+ *   1. Claim the shared CodeOn admin hub via filter `codeon/hub/toplevel_config`.
+ *      Runs synchronously at plugins_loaded(5) so paid CodeOn plugins booting
+ *      later pick up our toplevel identity instead of the framework defaults.
+ *
+ *   2. Build the framework Manifest + tabs and call Bootstrap::register so
+ *      Core's own submenu (Locations + Diagnostics) renders. Translations
+ *      that go INTO the manifest are deferred to `init` to avoid the WP 6.7+
+ *      "translation loaded too early" notice.
+ *
+ *   3. Wire the Locations feature on `init` (NOT `woocommerce_loaded`). WC
+ *      fires `woocommerce_loaded` inside its own plugins_loaded(0) callback
+ *      — earlier than our plugins_loaded(5) — so a callback we add to it
+ *      here would be registered AFTER the action already fired and would
+ *      never run. Switching to `init` (which fires after plugins_loaded
+ *      completes) guarantees our callback fires while still letting WC's
+ *      classes be available.
  *
  * @package CodeOn\Core
  */
@@ -41,20 +53,43 @@ final class Plugin
         }
         $this->booted = true;
 
+        // 1) Hub claim — does not consume any translated strings, safe to run now.
+        CoreHubBoot::register();
+
+        // 2) Defer the framework Bootstrap + Locations wiring to `init`.
+        //    Both consume translated strings (manifest labels, tab labels,
+        //    field labels) so they MUST run after textdomain is loaded.
+        //    Priority 5 keeps us early enough that admin_menu (priority 8/10)
+        //    still has our hub registration before WP renders the sidebar.
+        add_action('init', [$this, 'lateBoot'], 5);
+
+        // load_plugin_textdomain is automatic in WP 4.6+ for plugins on
+        // wordpress.org and falls back to /languages/ in the plugin folder
+        // for direct installs. Calling it explicitly at `init` is harmless.
         add_action('init', static function (): void {
             load_plugin_textdomain(
                 'codeon-core',
                 false,
-                dirname(CODEON_CORE_BASENAME) . '/languages'
+                CODEON_CORE_SLUG . '/languages'
             );
-        });
+        }, 1);
+    }
 
-        // 1) Hub claim. Idempotent filter wiring; safe even if other plugins
-        //    register first.
-        CoreHubBoot::register();
+    private bool $lateBooted = false;
 
-        // 2) Framework chrome for Core's own submenu (Locations + Diagnostics).
-        //    Pass null buildStamp — Core ships from .org as plain GPL source.
+    /**
+     * Runs at init(5). At this point: WC is fully loaded, textdomain is
+     * loaded, and `woocommerce_register_additional_checkout_field` is
+     * defined (WC fires its woocommerce_blocks_loaded earlier than init
+     * in modern versions). Idempotent.
+     */
+    public function lateBoot(): void
+    {
+        if ($this->lateBooted) {
+            return;
+        }
+        $this->lateBooted = true;
+
         $repo = new FlatOptionRepository('codeon_core_settings');
 
         $manifest = (new Manifest('codeon-core', __('CodeOn Core', 'codeon-core')))
@@ -74,12 +109,10 @@ final class Plugin
             null
         );
 
-        // 3) Locations feature — needs WooCommerce. Defer until WC has loaded
-        //    so woocommerce_states + checkout filters land at the right time.
+        // Locations feature: needs WC. If WC isn't around the rest of the
+        // plugin still works (Hub menu + Extensions tab + admin notice).
         if (class_exists('WooCommerce')) {
-            add_action('woocommerce_loaded', static function () use ($repo): void {
-                LocationsBoot::register($repo);
-            }, 20);
+            LocationsBoot::register($repo);
         }
     }
 }

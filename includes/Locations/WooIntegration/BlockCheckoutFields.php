@@ -41,9 +41,15 @@ final class BlockCheckoutFields
 
     public function register(): void
     {
-        // Field registration must happen on woocommerce_blocks_loaded so
-        // the WC Blocks Domain\Services\CheckoutFields service is ready.
-        add_action('woocommerce_blocks_loaded', [$this, 'registerFields']);
+        // WC bundles Blocks since 8.x. By the time Locations\Boot::register
+        // runs (at our init hook), woocommerce_register_additional_checkout_field
+        // is already defined. If the hook already fired we just call directly;
+        // otherwise we hook in case Locations\Boot ran early for some reason.
+        if (function_exists('woocommerce_register_additional_checkout_field')) {
+            $this->registerFields();
+        } else {
+            add_action('woocommerce_blocks_loaded', [$this, 'registerFields']);
+        }
 
         // Persist on order create — write our standard geo_* meta + sync
         // to the core `_billing_city` so WC reports keep working.

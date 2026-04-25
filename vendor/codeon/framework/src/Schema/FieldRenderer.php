@@ -40,6 +40,14 @@ final class FieldRenderer
         wp_nonce_field($nonceAction);
         echo '<input type="hidden" name="action" value="codeon_save_tab" />';
         echo '<input type="hidden" name="codeon_tab" value="' . esc_attr($tabSlug) . '" />';
+        // Slug discriminator — without this, every co-installed framework
+        // consumer's Page::handleSave fires on the same admin_post action
+        // and the FIRST registered Page's nonceAction check wins (or fails)
+        // regardless of which plugin's form was actually submitted. The
+        // slug pulled from the nonce action lets handleSave bail when
+        // this Page isn't the target.
+        $slug = (string) preg_replace('/^codeon_admin_/', '', $nonceAction);
+        echo '<input type="hidden" name="codeon_plugin_slug" value="' . esc_attr($slug) . '" />';
 
         self::renderRows($schema, $repo);
 

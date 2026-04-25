@@ -4,6 +4,19 @@ All notable changes to the CodeOn Plugin Framework. Format: [Keep a Changelog](h
 
 ---
 
+## [0.3.4] — 2026-04-25
+
+### Fixed — multi-plugin save flow (critical)
+
+When two or more framework consumers were active at the same time (e.g. `codeon-core` + `fina-sync`), every consumer's `Page::handleSave` listened on the global `admin_post_codeon_save_tab` hook. The first registered handler ran first, called `guardWriteRequest()`, and `wp_die()`'d on a nonce minted for a *different* plugin's form. Net result: the merchant got "Security check failed" on every Save click no matter which plugin's settings page they were on.
+
+- `Schema/FieldRenderer::renderForm()` now injects a hidden `codeon_plugin_slug` field with the slug parsed out of the nonce action.
+- `Admin/Page::handleSave()` and `handleTabAction()` bail early via the new `isOurPost()` helper when the posted slug doesn't match this Page's manifest. Legacy forms (no posted slug) still pass through for back-compat.
+
+No upgrade steps required for plugins on the framework — the discriminator is fully backward-compatible.
+
+---
+
 ## [0.3.3] — 2026-04-25
 
 ### Changed — License

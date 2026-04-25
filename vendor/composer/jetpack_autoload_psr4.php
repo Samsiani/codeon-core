@@ -7,7 +7,7 @@ $baseDir   = dirname($vendorDir);
 
 return array(
 	'CodeOn\\Framework\\' => array(
-		'version' => '0.3.3.0',
+		'version' => '0.3.4.0',
 		'path'    => array( $vendorDir . '/codeon/framework/src' )
 	),
 	'CodeOn\\Core\\' => array(

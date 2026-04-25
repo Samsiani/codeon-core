@@ -5,7 +5,7 @@ Requires at least: 6.2
 Tested up to: 6.7
 Requires PHP: 8.1
 Requires Plugins: woocommerce
-Stable tag: 0.1.3
+Stable tag: 0.1.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -72,6 +72,13 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 
 == Changelog ==
 
+= 0.1.4 — 2026-04-25 =
+* **Critical fix:** "Security check failed" on settings save when CodeOn Core is co-installed with another framework consumer (e.g. fina-sync). Fixed via framework v0.3.4 which adds a slug discriminator to the global admin-post save handler.
+* **Critical fix:** Block checkout fields + REST endpoints now actually register. Old code added the `woocommerce_loaded` callback at `plugins_loaded(5)` — but WC fires `woocommerce_loaded` at `plugins_loaded(0)`, so our callback was registered AFTER the action already fired and never ran. Switched to `init` hook + direct call when WC is already loaded.
+* PUC slug is now derived dynamically from the actual plugin folder name (works for both `codeon-core/` and `codeon-core-main/`).
+* Translations deferred to `init` to silence the WP 6.7+ "translation loaded too early" notice.
+* Re-entry guard at file load: bails silently if the plugin file is required twice in the same request (defense against autoloader oddities).
+
 = 0.1.3 — 2026-04-25 =
 * **Plugin Update Checker** wired to GitHub releases. Future versions appear in WP Admin → Updates without manual ZIP uploads, until codeon-core lands on WordPress.org (M3).
 
@@ -96,6 +103,9 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 * CodeOn hub claim.
 
 == Upgrade Notice ==
+
+= 0.1.4 =
+Critical fixes for "Security check failed" on save and missing block-checkout fields. Strongly recommended.
 
 = 0.1.3 =
 After upgrading to 0.1.3 once (manual ZIP install), all subsequent versions auto-update via the WP Updates screen. One-time manual install required.

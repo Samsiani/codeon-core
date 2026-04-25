@@ -120,6 +120,16 @@ final class Page
 
     public function handleSave(): void
     {
+        // When multiple framework consumers are co-installed they ALL
+        // listen on admin_post_codeon_save_tab. Bail unless the POST is
+        // for THIS plugin's slug — otherwise we'd run guardWriteRequest()
+        // and wp_die() on a nonce minted for a different plugin's form.
+        // The slug comes from the hidden codeon_plugin_slug field
+        // injected by FieldRenderer::renderForm.
+        if (!$this->isOurPost()) {
+            return;
+        }
+
         $this->guardWriteRequest();
 
         $tabSlug = isset($_POST['codeon_tab']) ? sanitize_key((string) $_POST['codeon_tab']) : '';
@@ -160,6 +170,9 @@ final class Page
 
     public function handleTabAction(): void
     {
+        if (!$this->isOurPost()) {
+            return;
+        }
         $this->guardWriteRequest();
 
         $tabSlug = isset($_POST['codeon_tab']) ? sanitize_key((string) $_POST['codeon_tab']) : '';
@@ -256,6 +269,24 @@ final class Page
             );
         }
         echo '</nav>';
+    }
+
+    /**
+     * Returns true when the current admin-post POST targets THIS Page's
+     * plugin slug. Used by handleSave / handleTabAction to bail early
+     * when another co-installed framework consumer's form was posted.
+     *
+     * Falls back to true when no slug is posted — preserves backward
+     * compatibility with forms rendered by older framework versions
+     * that didn't inject the discriminator.
+     */
+    private function isOurPost(): bool
+    {
+        if (!isset($_POST['codeon_plugin_slug'])) {
+            return true; // legacy form, can't discriminate
+        }
+        $posted = sanitize_key((string) wp_unslash($_POST['codeon_plugin_slug']));
+        return $posted === $this->manifest->slug;
     }
 
     private function guardWriteRequest(): void
