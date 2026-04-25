@@ -1,6 +1,8 @@
-/vendor/
 /node_modules/
 /build/codeon-core-*.zip
+# vendor/ IS committed for codeon-core (the .org plugin) — see release.yml
+# rationale. Other CodeOn plugins exclude it because they regenerate it
+# at release time via composer install + a private framework PAT.
 .DS_Store
 *.log
 .idea/

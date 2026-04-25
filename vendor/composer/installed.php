@@ -1,0 +1,41 @@
+<?php return array(
+    'root' => array(
+        'name' => 'codeon/codeon-core',
+        'pretty_version' => 'dev-main',
+        'version' => 'dev-main',
+        'reference' => 'bb59cfdec384376da6f5089ac754a36beb12391d',
+        'type' => 'wordpress-plugin',
+        'install_path' => __DIR__ . '/../../',
+        'aliases' => array(),
+        'dev' => false,
+    ),
+    'versions' => array(
+        'automattic/jetpack-autoloader' => array(
+            'pretty_version' => 'v5.0.16',
+            'version' => '5.0.16.0',
+            'reference' => 'd8ae822a35e7431137e860ee60eceedaa745e4d1',
+            'type' => 'composer-plugin',
+            'install_path' => __DIR__ . '/../automattic/jetpack-autoloader',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'codeon/codeon-core' => array(
+            'pretty_version' => 'dev-main',
+            'version' => 'dev-main',
+            'reference' => 'bb59cfdec384376da6f5089ac754a36beb12391d',
+            'type' => 'wordpress-plugin',
+            'install_path' => __DIR__ . '/../../',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'codeon/framework' => array(
+            'pretty_version' => '0.3.2',
+            'version' => '0.3.2.0',
+            'reference' => 'ed8c8f02164cdfa0b8453e13f66b61dfa6e6359c',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../codeon/framework',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+    ),
+);

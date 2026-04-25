@@ -1,0 +1,32 @@
+{
+    "name": "codeon/framework",
+    "description": "Shared admin UI + chrome + hub menu + license/update plumbing for CodeOn WooCommerce plugins (codeon.ge).",
+    "type": "library",
+    "version": "0.3.2",
+    "license": "proprietary",
+    "homepage": "https://github.com/Samsiani/codeon-plugin-basic-architecture",
+    "require": {
+        "php": ">=8.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.5",
+        "phpstan/phpstan": "^1.11"
+    },
+    "autoload": {
+        "psr-4": {
+            "CodeOn\\Framework\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "CodeOn\\Framework\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "scripts": {
+        "test": "phpunit",
+        "stan": "phpstan analyse src --level=8"
+    }
+}

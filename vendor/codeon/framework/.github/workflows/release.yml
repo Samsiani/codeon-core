@@ -1,0 +1,65 @@
+name: Release
+
+# Framework is a Composer library, not a plugin ZIP. Tagging a semver
+# release triggers only a GitHub Release entry whose body is extracted
+# from CHANGELOG.md's matching "## [X.Y.Z]" block. Host plugins pull
+# the code via `composer require codeon/framework:X.Y.Z`.
+#
+# Security: only github.ref_name (the pushed tag) is external input,
+# and it is always passed through env: — never interpolated into a
+# run: shell command directly. No issue / PR / commit text is read.
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup PHP 8.1
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          coverage: none
+
+      - name: PHP syntax check
+        run: |
+          set -euo pipefail
+          find src -name '*.php' -print0 | xargs -0 -n1 php -l
+
+      - name: Extract changelog notes
+        env:
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          VERSION="${TAG_NAME#v}"
+          RN="$GITHUB_WORKSPACE/release-notes.md"
+          : > "$RN"
+          if [ -f CHANGELOG.md ]; then
+            awk -v v="$VERSION" '
+              $0 ~ ("^## \\[" v "\\]") { flag=1; next }
+              flag && /^## / { exit }
+              flag { print }
+            ' CHANGELOG.md > "$RN"
+          fi
+          if [ ! -s "$RN" ]; then
+            echo "Release ${TAG_NAME}. See CHANGELOG.md for details." > "$RN"
+          fi
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: release-notes.md
+          draft: false
+          prerelease: false
