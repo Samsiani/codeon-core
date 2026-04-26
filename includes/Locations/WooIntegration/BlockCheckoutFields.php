@@ -31,6 +31,8 @@ declare(strict_types=1);
 
 namespace CodeOn\Core\Locations\WooIntegration;
 
+defined('ABSPATH') || exit;
+
 use CodeOn\Core\Locations\Data\DisplayFormatter;
 use CodeOn\Core\Locations\Data\Repository;
 

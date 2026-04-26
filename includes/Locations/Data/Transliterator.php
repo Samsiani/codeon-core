@@ -21,6 +21,8 @@ declare(strict_types=1);
 
 namespace CodeOn\Core\Locations\Data;
 
+defined('ABSPATH') || exit;
+
 final class Transliterator
 {
     /** @var array<string,string> */

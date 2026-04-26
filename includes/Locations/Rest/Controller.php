@@ -18,6 +18,8 @@ declare(strict_types=1);
 
 namespace CodeOn\Core\Locations\Rest;
 
+defined('ABSPATH') || exit;
+
 use CodeOn\Core\Locations\Data\DisplayFormatter;
 use CodeOn\Core\Locations\Data\Repository;
 use CodeOn\Framework\Storage\SettingsRepository;

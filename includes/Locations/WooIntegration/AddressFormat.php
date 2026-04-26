@@ -12,6 +12,8 @@ declare(strict_types=1);
 
 namespace CodeOn\Core\Locations\WooIntegration;
 
+defined('ABSPATH') || exit;
+
 final class AddressFormat
 {
     public function register(): void

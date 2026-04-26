@@ -14,6 +14,8 @@ declare(strict_types=1);
 
 namespace CodeOn\Core;
 
+defined('ABSPATH') || exit;
+
 final class Activator
 {
     public static function activate(): void

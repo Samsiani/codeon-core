@@ -18,6 +18,8 @@ declare(strict_types=1);
 
 namespace CodeOn\Core\Hub;
 
+defined('ABSPATH') || exit;
+
 use CodeOn\Framework\Extensions\ExtensionsTab as FrameworkExtensionsTab;
 
 final class ExtensionsTab extends FrameworkExtensionsTab

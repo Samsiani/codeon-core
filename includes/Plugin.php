@@ -28,6 +28,8 @@ declare(strict_types=1);
 
 namespace CodeOn\Core;
 
+defined('ABSPATH') || exit;
+
 use CodeOn\Core\Hub\CoreHubBoot;
 use CodeOn\Core\Locations\Boot as LocationsBoot;
 use CodeOn\Core\Locations\Settings\DiagnosticsTab;

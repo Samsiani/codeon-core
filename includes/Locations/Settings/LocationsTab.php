@@ -12,6 +12,8 @@ declare(strict_types=1);
 
 namespace CodeOn\Core\Locations\Settings;
 
+defined('ABSPATH') || exit;
+
 use CodeOn\Framework\Admin\Tab;
 use CodeOn\Framework\Schema\Field;
 use CodeOn\Framework\Storage\SettingsRepository;

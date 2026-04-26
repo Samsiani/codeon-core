@@ -14,6 +14,8 @@ declare(strict_types=1);
 
 namespace CodeOn\Core\Locations\Settings;
 
+defined('ABSPATH') || exit;
+
 use CodeOn\Core\Locations\Data\Repository;
 use CodeOn\Framework\Admin\Tab;
 

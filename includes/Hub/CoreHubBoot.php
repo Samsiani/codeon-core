@@ -20,6 +20,8 @@ declare(strict_types=1);
 
 namespace CodeOn\Core\Hub;
 
+defined('ABSPATH') || exit;
+
 use CodeOn\Framework\Plugin\HubRegistry;
 
 final class CoreHubBoot

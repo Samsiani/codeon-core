@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace CodeOn\Core\Locations;
 
+defined('ABSPATH') || exit;
+
 use CodeOn\Core\Locations\Rest\Controller as RestController;
 use CodeOn\Core\Locations\WooIntegration\AddressFormat;
 use CodeOn\Core\Locations\WooIntegration\BlockCheckoutFields;

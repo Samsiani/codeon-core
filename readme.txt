@@ -5,11 +5,11 @@ Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 8.1
 Requires Plugins: woocommerce
-Stable tag: 0.2.0
+Stable tag: 0.2.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Georgian Locations for WooCommerce — replaces the free-text City field with a real cascading Region → Municipality → Settlement picker. 4,394 settlements bundled.
+Cascading Region → Municipality → Settlement address picker for WooCommerce in Georgia. 4,394 settlements bundled.
 
 == Description ==
 
@@ -71,6 +71,11 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 3. CodeOn hub menu with installed plugins listed underneath.
 
 == Changelog ==
+
+= 0.2.1 — 2026-04-26 =
+* **Plugin Check fixes:**
+    * Added `defined('ABSPATH') || exit;` direct-access guard to all 17 PHP files in `includes/` (Plugin Check `missing_direct_file_access_protection` error).
+    * Trimmed the short description in `readme.txt` to 118 chars (under the 150-char limit Plugin Check enforces).
 
 = 0.2.0 — 2026-04-26 =
 * **WordPress.org submission release.**
