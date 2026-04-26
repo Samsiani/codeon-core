@@ -52,21 +52,24 @@ final class ClassicCheckoutFields
     }
 
     /**
-     * Last-writer-wins enforcement of our field tweaks. Runs AFTER every
-     * other plugin and theme has had a chance to mangle the checkout
-     * fields, then re-applies our specific changes:
-     *   - state field at priority 45 (Region label)
-     *   - municipality field inserted at priority 46
-     *   - city field at priority 47 (Settlement label, select type)
+     * Last-writer-wins enforcement of our field setup. Runs AFTER every
+     * other plugin/theme has had a chance to mangle the checkout fields.
      *
-     * Only touches the billing + shipping groups; leaves account and
-     * order groups alone.
+     * Cascade UX (per user feedback):
+     *   - State (Region) is HIDDEN — auto-populated by JS from the chosen
+     *     municipality so WC's tax/shipping/order-meta still get a state
+     *     code under the hood.
+     *   - Municipality is the first user-facing dropdown, pre-loaded with
+     *     all 77 munis (label includes region prefix for context).
+     *   - Settlement (city) cascades from Municipality.
      *
      * @param array<string, array<string, array<string,mixed>>> $checkoutFields
      * @return array<string, array<string, array<string,mixed>>>
      */
     public function enforceFinalFieldSetup(array $checkoutFields): array
     {
+        $munOptions = $this->buildMunicipalityOptions();
+
         foreach (['billing', 'shipping'] as $group) {
             if (!isset($checkoutFields[$group]) || !is_array($checkoutFields[$group])) {
                 continue;
@@ -77,29 +80,101 @@ final class ClassicCheckoutFields
             $munKey   = $group . '_municipality';
             $cityKey  = $group . '_city';
 
+            // Hide state field — value is auto-set by JS from chosen muni.
+            // Keep it required at the validation level so WC still records it.
             if (isset($checkoutFields[$group][$stateKey])) {
                 $checkoutFields[$group][$stateKey]['priority'] = 45;
-                $checkoutFields[$group][$stateKey]['label']    = __('Region', 'codeon-core');
                 $checkoutFields[$group][$stateKey]['required'] = true;
+                $checkoutFields[$group][$stateKey]['class']    = array_merge(
+                    (array) ($checkoutFields[$group][$stateKey]['class'] ?? []),
+                    ['codeon-geo-state-hidden']
+                );
             }
+
+            // Municipality: priority 46, all 77 muns pre-loaded, Select2 class.
             if (isset($checkoutFields[$group][$munKey])) {
                 $checkoutFields[$group][$munKey]['priority'] = 46;
                 $checkoutFields[$group][$munKey]['label']    = __('Municipality', 'codeon-core');
                 $checkoutFields[$group][$munKey]['type']     = 'select';
-                if (empty($checkoutFields[$group][$munKey]['options'])) {
-                    $checkoutFields[$group][$munKey]['options'] = ['' => __('Select…', 'codeon-core')];
-                }
+                $checkoutFields[$group][$munKey]['options']  = $munOptions;
+                $checkoutFields[$group][$munKey]['class']    = array_merge(
+                    (array) ($checkoutFields[$group][$munKey]['class'] ?? []),
+                    ['form-row-wide', 'codeon-geo-field', 'codeon-geo-municipality']
+                );
+                $checkoutFields[$group][$munKey]['input_class'] = array_merge(
+                    (array) ($checkoutFields[$group][$munKey]['input_class'] ?? []),
+                    ['codeon-geo-select']
+                );
             }
+
+            // Settlement (city): priority 47, options cascade from muni.
             if (isset($checkoutFields[$group][$cityKey])) {
                 $checkoutFields[$group][$cityKey]['priority'] = 47;
                 $checkoutFields[$group][$cityKey]['label']    = __('Settlement', 'codeon-core');
                 $checkoutFields[$group][$cityKey]['type']     = 'select';
-                if (empty($checkoutFields[$group][$cityKey]['options'])) {
-                    $checkoutFields[$group][$cityKey]['options'] = ['' => __('Select…', 'codeon-core')];
-                }
+                $checkoutFields[$group][$cityKey]['options']  = ['' => __('— pick a Municipality first —', 'codeon-core')];
+                $checkoutFields[$group][$cityKey]['class']    = array_merge(
+                    (array) ($checkoutFields[$group][$cityKey]['class'] ?? []),
+                    ['form-row-wide', 'codeon-geo-field', 'codeon-geo-city']
+                );
+                $checkoutFields[$group][$cityKey]['input_class'] = array_merge(
+                    (array) ($checkoutFields[$group][$cityKey]['input_class'] ?? []),
+                    ['codeon-geo-select']
+                );
             }
         }
         return $checkoutFields;
+    }
+
+    /**
+     * Build the Municipality select options array. All 77 munis with region
+     * prefix in the label so users can disambiguate without seeing a state
+     * dropdown. Honours the `show_occupied` plugin setting.
+     *
+     * @return array<string,string> [muni-id => formatted label]
+     */
+    private function buildMunicipalityOptions(): array
+    {
+        $repo = \CodeOn\Core\Locations\Data\Repository::instance();
+        $fmt  = \CodeOn\Core\Locations\Data\DisplayFormatter::fromOptions();
+        $opts = (array) get_option('codeon_core_settings', []);
+        $showOccupied = (bool) ($opts['show_occupied'] ?? false);
+
+        $out = ['' => __('Select municipality…', 'codeon-core')];
+        foreach ($repo->regions(includeOccupied: $showOccupied) as $region) {
+            foreach ($region['municipalities'] as $m) {
+                if (!$showOccupied && $m['occupied']) continue;
+                $out[$m['id']] = sprintf(
+                    '%s — %s',
+                    $fmt->label(['name_ka' => $region['name_ka'], 'name_en' => $region['name_en']]),
+                    $fmt->label($m)
+                );
+            }
+        }
+        return $out;
+    }
+
+    /**
+     * Build a [muni-id => wc-state-code] map for the JS cascade. Exposed
+     * via wp_localize_script so JS can auto-fill the hidden state field
+     * when the user picks a municipality.
+     *
+     * @return array<string,string>
+     */
+    private function buildMunToStateMap(): array
+    {
+        $repo = \CodeOn\Core\Locations\Data\Repository::instance();
+        $opts = (array) get_option('codeon_core_settings', []);
+        $showOccupied = (bool) ($opts['show_occupied'] ?? false);
+
+        $out = [];
+        foreach ($repo->regions(includeOccupied: $showOccupied) as $region) {
+            foreach ($region['municipalities'] as $m) {
+                if (!$showOccupied && $m['occupied']) continue;
+                $out[$m['id']] = $region['wc_state_code'];
+            }
+        }
+        return $out;
     }
 
     /**
@@ -272,13 +347,14 @@ final class ClassicCheckoutFields
             true
         );
         wp_localize_script('codeon-core-checkout-cascade', 'CodeOnGeo', [
-            'restUrl' => esc_url_raw(rest_url('codeon-geo/v1/')),
-            'nonce'   => wp_create_nonce('wp_rest'),
+            'restUrl'    => esc_url_raw(rest_url('codeon-geo/v1/')),
+            'nonce'      => wp_create_nonce('wp_rest'),
+            'munToState' => $this->buildMunToStateMap(),
             'i18n'    => [
-                'select'           => __('Select…', 'codeon-core'),
+                'select'           => __('Select municipality…', 'codeon-core'),
+                'selectSettlement' => __('Select settlement…', 'codeon-core'),
                 'loading'          => __('Loading…', 'codeon-core'),
                 'noResults'        => __('No matches', 'codeon-core'),
-                'pickRegionFirst'  => __('— pick a Region first —', 'codeon-core'),
                 'pickMuniFirst'    => __('— pick a Municipality first —', 'codeon-core'),
             ],
         ]);

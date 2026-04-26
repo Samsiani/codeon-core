@@ -62,13 +62,28 @@ final class OrderMeta
         $munId     = (string) ($data["{$ctx}_municipality"] ?? '');
         $cityName  = (string) ($data["{$ctx}_city"] ?? '');
 
+        // Defense-in-depth: state field is hidden in the cascade UX, so it
+        // should already be auto-set by JS. If it isn't (JS disabled, browser
+        // quirks), derive it from the chosen municipality so the order still
+        // has a state code for tax/shipping calculations and reports.
+        $mun = $munId !== '' ? $repo->municipality($munId) : null;
+        if ($stateCode === '' && $mun !== null) {
+            $munRegion = $repo->region($mun['region_id']);
+            if ($munRegion !== null) {
+                $stateCode = $munRegion['wc_state_code'];
+                $setter = "set_{$ctx}_state";
+                if (method_exists($order, $setter)) {
+                    $order->{$setter}($stateCode);
+                }
+            }
+        }
+
         $region = $stateCode !== '' ? $repo->regionByWcCode($stateCode) : null;
         if ($region === null) {
             return;
         }
         $order->update_meta_data("_{$ctx}_geo_region_id", $region['id']);
 
-        $mun = $munId !== '' ? $repo->municipality($munId) : null;
         if ($mun !== null) {
             $order->update_meta_data("_{$ctx}_geo_municipality_id", $mun['id']);
             $order->update_meta_data("_{$ctx}_geo_municipality_label", $mun['name_ka']);

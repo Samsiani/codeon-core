@@ -1,12 +1,28 @@
 /**
  * CodeOn Core — checkout cascade styling.
- * Keeps the inserted Municipality field visually consistent with WC's
- * native State/City fields without overriding theme styles.
+ *
+ * Hides the Region (state) field row entirely — the value is auto-set
+ * by JS from the chosen Municipality, so the field exists for WC's
+ * tax/shipping calculation but never shows on the form.
+ *
+ * Keeps Municipality + Settlement visually consistent with WC's native
+ * Country dropdown by enabling Select2 enhancement (handled in JS) and
+ * matching its width.
  */
+
+.codeon-geo-state-hidden {
+    display: none !important;
+}
 
 .woocommerce form .form-row.codeon-geo-field select,
 .woocommerce-page form .form-row.codeon-geo-field select {
     width: 100%;
+}
+
+/* Match WC's native country/state Select2 sizing. */
+.woocommerce form .form-row.codeon-geo-field .select2-container,
+.woocommerce-page form .form-row.codeon-geo-field .select2-container {
+    width: 100% !important;
 }
 
 /* Loading state: the cascade JS adds .codeon-loading to the row while a

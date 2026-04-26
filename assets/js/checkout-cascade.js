@@ -1,17 +1,14 @@
 /**
- * Classic-checkout cascade for Georgian addresses.
+ * Classic-checkout cascade for Georgian addresses (v0.1.11+).
  *
- * Watches the country / state / municipality fields. When any changes:
- *   1. country = GE → enable the cascade
- *   2. state changes → fetch municipalities for that region, populate select
- *   3. municipality changes → fetch settlements, populate the city select
+ * Cascade UX:
+ *   - Country = Georgia (already preselected on most GE shops)
+ *   - Region (state) field is HIDDEN — auto-set from chosen Municipality
+ *   - Municipality dropdown shows all 77 munis with region prefix labels
+ *   - Settlement (city) cascades from Municipality
  *
- * v0.1.7 fixes the infinite loop that v0.1.5/0.1.6 had: fillSelect used
- * to call $select.trigger('change') which fired WC's update_checkout
- * handler, which in turn re-ran our refreshMunicipalities, which called
- * fillSelect again — a tight loop that froze the page. Now fillSelect
- * is silent; we drive the cascade only off user-initiated change events
- * + a one-shot population on page load.
+ * Also enhances the Municipality + Settlement <select> elements with WC's
+ * bundled Select2 so they look identical to the Country dropdown.
  */
 (function ($) {
     'use strict';
@@ -25,14 +22,11 @@
         city:         '#billing_city, #shipping_city',
     };
 
-    // Cache REST responses for the lifetime of the page.
+    // Cache REST responses for the page lifetime.
     const cache = new Map();
-
     async function fetchJson(path) {
         if (cache.has(path)) return cache.get(path);
-        const resp = await fetch(cfg.restUrl + path, {
-            headers: { 'Accept': 'application/json' }
-        });
+        const resp = await fetch(cfg.restUrl + path, { headers: { 'Accept': 'application/json' } });
         if (!resp.ok) throw new Error('HTTP ' + resp.status);
         const data = await resp.json();
         cache.set(path, data);
@@ -40,15 +34,8 @@
     }
 
     /**
-     * Populate a <select> with new options. Crucially does NOT trigger a
-     * change event — the previous version's trigger('change') fired
-     * WC's update_checkout, which re-rendered the form, which re-ran
-     * the cascade, which called fillSelect again. Tight infinite loop.
-     *
-     * `placeholderText` allows showing a contextual hint when there are no
-     * options ("Select region first…" instead of just "Select…"). Also
-     * disables the select when there are no real options, since clicking
-     * an empty dropdown is a confusing dead-end.
+     * Replace a <select>'s options. Does NOT trigger 'change' (that caused
+     * the v0.1.5/0.1.6 infinite loop with WC's update_checkout).
      */
     function fillSelect($select, items, currentValue, placeholderText) {
         const dom = $select[0];
@@ -70,12 +57,32 @@
             }
             dom.appendChild(opt);
         });
-
         if (!matched) dom.selectedIndex = 0;
 
-        // Disable when there are no real options — gives the user a visual
-        // cue that something else needs to be filled in first.
         $select.prop('disabled', items.length === 0);
+
+        // Re-init Select2 if it was already enhanced (so the visible UI
+        // reflects the new options). select2('destroy') then recreate.
+        if ($select.data('select2')) {
+            $select.select2('destroy');
+        }
+        enhanceWithSelect2($select);
+    }
+
+    /**
+     * Apply WC's bundled Select2 to a select so it looks identical to the
+     * Country/State dropdowns. WC enqueues Select2 globally on checkout
+     * (via the country_select handle), so it's always available here.
+     */
+    function enhanceWithSelect2($select) {
+        if (typeof $.fn.select2 !== 'function') return;
+        if ($select.data('select2')) return;
+        $select.select2({
+            width: '100%',
+            placeholder: $select.find('option:first').text() || cfg.i18n.select,
+            allowClear: false,
+            // Match WC frontend's matcher behavior — case-insensitive substring.
+        });
     }
 
     function gatherContext(prefix) {
@@ -87,24 +94,26 @@
         };
     }
 
-    async function refreshMunicipalities(prefix) {
+    /**
+     * When the user picks a Municipality:
+     *   1. Auto-set the (hidden) state field via cfg.munToState map.
+     *   2. Cascade: refresh Settlement options for that muni.
+     */
+    async function onMunicipalityChange(prefix) {
         const ctx = gatherContext(prefix);
-        const $mun = $('#' + prefix + 'municipality');
-        if (!$mun.length) return;
-        if (ctx.country !== 'GE' || !ctx.state) {
-            fillSelect($mun, [], '', cfg.i18n.pickRegionFirst);
-            // Cascade clear settlements too — stale options confuse.
-            const $city = $('#' + prefix + 'city');
-            if ($city.length) fillSelect($city, [], '', cfg.i18n.pickMuniFirst);
-            return;
+        const $state = $('#' + prefix + 'state');
+
+        // 1) Auto-fill state. Use silent .val() set — no .trigger('change')
+        //    here because WC's update_checkout would re-fire and we'd loop.
+        //    The next user interaction (selecting Settlement) triggers
+        //    update_checkout naturally and WC reads the updated state.
+        if (cfg.munToState && ctx.municipality && cfg.munToState[ctx.municipality]) {
+            const stateCode = cfg.munToState[ctx.municipality];
+            $state.val(stateCode);
         }
-        try {
-            const muns = await fetchJson('regions/' + encodeURIComponent(ctx.state) + '/municipalities');
-            fillSelect($mun, muns, ctx.municipality);
-            await refreshSettlements(prefix);
-        } catch (e) {
-            console.warn('CodeOnGeo: failed to load municipalities', e);
-        }
+
+        // 2) Cascade settlements.
+        await refreshSettlements(prefix);
     }
 
     async function refreshSettlements(prefix) {
@@ -117,45 +126,36 @@
         }
         try {
             const settles = await fetchJson('municipalities/' + encodeURIComponent(ctx.municipality) + '/settlements');
-            // City field stores the settlement NAME (not id) — keeps WC
-            // reports / customer addresses working with text values.
             const items = settles.map(function (s) {
                 return { id: s.name_ka, name: s.name };
             });
-            fillSelect($city, items, ctx.city);
+            fillSelect($city, items, ctx.city, cfg.i18n.selectSettlement);
         } catch (e) {
             console.warn('CodeOnGeo: failed to load settlements', e);
         }
     }
 
     function bind() {
-        // User-initiated changes only — no listener on updated_checkout
-        // (that was the loop trigger).
         $(document.body)
             .off('change.codeonGeo')
-            .on('change.codeonGeo', SELECTORS.state, function () {
-                const prefix = $(this).attr('id').replace('state', '');
-                refreshMunicipalities(prefix);
-            })
             .on('change.codeonGeo', SELECTORS.municipality, function () {
                 const prefix = $(this).attr('id').replace('municipality', '');
-                refreshSettlements(prefix);
+                onMunicipalityChange(prefix);
             });
 
-        // Initial state on page load: cascade to fill if state is already
-        // chosen, OR show the helpful "Pick region first" placeholder so
-        // users know what to do instead of staring at an empty dropdown.
+        // Initial enhancement + cascade. Each Municipality select gets
+        // Select2; each Settlement select gets Select2 once it has options
+        // (on first muni change). On page load, if muni is already chosen
+        // (saved address), populate settlements immediately.
         ['billing_', 'shipping_'].forEach(function (prefix) {
+            const $mun = $('#' + prefix + 'municipality');
+            const $city = $('#' + prefix + 'city');
+            if ($mun.length) enhanceWithSelect2($mun);
+            if ($city.length) enhanceWithSelect2($city);
+
             const ctx = gatherContext(prefix);
-            if (ctx.country === 'GE' && ctx.state) {
-                refreshMunicipalities(prefix);
-            } else if (ctx.country === 'GE') {
-                // Country is GE but state isn't — set the helpful placeholder
-                // on muni + city so the user knows what blocks them.
-                const $mun = $('#' + prefix + 'municipality');
-                const $city = $('#' + prefix + 'city');
-                if ($mun.length) fillSelect($mun, [], '', cfg.i18n.pickRegionFirst);
-                if ($city.length) fillSelect($city, [], '', cfg.i18n.pickRegionFirst);
+            if (ctx.country === 'GE' && ctx.municipality) {
+                onMunicipalityChange(prefix);
             }
         });
     }

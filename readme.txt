@@ -5,7 +5,7 @@ Requires at least: 6.2
 Tested up to: 6.7
 Requires PHP: 8.1
 Requires Plugins: woocommerce
-Stable tag: 0.1.10
+Stable tag: 0.1.11
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,13 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 3. CodeOn hub menu with installed plugins listed underneath.
 
 == Changelog ==
+
+= 0.1.11 — 2026-04-26 =
+* **UX redesign:** cascade now starts at Municipality. Region (state) field is hidden and auto-set from the chosen municipality, so customers only interact with two dropdowns instead of three.
+* Municipality dropdown is pre-loaded with all 77 municipalities (label includes region prefix for context: "Kakheti — Telavi Municipality"). No prerequisite — pick directly.
+* Settlement (city) cascades from Municipality.
+* Municipality + Settlement now use WooCommerce's bundled Select2 — same look & feel as the Country/State dropdowns.
+* State value still gets recorded on every order (auto-derived from muni server-side as defense-in-depth) so tax / shipping zones / reports continue to work.
 
 = 0.1.10 — 2026-04-25 =
 * **Theme override resistance:** Woodmart's "Checkout fields manager" hooks `woocommerce_checkout_fields` at priority 99999 and rewrites the entire field array, undoing our priority/label/type tweaks. Added a final-pass enforcement at priority 100000 that re-applies our changes AFTER any theme/plugin meddling. Works with Woodmart out-of-the-box; same defense applies to any other plugin/theme that touches checkout fields.
