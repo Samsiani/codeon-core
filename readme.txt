@@ -5,11 +5,11 @@ Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 8.1
 Requires Plugins: woocommerce
-Stable tag: 0.2.1
+Stable tag: 0.2.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Cascading Region → Municipality → Settlement address picker for WooCommerce in Georgia. 4,394 settlements bundled.
+Georgian Locations for WooCommerce — cascading Region → Municipality → Settlement address picker. 4,394 settlements bundled.
 
 == Description ==
 
@@ -71,6 +71,9 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 3. CodeOn hub menu with installed plugins listed underneath.
 
 == Changelog ==
+
+= 0.2.2 — 2026-04-26 =
+* Short description leads with "Georgian Locations for WooCommerce" so the .org search and listing card surface that phrase prominently. Still under the 150-char cap (130 chars).
 
 = 0.2.1 — 2026-04-26 =
 * **Plugin Check fixes:**
