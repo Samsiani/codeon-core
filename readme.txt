@@ -5,7 +5,7 @@ Requires at least: 6.2
 Tested up to: 6.7
 Requires PHP: 8.1
 Requires Plugins: woocommerce
-Stable tag: 0.1.12
+Stable tag: 0.1.13
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,9 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 3. CodeOn hub menu with installed plugins listed underneath.
 
 == Changelog ==
+
+= 0.1.13 — 2026-04-26 =
+* Plugins → Updates screen now shows the plugin's icon + banner instead of the empty-picture placeholder. PUC's update response was missing the `icons` and `banners` keys WordPress needs to render branded artwork in the updater UI.
 
 = 0.1.12 — 2026-04-26 =
 * **Field visibility toggles** in plugin settings — five new checkboxes under Settings → Locations → "Checkout field visibility":

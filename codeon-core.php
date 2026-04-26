@@ -3,7 +3,7 @@
  * Plugin Name:       CodeOn Core — Georgian Locations for WooCommerce
  * Plugin URI:        https://wordpress.org/plugins/codeon-core/
  * Description:       Replaces WooCommerce's free-text City field with a real cascading Region → Municipality → Settlement picker for Georgia (4,394 settlements). Also acts as the canonical hub for the CodeOn plugin family.
- * Version:           0.1.12
+ * Version:           0.1.13
  * Requires at least: 6.2
  * Requires PHP:      8.1
  * Requires Plugins:  woocommerce
@@ -31,7 +31,7 @@ if (defined('CODEON_CORE_VERSION')) {
     return;
 }
 
-define('CODEON_CORE_VERSION', '0.1.12');
+define('CODEON_CORE_VERSION', '0.1.13');
 define('CODEON_CORE_FILE', __FILE__);
 define('CODEON_CORE_PATH', plugin_dir_path(__FILE__));
 define('CODEON_CORE_URL', plugin_dir_url(__FILE__));
@@ -84,6 +84,26 @@ if (class_exists(\YahnisElsts\PluginUpdateChecker\v5\PucFactory::class)) {
         CODEON_CORE_SLUG
     );
     $codeon_core_puc->getVcsApi()->enableReleaseAssets();
+
+    // Inject icons + banners into the update info response. Without these
+    // WP renders the empty-picture placeholder on Plugins → Updates and
+    // a blank header in the "View details" modal — the icons live in the
+    // plugin folder so the merchant's own server hosts them. Same shape
+    // WP.org-hosted plugins use natively.
+    $codeon_core_puc->addResultFilter(static function ($info) {
+        $base = plugin_dir_url(CODEON_CORE_FILE) . 'assets/icon/';
+        $info->icons = [
+            '1x'      => $base . 'icon-128x128.png',
+            '2x'      => $base . 'icon-256x256.png',
+            'svg'     => $base . 'icon.svg',
+            'default' => $base . 'icon-256x256.png',
+        ];
+        $info->banners = [
+            'low'  => $base . 'banner-772x250.png',
+            'high' => $base . 'banner-1544x500.png',
+        ];
+        return $info;
+    });
 }
 
 // HPOS compatibility — declared as early as possible.
