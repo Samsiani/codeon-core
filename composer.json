@@ -7,8 +7,7 @@
     "require": {
         "php": ">=8.1",
         "automattic/jetpack-autoloader": "^5.0",
-        "codeon/framework": "^0.3.4",
-        "yahnis-elsts/plugin-update-checker": "^5.5"
+        "codeon/framework": "^0.3.4"
     },
     "repositories": [
         {

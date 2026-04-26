@@ -1,9 +1,9 @@
 <?php
 /**
- * Plugin Name:       CodeOn Core — Georgian Locations for WooCommerce
+ * Plugin Name:       CodeOn Core
  * Plugin URI:        https://wordpress.org/plugins/codeon-core/
- * Description:       Replaces WooCommerce's free-text City field with a real cascading Region → Municipality → Settlement picker for Georgia (4,394 settlements). Also acts as the canonical hub for the CodeOn plugin family.
- * Version:           0.1.14
+ * Description:       Georgian Locations for WooCommerce — replaces the free-text City field with a real cascading Region → Municipality → Settlement picker (4,394 settlements bundled). Also the canonical hub for the CodeOn plugin family.
+ * Version:           0.2.0
  * Requires at least: 6.2
  * Requires PHP:      8.1
  * Requires Plugins:  woocommerce
@@ -31,7 +31,7 @@ if (defined('CODEON_CORE_VERSION')) {
     return;
 }
 
-define('CODEON_CORE_VERSION', '0.1.14');
+define('CODEON_CORE_VERSION', '0.2.0');
 define('CODEON_CORE_FILE', __FILE__);
 define('CODEON_CORE_PATH', plugin_dir_path(__FILE__));
 define('CODEON_CORE_URL', plugin_dir_url(__FILE__));
@@ -69,42 +69,10 @@ if (is_file(CODEON_CORE_PATH . 'vendor/autoload_packages.php')) {
 
 register_activation_hook(__FILE__, [\CodeOn\Core\Activator::class, 'activate']);
 
-/*
- * Plugin Update Checker — points at GitHub releases.
- *
- * The third arg is the plugin's slug for matching against the WP active
- * plugins list. We derive it from CODEON_CORE_SLUG (= the actual folder
- * name) so PUC works whether the merchant unzipped a release ZIP
- * (`codeon-core/`) or a GitHub source ZIP (`codeon-core-main/`).
- */
-if (class_exists(\YahnisElsts\PluginUpdateChecker\v5\PucFactory::class)) {
-    $codeon_core_puc = \YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
-        'https://github.com/Samsiani/codeon-core/',
-        __FILE__,
-        CODEON_CORE_SLUG
-    );
-    $codeon_core_puc->getVcsApi()->enableReleaseAssets();
-
-    // Inject icons + banners into the update info response. Without these
-    // WP renders the empty-picture placeholder on Plugins → Updates and
-    // a blank header in the "View details" modal — the icons live in the
-    // plugin folder so the merchant's own server hosts them. Same shape
-    // WP.org-hosted plugins use natively.
-    $codeon_core_puc->addResultFilter(static function ($info) {
-        $base = plugin_dir_url(CODEON_CORE_FILE) . 'assets/icon/';
-        $info->icons = [
-            '1x'      => $base . 'icon-128x128.png',
-            '2x'      => $base . 'icon-256x256.png',
-            'svg'     => $base . 'icon.svg',
-            'default' => $base . 'icon-256x256.png',
-        ];
-        $info->banners = [
-            'low'  => $base . 'banner-772x250.png',
-            'high' => $base . 'banner-1544x500.png',
-        ];
-        return $info;
-    });
-}
+// Updates: handled by WordPress.org's native plugin-update infrastructure.
+// We previously bundled yahnis-elsts/plugin-update-checker for GitHub-driven
+// updates, but WP.org forbids third-party update checkers in hosted plugins
+// — once a plugin is on .org, .org IS the update server. Removed in v0.2.0.
 
 // HPOS compatibility — declared as early as possible.
 add_action('before_woocommerce_init', static function (): void {

@@ -62,9 +62,11 @@ jobs:
             --exclude "*.zip" \
             --exclude ".gitignore" \
             --exclude ".DS_Store" \
-            --exclude "/composer.lock" --exclude "codeon-core/composer.lock" \
-            --exclude "/composer.json" --exclude "codeon-core/composer.json" \
             ./ "build/${STAGE}/"
+          # NOTE: composer.json + composer.lock are INCLUDED. WP.org's
+          # plugin-check flags vendor/ without a manifest as suspicious
+          # (missing_composer_json_file). Shipping the manifest is harmless
+          # and helps reviewers verify what's vendored.
           (cd build && zip -rq "../${OUT}" "${STAGE}")
           ls -la "${OUT}"
 

@@ -1,15 +1,15 @@
-=== CodeOn Core — Georgian Locations for WooCommerce ===
+=== CodeOn Core ===
 Contributors: samsiani
 Tags: woocommerce, georgia, address, checkout, location
 Requires at least: 6.2
-Tested up to: 6.7
+Tested up to: 6.9
 Requires PHP: 8.1
 Requires Plugins: woocommerce
-Stable tag: 0.1.14
+Stable tag: 0.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Replaces WooCommerce's free-text "City" field with a real cascading Region → Municipality → Settlement picker for Georgia. 4,394 settlements bundled. Bilingual.
+Georgian Locations for WooCommerce — replaces the free-text City field with a real cascading Region → Municipality → Settlement picker. 4,394 settlements bundled.
 
 == Description ==
 
@@ -71,6 +71,14 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 3. CodeOn hub menu with installed plugins listed underneath.
 
 == Changelog ==
+
+= 0.2.0 — 2026-04-26 =
+* **WordPress.org submission release.**
+* Removed bundled Plugin Update Checker (PUC) — WP.org doesn't allow third-party update checkers in hosted plugins. Updates now flow exclusively through WP's native plugin-updates infrastructure.
+* "Plugin Name" header shortened to "CodeOn Core" so the .org slug becomes `codeon-core`. The full descriptive title moves into the description.
+* `Tested up to` bumped to 6.9.
+* `languages/codeon-core.pot` template added so translators can contribute via wordpress.org/translate.
+* Release ZIP now includes `composer.json` so reviewers can verify our dependency manifest.
 
 = 0.1.14 — 2026-04-26 =
 * Verification release for the v0.1.13 icon/banner fix — no code changes. Triggers a fresh PUC update poll so the merchant can confirm Plugins → Updates renders the branded artwork.

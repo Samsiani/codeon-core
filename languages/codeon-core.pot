@@ -1,0 +1,457 @@
+# Copyright (C) 2026 CodeOn (Samsiani)
+# This file is distributed under the GPL-2.0-or-later license.
+msgid ""
+msgstr ""
+"Project-Id-Version: CodeOn Core 0.2.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/codeon-core\n"
+"POT-Creation-Date: 2026-04-26T00:00:00+00:00\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language-Team: \n"
+"X-Generator: codeon-core build script\n"
+"X-Domain: codeon-core\n"
+
+#: includes/Hub/DashboardRenderer.php:41
+#: includes/Hub/DashboardRenderer.php:41
+msgid "A small family of WooCommerce plugins built for Georgian stores. CodeOn Core is free — premium plugins (TBC, BOG, Flitt) sit underneath it as siblings."
+msgstr ""
+
+#: includes/Locations/Settings/LocationsTab.php:72
+#: includes/Locations/Settings/LocationsTab.php:72
+msgid "Adds Abkhazia and the Tskhinvali region to the regions dropdown. Hidden by default since most stores cannot ship there."
+msgstr ""
+
+#: includes/Locations/Settings/LocationsTab.php:47
+#: includes/Locations/Settings/LocationsTab.php:47
+msgid "Always English (Kondoli) — transliterated"
+msgstr ""
+
+#: includes/Locations/Settings/LocationsTab.php:46
+#: includes/Locations/Settings/LocationsTab.php:46
+msgid "Always Georgian (კონდოლი)"
+msgstr ""
+
+#: includes/Locations/Settings/LocationsTab.php:45
+#: includes/Locations/Settings/LocationsTab.php:45
+msgid "Automatic — Georgian if site is in Georgian, otherwise Bilingual"
+msgstr ""
+
+#: includes/Locations/Settings/LocationsTab.php:48
+#: includes/Locations/Settings/LocationsTab.php:48
+msgid "Bilingual — კონდოლი (Kondoli)"
+msgstr ""
+
+#: includes/Hub/DashboardRenderer.php:49
+#: includes/Hub/DashboardRenderer.php:49
+msgid "Browse Extensions"
+msgstr ""
+
+#: includes/Locations/Settings/DiagnosticsTab.php:56
+#: includes/Locations/Settings/DiagnosticsTab.php:56
+msgid "Built at"
+msgstr ""
+
+#: includes/Hub/DashboardRenderer.php:67
+#: includes/Hub/DashboardRenderer.php:67
+msgid "Bundle built %s."
+msgstr ""
+
+#: includes/Locations/Settings/LocationsTab.php:74
+#: includes/Locations/Settings/LocationsTab.php:74
+msgid "Checkout field visibility"
+msgstr ""
+
+#: includes/Hub/CoreHubBoot.php:85
+#: includes/Hub/CoreHubBoot.php:85
+msgid "CodeOn"
+msgstr ""
+
+#: includes/Plugin.php:95
+#: includes/Plugin.php:95
+msgid "CodeOn Core"
+msgstr ""
+
+#: codeon-core.php:103
+msgid "CodeOn Core needs %s to be active for the Georgian Locations feature. The CodeOn hub menu still works without it."
+msgstr ""
+
+#: includes/Activator.php:53
+#: includes/Activator.php:53
+msgid "CodeOn Core requires PHP %1$s or newer. This server is running %2$s."
+msgstr ""
+
+#: includes/Hub/DashboardRenderer.php:37
+#: includes/Hub/DashboardRenderer.php:37
+msgid "CodeOn Dashboard"
+msgstr ""
+
+#: includes/Hub/CoreHubBoot.php:100
+#: includes/Hub/CoreHubBoot.php:130
+#: includes/Hub/CoreHubBoot.php:100
+#: includes/Hub/CoreHubBoot.php:130
+msgid "CodeOn Plugins"
+msgstr ""
+
+#: includes/Hub/DashboardRenderer.php:45
+#: includes/Hub/DashboardRenderer.php:45
+msgid "Configure Locations"
+msgstr ""
+
+#: includes/Locations/Settings/DiagnosticsTab.php:94
+#: includes/Locations/Settings/DiagnosticsTab.php:94
+msgid "Current user ID"
+msgstr ""
+
+#: includes/Locations/Settings/LocationsTab.php:66
+#: includes/Locations/Settings/LocationsTab.php:66
+msgid "Customers must select a city/town/village (not just a region)."
+msgstr ""
+
+#: includes/Locations/Settings/LocationsTab.php:62
+#: includes/Locations/Settings/LocationsTab.php:62
+msgid "Customers must select a municipality before placing an order. Recommended for accurate shipping."
+msgstr ""
+
+#: includes/Locations/Settings/DiagnosticsTab.php:52
+#: includes/Locations/Settings/DiagnosticsTab.php:52
+msgid "Dataset version"
+msgstr ""
+
+#: includes/Locations/Settings/DiagnosticsTab.php:29
+#: includes/Locations/Settings/DiagnosticsTab.php:47
+#: includes/Locations/Settings/DiagnosticsTab.php:29
+#: includes/Locations/Settings/DiagnosticsTab.php:47
+msgid "Diagnostics"
+msgstr ""
+
+#: includes/Locations/Settings/LocationsTab.php:41
+#: includes/Locations/Settings/LocationsTab.php:41
+msgid "Display"
+msgstr ""
+
+#: includes/Locations/Settings/DiagnosticsTab.php:83
+#: includes/Locations/Settings/DiagnosticsTab.php:83
+msgid "Expected nonce action"
+msgstr ""
+
+#: includes/Hub/ExtensionsTab.php:27
+#: includes/Hub/CoreHubBoot.php:101
+#: includes/Hub/ExtensionsTab.php:27
+#: includes/Hub/CoreHubBoot.php:101
+msgid "Extensions"
+msgstr ""
+
+#: includes/Locations/Settings/LocationsTab.php:30
+#: includes/Locations/Settings/LocationsTab.php:30
+msgid "General"
+msgstr ""
+
+#: includes/Locations/Settings/LocationsTab.php:68
+#: includes/Locations/Settings/LocationsTab.php:68
+msgid "Geographic scope"
+msgstr ""
+
+#: includes/Hub/DashboardRenderer.php:56
+#: includes/Hub/DashboardRenderer.php:56
+msgid "Georgian Locations dataset"
+msgstr ""
+
+#: includes/Hub/DashboardRenderer.php:102
+#: includes/Hub/DashboardRenderer.php:102
+msgid "Help & resources"
+msgstr ""
+
+#: includes/Locations/Settings/LocationsTab.php:88
+#: includes/Locations/Settings/LocationsTab.php:88
+msgid "Hide Address line 2 (apartment/suite) field"
+msgstr ""
+
+#: includes/Locations/Settings/LocationsTab.php:85
+#: includes/Locations/Settings/LocationsTab.php:85
+msgid "Hide Company name field"
+msgstr ""
+
+#: includes/Locations/Settings/LocationsTab.php:81
+#: includes/Locations/Settings/LocationsTab.php:81
+msgid "Hide Country / Region field"
+msgstr ""
+
+#: includes/Locations/Settings/LocationsTab.php:91
+#: includes/Locations/Settings/LocationsTab.php:91
+msgid "Hide Postcode / ZIP field"
+msgstr ""
+
+#: includes/Locations/Settings/LocationsTab.php:77
+#: includes/Locations/Settings/LocationsTab.php:77
+msgid "Hide Region (state) field"
+msgstr ""
+
+#: includes/Locations/Settings/LocationsTab.php:75
+#: includes/Locations/Settings/LocationsTab.php:75
+msgid "Hide standard WooCommerce checkout fields you don\\'t need. Hidden fields still record their values (auto-derived where applicable) so tax, shipping zones, and reports continue to work."
+msgstr ""
+
+#: includes/Locations/Settings/LocationsTab.php:51
+#: includes/Locations/Settings/LocationsTab.php:51
+msgid "How village names appear in the checkout dropdown, on emails, and in the admin. Settlements only have Georgian names natively — English mode uses the Georgian National Romanization System."
+msgstr ""
+
+#: includes/Locations/Settings/DiagnosticsTab.php:79
+#: includes/Locations/Settings/DiagnosticsTab.php:79
+msgid "If you got \"Security check failed\" when saving the General tab, compare the nonce action below against what the form expects. Most often the cause is an aggressive page cache (LiteSpeed Cache, Cloudflare APO) caching the admin page HTML — exclude /wp-admin/ from caching to fix."
+msgstr ""
+
+#: includes/Locations/Settings/LocationsTab.php:70
+#: includes/Locations/Settings/LocationsTab.php:70
+msgid "Include occupied territories"
+msgstr ""
+
+#: includes/Hub/CoreHubBoot.php:161
+#: includes/Hub/CoreHubBoot.php:161
+msgid "Install %s"
+msgstr ""
+
+#: includes/Hub/DashboardRenderer.php:80
+#: includes/Hub/DashboardRenderer.php:80
+msgid "Installed CodeOn plugins"
+msgstr ""
+
+#: includes/Locations/Settings/LocationsTab.php:43
+#: includes/Locations/Settings/LocationsTab.php:43
+msgid "Label language"
+msgstr ""
+
+#: includes/Locations/WooIntegration/ClassicCheckoutFields.php:429
+#: includes/Locations/WooIntegration/ClassicCheckoutFields.php:429
+msgid "Loading…"
+msgstr ""
+
+#: includes/Plugin.php:100
+#: includes/Plugin.php:100
+msgid "Locations"
+msgstr ""
+
+#: includes/Locations/Settings/DiagnosticsTab.php:68
+#: includes/Locations/Settings/DiagnosticsTab.php:68
+msgid "Municipalities"
+msgstr ""
+
+#: includes/Locations/WooIntegration/ClassicCheckoutFields.php:122
+#: includes/Locations/WooIntegration/ClassicCheckoutFields.php:285
+#: includes/Locations/WooIntegration/ClassicCheckoutFields.php:379
+#: includes/Locations/WooIntegration/BlockCheckoutFields.php:100
+#: includes/Locations/WooIntegration/ClassicCheckoutFields.php:122
+#: includes/Locations/WooIntegration/ClassicCheckoutFields.php:285
+#: includes/Locations/WooIntegration/ClassicCheckoutFields.php:379
+#: includes/Locations/WooIntegration/BlockCheckoutFields.php:100
+msgid "Municipality"
+msgstr ""
+
+#: includes/Locations/Settings/LocationsTab.php:60
+#: includes/Locations/Settings/LocationsTab.php:60
+msgid "Municipality is required"
+msgstr ""
+
+#: includes/Locations/WooIntegration/ClassicCheckoutFields.php:430
+#: includes/Locations/WooIntegration/ClassicCheckoutFields.php:430
+msgid "No matches"
+msgstr ""
+
+#: includes/Hub/DashboardRenderer.php:82
+#: includes/Hub/DashboardRenderer.php:82
+msgid "Only Core is installed. Browse Extensions to add payment plugins."
+msgstr ""
+
+#: includes/Locations/Settings/DiagnosticsTab.php:121
+#: includes/Locations/Settings/DiagnosticsTab.php:121
+msgid "Pick a region to see its municipalities. Confirms the dataset is loaded and the REST endpoints are responding."
+msgstr ""
+
+#: includes/Locations/WooIntegration/BlockCheckoutFields.php:141
+#: includes/Locations/WooIntegration/BlockCheckoutFields.php:141
+msgid "Please pick a valid Georgian municipality."
+msgstr ""
+
+#: includes/Activator.php:57
+#: includes/Activator.php:57
+msgid "Plugin activation failed"
+msgstr ""
+
+#: includes/Locations/Settings/DiagnosticsTab.php:104
+#: includes/Locations/Settings/DiagnosticsTab.php:104
+msgid "REST endpoints"
+msgstr ""
+
+#: includes/Locations/WooIntegration/ClassicCheckoutFields.php:116
+#: includes/Locations/WooIntegration/ClassicCheckoutFields.php:312
+#: includes/Locations/WooIntegration/ClassicCheckoutFields.php:116
+#: includes/Locations/WooIntegration/ClassicCheckoutFields.php:312
+msgid "Region"
+msgstr ""
+
+#: includes/Locations/Settings/DiagnosticsTab.php:64
+#: includes/Locations/Settings/DiagnosticsTab.php:64
+msgid "Regions"
+msgstr ""
+
+#: includes/Locations/Settings/DiagnosticsTab.php:87
+#: includes/Locations/Settings/DiagnosticsTab.php:87
+msgid "Required capability"
+msgstr ""
+
+#: includes/Locations/Settings/LocationsTab.php:58
+#: includes/Locations/Settings/LocationsTab.php:58
+msgid "Required fields at checkout"
+msgstr ""
+
+#: includes/Locations/Settings/DiagnosticsTab.php:78
+#: includes/Locations/Settings/DiagnosticsTab.php:78
+msgid "Save-flow diagnostics"
+msgstr ""
+
+#: includes/Locations/WooIntegration/ClassicCheckoutFields.php:160
+#: includes/Locations/WooIntegration/ClassicCheckoutFields.php:427
+#: includes/Locations/WooIntegration/ClassicCheckoutFields.php:160
+#: includes/Locations/WooIntegration/ClassicCheckoutFields.php:427
+msgid "Select municipality…"
+msgstr ""
+
+#: includes/Locations/WooIntegration/ClassicCheckoutFields.php:428
+#: includes/Locations/WooIntegration/ClassicCheckoutFields.php:428
+msgid "Select settlement…"
+msgstr ""
+
+#: includes/Locations/WooIntegration/ClassicCheckoutFields.php:255
+#: includes/Locations/WooIntegration/ClassicCheckoutFields.php:289
+#: includes/Locations/WooIntegration/ClassicCheckoutFields.php:383
+#: includes/Locations/WooIntegration/ClassicCheckoutFields.php:255
+#: includes/Locations/WooIntegration/ClassicCheckoutFields.php:289
+#: includes/Locations/WooIntegration/ClassicCheckoutFields.php:383
+msgid "Select…"
+msgstr ""
+
+#: includes/Locations/WooIntegration/ClassicCheckoutFields.php:134
+#: includes/Locations/WooIntegration/ClassicCheckoutFields.php:320
+#: includes/Locations/WooIntegration/ClassicCheckoutFields.php:134
+#: includes/Locations/WooIntegration/ClassicCheckoutFields.php:320
+msgid "Settlement"
+msgstr ""
+
+#: includes/Locations/WooIntegration/BlockCheckoutFields.php:122
+#: includes/Locations/WooIntegration/BlockCheckoutFields.php:122
+msgid "Settlement (city / town / village)"
+msgstr ""
+
+#: includes/Locations/Settings/LocationsTab.php:64
+#: includes/Locations/Settings/LocationsTab.php:64
+msgid "Settlement is required"
+msgstr ""
+
+#: includes/Locations/Settings/DiagnosticsTab.php:72
+#: includes/Locations/Settings/DiagnosticsTab.php:72
+msgid "Settlements (cities + towns + villages)"
+msgstr ""
+
+#: includes/Locations/Settings/LocationsTab.php:53
+#: includes/Locations/Settings/LocationsTab.php:53
+msgid "Simplified Latin (no apostrophes)"
+msgstr ""
+
+#: includes/Locations/Settings/DiagnosticsTab.php:60
+#: includes/Locations/Settings/DiagnosticsTab.php:60
+msgid "Source"
+msgstr ""
+
+#: includes/Hub/DashboardRenderer.php:104
+#: includes/Hub/DashboardRenderer.php:104
+msgid "Support forum"
+msgstr ""
+
+#: includes/Locations/Settings/DiagnosticsTab.php:120
+#: includes/Locations/Settings/DiagnosticsTab.php:120
+msgid "Test cascade"
+msgstr ""
+
+#: includes/Locations/Settings/DiagnosticsTab.php:98
+#: includes/Locations/Settings/DiagnosticsTab.php:98
+msgid "Test nonce (now)"
+msgstr ""
+
+#: includes/Locations/Settings/LocationsTab.php:55
+#: includes/Locations/Settings/LocationsTab.php:55
+msgid "Use \"k\", \"p\", \"t\" instead of \"kʼ\", \"pʼ\", \"tʼ\". Most merchants prefer simplified."
+msgstr ""
+
+#: includes/Locations/Settings/LocationsTab.php:93
+#: includes/Locations/Settings/LocationsTab.php:93
+msgid "Useful for Georgia where postcodes are rarely required. WC still validates a value if you don\\'t hide it."
+msgstr ""
+
+#: includes/Locations/Settings/LocationsTab.php:83
+#: includes/Locations/Settings/LocationsTab.php:83
+msgid "Useful for Georgia-only shops. Field stays in the form (so it submits \"Georgia\") but is invisible."
+msgstr ""
+
+#: includes/Hub/DashboardRenderer.php:40
+#: includes/Hub/DashboardRenderer.php:40
+msgid "Welcome to CodeOn"
+msgstr ""
+
+#: includes/Locations/Settings/LocationsTab.php:79
+#: includes/Locations/Settings/LocationsTab.php:79
+msgid "When hidden, Region is auto-set from the chosen Municipality. Recommended unless you want customers to filter the Municipality dropdown by region first."
+msgstr ""
+
+#: includes/Hub/DashboardRenderer.php:75
+#: includes/Hub/DashboardRenderer.php:75
+msgid "WooCommerce is not active — install and activate it to use the Georgian Locations cascade."
+msgstr ""
+
+#: includes/Hub/CoreHubBoot.php:114
+#: includes/Hub/DashboardRenderer.php:28
+#: includes/Hub/CoreHubBoot.php:114
+#: includes/Hub/DashboardRenderer.php:28
+msgid "You do not have permission to access this page."
+msgstr ""
+
+#: includes/Hub/DashboardRenderer.php:60
+#: includes/Hub/DashboardRenderer.php:60
+msgid "municipalities"
+msgstr ""
+
+#: includes/Hub/DashboardRenderer.php:59
+#: includes/Hub/DashboardRenderer.php:59
+msgid "regions"
+msgstr ""
+
+#: includes/Hub/DashboardRenderer.php:61
+#: includes/Hub/DashboardRenderer.php:61
+msgid "settlements"
+msgstr ""
+
+#: includes/Locations/Settings/DiagnosticsTab.php:134
+#: includes/Locations/Settings/DiagnosticsTab.php:150
+#: includes/Locations/Settings/DiagnosticsTab.php:134
+#: includes/Locations/Settings/DiagnosticsTab.php:150
+msgid "— municipality —"
+msgstr ""
+
+#: includes/Locations/WooIntegration/ClassicCheckoutFields.php:136
+#: includes/Locations/WooIntegration/ClassicCheckoutFields.php:431
+#: includes/Locations/WooIntegration/ClassicCheckoutFields.php:136
+#: includes/Locations/WooIntegration/ClassicCheckoutFields.php:431
+msgid "— pick a Municipality first —"
+msgstr ""
+
+#: includes/Locations/Settings/DiagnosticsTab.php:125
+#: includes/Locations/Settings/DiagnosticsTab.php:125
+msgid "— region —"
+msgstr ""
+
+#: includes/Locations/Settings/DiagnosticsTab.php:138
+#: includes/Locations/Settings/DiagnosticsTab.php:151
+#: includes/Locations/Settings/DiagnosticsTab.php:138
+#: includes/Locations/Settings/DiagnosticsTab.php:151
+msgid "— settlement —"
+msgstr ""
