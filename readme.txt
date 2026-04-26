@@ -5,7 +5,7 @@ Requires at least: 6.2
 Tested up to: 6.7
 Requires PHP: 8.1
 Requires Plugins: woocommerce
-Stable tag: 0.1.11
+Stable tag: 0.1.12
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,17 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 3. CodeOn hub menu with installed plugins listed underneath.
 
 == Changelog ==
+
+= 0.1.12 — 2026-04-26 =
+* **Field visibility toggles** in plugin settings — five new checkboxes under Settings → Locations → "Checkout field visibility":
+    * Hide Region (state) field — default ON (auto-derived from muni)
+    * Hide Country / Region field — default OFF
+    * Hide Company field — default OFF
+    * Hide Address line 2 field — default OFF
+    * Hide Postcode field — default OFF
+* Hide CSS targets BOTH classic and block-checkout selectors so a single setting works in both.
+* **Region is now opt-in instead of always-hidden:** when shown, picking a Region narrows the Municipality dropdown to that region's munis. Picking a Municipality still auto-sets Region (whether visible or hidden).
+* **Municipality labels no longer prefix the region name** — just "დმანისის მუნიციპალიტეტი" instead of "ქვემო ქართლი — დმანისის მუნიციპალიტეტი". Region info is conveyed by the (optional) Region dropdown and the Settlement cascade.
 
 = 0.1.11 — 2026-04-26 =
 * **UX redesign:** cascade now starts at Municipality. Region (state) field is hidden and auto-set from the chosen municipality, so customers only interact with two dropdowns instead of three.

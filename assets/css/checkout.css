@@ -10,7 +10,8 @@
  * matching its width.
  */
 
-.codeon-geo-state-hidden {
+/* Generic hide for any field row the merchant disabled in Settings */
+.codeon-hidden-row {
     display: none !important;
 }
 

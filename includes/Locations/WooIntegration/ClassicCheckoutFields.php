@@ -69,6 +69,15 @@ final class ClassicCheckoutFields
     public function enforceFinalFieldSetup(array $checkoutFields): array
     {
         $munOptions = $this->buildMunicipalityOptions();
+        $opts       = (array) get_option('codeon_core_settings', []);
+
+        $hideMap = [
+            '_country'   => (bool) ($opts['hide_country_field']   ?? false),
+            '_state'     => (bool) ($opts['hide_region_field']    ?? true),
+            '_company'   => (bool) ($opts['hide_company_field']   ?? false),
+            '_address_2' => (bool) ($opts['hide_address_2_field'] ?? false),
+            '_postcode'  => (bool) ($opts['hide_postcode_field']  ?? false),
+        ];
 
         foreach (['billing', 'shipping'] as $group) {
             if (!isset($checkoutFields[$group]) || !is_array($checkoutFields[$group])) {
@@ -76,22 +85,38 @@ final class ClassicCheckoutFields
             }
             $checkoutFields[$group] = $this->ensureMunicipalityField($checkoutFields[$group], $group . '_');
 
+            // Apply visibility-hiding class to user-toggled fields.
+            foreach ($hideMap as $suffix => $hide) {
+                if (!$hide) continue;
+                $key = $group . $suffix;
+                if (isset($checkoutFields[$group][$key])) {
+                    $checkoutFields[$group][$key]['class'] = array_merge(
+                        (array) ($checkoutFields[$group][$key]['class'] ?? []),
+                        ['codeon-hidden-row']
+                    );
+                    // Drop required flag — a hidden field that's required
+                    // and empty would block checkout. Country/state stay
+                    // required because they have values (preselected /
+                    // auto-derived).
+                    if (!in_array($suffix, ['_country', '_state'], true)) {
+                        $checkoutFields[$group][$key]['required'] = false;
+                    }
+                }
+            }
+
             $stateKey = $group . '_state';
             $munKey   = $group . '_municipality';
             $cityKey  = $group . '_city';
 
-            // Hide state field — value is auto-set by JS from chosen muni.
-            // Keep it required at the validation level so WC still records it.
+            // Region (state): priority 45, label "Region". Always required
+            // (value is auto-derived from muni). Visibility per setting.
             if (isset($checkoutFields[$group][$stateKey])) {
                 $checkoutFields[$group][$stateKey]['priority'] = 45;
                 $checkoutFields[$group][$stateKey]['required'] = true;
-                $checkoutFields[$group][$stateKey]['class']    = array_merge(
-                    (array) ($checkoutFields[$group][$stateKey]['class'] ?? []),
-                    ['codeon-geo-state-hidden']
-                );
+                $checkoutFields[$group][$stateKey]['label']    = __('Region', 'codeon-core');
             }
 
-            // Municipality: priority 46, all 77 muns pre-loaded, Select2 class.
+            // Municipality: priority 46, all 77 muns pre-loaded.
             if (isset($checkoutFields[$group][$munKey])) {
                 $checkoutFields[$group][$munKey]['priority'] = 46;
                 $checkoutFields[$group][$munKey]['label']    = __('Municipality', 'codeon-core');
@@ -100,10 +125,6 @@ final class ClassicCheckoutFields
                 $checkoutFields[$group][$munKey]['class']    = array_merge(
                     (array) ($checkoutFields[$group][$munKey]['class'] ?? []),
                     ['form-row-wide', 'codeon-geo-field', 'codeon-geo-municipality']
-                );
-                $checkoutFields[$group][$munKey]['input_class'] = array_merge(
-                    (array) ($checkoutFields[$group][$munKey]['input_class'] ?? []),
-                    ['codeon-geo-select']
                 );
             }
 
@@ -116,10 +137,6 @@ final class ClassicCheckoutFields
                 $checkoutFields[$group][$cityKey]['class']    = array_merge(
                     (array) ($checkoutFields[$group][$cityKey]['class'] ?? []),
                     ['form-row-wide', 'codeon-geo-field', 'codeon-geo-city']
-                );
-                $checkoutFields[$group][$cityKey]['input_class'] = array_merge(
-                    (array) ($checkoutFields[$group][$cityKey]['input_class'] ?? []),
-                    ['codeon-geo-select']
                 );
             }
         }
@@ -144,14 +161,62 @@ final class ClassicCheckoutFields
         foreach ($repo->regions(includeOccupied: $showOccupied) as $region) {
             foreach ($region['municipalities'] as $m) {
                 if (!$showOccupied && $m['occupied']) continue;
-                $out[$m['id']] = sprintf(
-                    '%s — %s',
-                    $fmt->label(['name_ka' => $region['name_ka'], 'name_en' => $region['name_en']]),
-                    $fmt->label($m)
-                );
+                // Just the muni name — no region prefix. Region is
+                // auto-derived (or visible separately if user enabled the
+                // Region field via settings).
+                $out[$m['id']] = $fmt->label($m);
             }
         }
         return $out;
+    }
+
+    /**
+     * Inline CSS that hides classic AND block-checkout fields based on the
+     * merchant's Settings → Locations → Field visibility toggles. The
+     * classic-checkout hides also work via the `codeon-hidden-row` class
+     * we set on the field config, but block checkout doesn't read those
+     * classes so we need explicit selectors here.
+     */
+    private function buildHideCss(): string
+    {
+        $opts = (array) get_option('codeon_core_settings', []);
+        $rules = [];
+
+        // Map of setting key → array of CSS selectors to hide.
+        $map = [
+            'hide_country_field' => [
+                '#billing_country_field',
+                '#shipping_country_field',
+                '.wc-block-components-address-form__country',
+            ],
+            'hide_region_field' => [
+                '#billing_state_field',
+                '#shipping_state_field',
+                '.wc-block-components-address-form__state',
+            ],
+            'hide_company_field' => [
+                '#billing_company_field',
+                '#shipping_company_field',
+                '.wc-block-components-address-form__company',
+            ],
+            'hide_address_2_field' => [
+                '#billing_address_2_field',
+                '#shipping_address_2_field',
+                '.wc-block-components-address-form__address_2',
+            ],
+            'hide_postcode_field' => [
+                '#billing_postcode_field',
+                '#shipping_postcode_field',
+                '.wc-block-components-address-form__postcode',
+            ],
+        ];
+
+        foreach ($map as $key => $selectors) {
+            if (!empty($opts[$key])) {
+                $rules[] = implode(', ', $selectors) . ' { display: none !important; }';
+            }
+        }
+        return implode("\n", $rules);
     }
 
     /**
@@ -339,6 +404,14 @@ final class ClassicCheckoutFields
             [],
             CODEON_CORE_VERSION
         );
+
+        // Inline CSS targets BOTH classic and block-checkout selectors so a
+        // single setting hides the field everywhere. Block-checkout doesn't
+        // expose a hide-core-field API, so CSS is the practical option.
+        $extra = $this->buildHideCss();
+        if ($extra !== '') {
+            wp_add_inline_style('codeon-core-checkout', $extra);
+        }
         wp_enqueue_script(
             'codeon-core-checkout-cascade',
             CODEON_CORE_URL . 'assets/js/checkout-cascade.js',

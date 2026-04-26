@@ -64,11 +64,19 @@ final class Activator
     {
         if (get_option('codeon_core_settings') === false) {
             add_option('codeon_core_settings', [
-                'display_mode'      => 'auto',   // auto | ka | en | bilingual
+                'display_mode'      => 'auto',
                 'show_occupied'     => false,
                 'require_municipality' => true,
                 'require_settlement'   => true,
                 'simplified_latin'     => true,
+                // Field visibility on classic checkout. Defaults match the
+                // common Georgian-store baseline: only Region is hidden
+                // (auto-derived from muni); everything else stays visible.
+                'hide_region_field'    => true,
+                'hide_country_field'   => false,
+                'hide_company_field'   => false,
+                'hide_address_2_field' => false,
+                'hide_postcode_field'  => false,
             ]);
         }
         if (get_option('codeon_core_activated_at') === false) {

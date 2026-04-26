@@ -70,6 +70,27 @@ final class LocationsTab extends Tab
             Field::checkbox('show_occupied', __('Include occupied territories', 'codeon-core'))
                 ->default(false)
                 ->description(__('Adds Abkhazia and the Tskhinvali region to the regions dropdown. Hidden by default since most stores cannot ship there.', 'codeon-core')),
+
+            Field::heading('h_visibility', __('Checkout field visibility', 'codeon-core'),
+                __('Hide standard WooCommerce checkout fields you don\'t need. Hidden fields still record their values (auto-derived where applicable) so tax, shipping zones, and reports continue to work.', 'codeon-core')),
+
+            Field::checkbox('hide_region_field', __('Hide Region (state) field', 'codeon-core'))
+                ->default(true)
+                ->description(__('When hidden, Region is auto-set from the chosen Municipality. Recommended unless you want customers to filter the Municipality dropdown by region first.', 'codeon-core')),
+
+            Field::checkbox('hide_country_field', __('Hide Country / Region field', 'codeon-core'))
+                ->default(false)
+                ->description(__('Useful for Georgia-only shops. Field stays in the form (so it submits "Georgia") but is invisible.', 'codeon-core')),
+
+            Field::checkbox('hide_company_field', __('Hide Company name field', 'codeon-core'))
+                ->default(false),
+
+            Field::checkbox('hide_address_2_field', __('Hide Address line 2 (apartment/suite) field', 'codeon-core'))
+                ->default(false),
+
+            Field::checkbox('hide_postcode_field', __('Hide Postcode / ZIP field', 'codeon-core'))
+                ->default(false)
+                ->description(__('Useful for Georgia where postcodes are rarely required. WC still validates a value if you don\'t hide it.', 'codeon-core')),
         ];
     }
 
