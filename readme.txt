@@ -5,7 +5,7 @@ Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 8.1
 Requires Plugins: woocommerce
-Stable tag: 0.2.2
+Stable tag: 0.2.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,12 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 3. CodeOn hub menu with installed plugins listed underneath.
 
 == Changelog ==
+
+= 0.2.3 — 2026-04-30 =
+* Bump bundled `codeon/framework` from `^0.3.4` to `^0.3.8`. Picks up two framework fixes (none of them critical to Core itself, since Core has no License module — but they matter when Core is co-installed alongside any of the licensed CodeOn plugins, which is the common deployment):
+    * **v0.3.6** — License heartbeat infra: `LicenseClient` now returns a `definitive` flag on failure and `LicenseStore` records every cron tick. Lets paid plugins surface the real "Last checked" + "Last error" on their License tab and flip to Revoked the moment codeon.ge stops recognising the key, instead of reporting Active forever after a server-side delete.
+    * **v0.3.7 / v0.3.8** — multi-plugin form-discriminator: `Tab::setPluginSlug()` setter so plugins that override `Manifest::nonce()` (fina-sync, codeon-payments) don't post a wrong slug that makes their License tab buttons land on a blank `admin-post.php` page.
+* No code changes in Core itself — the existing `LocationsTab` / `DiagnosticsTab` / `ExtensionsTab` subclasses keep working unchanged because `v0.3.8` reverted the `Tab::render()` signature change from `v0.3.7` and uses a setter instead.
 
 = 0.2.2 — 2026-04-26 =
 * Short description leads with "Georgian Locations for WooCommerce" so the .org search and listing card surface that phrase prominently. Still under the 150-char cap (130 chars).

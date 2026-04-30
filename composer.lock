@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8f6e9235f096df0dbd393339d1498b85",
+    "content-hash": "cd7253816348744b92ef9e20f1a6e3b9",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -73,16 +73,16 @@
         },
         {
             "name": "codeon/framework",
-            "version": "0.3.4",
+            "version": "0.3.8",
             "source": {
                 "type": "git",
                 "url": "git@github.com:Samsiani/codeon-plugin-basic-architecture.git",
-                "reference": "9018d07f8708daa034c3a4877e5810c56a3cfaf4"
+                "reference": "986bdf031d37c8d23b14fa7273befde38f485a71"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Samsiani/codeon-plugin-basic-architecture/zipball/9018d07f8708daa034c3a4877e5810c56a3cfaf4",
-                "reference": "9018d07f8708daa034c3a4877e5810c56a3cfaf4",
+                "url": "https://api.github.com/repos/Samsiani/codeon-plugin-basic-architecture/zipball/986bdf031d37c8d23b14fa7273befde38f485a71",
+                "reference": "986bdf031d37c8d23b14fa7273befde38f485a71",
                 "shasum": ""
             },
             "require": {
@@ -116,7 +116,7 @@
             ],
             "description": "Shared admin UI + chrome + hub menu + license/update plumbing for CodeOn WooCommerce plugins (codeon.ge).",
             "homepage": "https://github.com/Samsiani/codeon-plugin-basic-architecture",
-            "time": "2026-04-25T16:00:11+00:00"
+            "time": "2026-04-30T12:50:43+00:00"
         }
     ],
     "packages-dev": [],
