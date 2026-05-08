@@ -3,7 +3,7 @@
  * Plugin Name:       CodeOn Core
  * Plugin URI:        https://wordpress.org/plugins/codeon-core/
  * Description:       Georgian Locations for WooCommerce — replaces the free-text City field with a real cascading Region → Municipality → Settlement picker (4,394 settlements bundled). Also the canonical hub for the CodeOn plugin family.
- * Version:           0.2.6
+ * Version:           0.2.7
  * Requires at least: 6.2
  * Requires PHP:      8.1
  * Requires Plugins:  woocommerce
@@ -31,7 +31,7 @@ if (defined('CODEON_CORE_VERSION')) {
     return;
 }
 
-define('CODEON_CORE_VERSION', '0.2.6');
+define('CODEON_CORE_VERSION', '0.2.7');
 define('CODEON_CORE_FILE', __FILE__);
 define('CODEON_CORE_PATH', plugin_dir_path(__FILE__));
 define('CODEON_CORE_URL', plugin_dir_url(__FILE__));
@@ -69,10 +69,38 @@ if (is_file(CODEON_CORE_PATH . 'vendor/autoload_packages.php')) {
 
 register_activation_hook(__FILE__, [\CodeOn\Core\Activator::class, 'activate']);
 
-// Updates: handled by WordPress.org's native plugin-update infrastructure.
-// We previously bundled yahnis-elsts/plugin-update-checker for GitHub-driven
-// updates, but WP.org forbids third-party update checkers in hosted plugins
-// — once a plugin is on .org, .org IS the update server. Removed in v0.2.0.
+// Self-hosted updates from GitHub Releases (re-introduced in v0.2.7
+// after dropping WordPress.org distribution). Polls
+// github.com/Samsiani/codeon-core for new tags every ~12h, surfaces
+// matching `codeon-core-vX.Y.Z.zip` release assets to WordPress's
+// native Plugins → Updates UI. The release ZIP is built by this
+// repo's release.yml on every `v*` tag push.
+//
+// codeon-core is a public repo, so PUC hits the GitHub API
+// unauthenticated — no PAT required in plugin code. Rate limit is
+// per-IP (60 req/h unauthenticated), and PUC caches each poll for
+// 12h, so even on a host that runs many WP sites the budget is fine.
+if (is_file(CODEON_CORE_PATH . 'vendor/yahnis-elsts/plugin-update-checker/plugin-update-checker.php')) {
+    require_once CODEON_CORE_PATH . 'vendor/yahnis-elsts/plugin-update-checker/plugin-update-checker.php';
+
+    if (class_exists(\YahnisElsts\PluginUpdateChecker\v5\PucFactory::class)) {
+        $codeonCoreUpdateChecker = \YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
+            'https://github.com/Samsiani/codeon-core/',
+            __FILE__,
+            'codeon-core'
+        );
+        // Pull from the `main` branch's tags. Combined with
+        // enableReleaseAssets() below, PUC prefers the uploaded
+        // codeon-core-vX.Y.Z.zip asset over a tarball of the source
+        // tree — important because the release ZIP is the only thing
+        // that ships vendor/ inside the package.
+        $codeonCoreUpdateChecker->setBranch('main');
+        $vcsApi = $codeonCoreUpdateChecker->getVcsApi();
+        if (method_exists($vcsApi, 'enableReleaseAssets')) {
+            $vcsApi->enableReleaseAssets();
+        }
+    }
+}
 
 // HPOS compatibility — declared as early as possible.
 add_action('before_woocommerce_init', static function (): void {
