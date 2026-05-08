@@ -27,6 +27,15 @@ final class Boot
 {
     public static function register(SettingsRepository $settings): void
     {
+        // Master switch (LocationsTab → "Enable Georgian Locations cascade at
+        // checkout"). Default true so existing merchants keep current behavior
+        // on update. When false, NONE of the WC-side hooks below register —
+        // checkout falls back to vanilla WooCommerce fields and the typeahead
+        // REST endpoints are not exposed.
+        if ($settings->get('locations_enabled', true) !== true) {
+            return;
+        }
+
         (new States($settings))->register();
         (new ClassicCheckoutFields($settings))->register();
         (new BlockCheckoutFields())->register();

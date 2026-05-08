@@ -5,7 +5,7 @@ Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 8.1
 Requires Plugins: woocommerce
-Stable tag: 0.2.4
+Stable tag: 0.2.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,10 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 3. CodeOn hub menu with installed plugins listed underneath.
 
 == Changelog ==
+
+= 0.2.5 — 2026-05-08 =
+* **Master Enable / Disable toggle for the Locations feature.** New first field on Settings → CodeOn → Locations: "Enable Georgian Locations cascade at checkout" — default ON so existing merchants are unaffected on update. When OFF, none of the WC-side hooks register: classic checkout, block checkout, address-format override, order-meta capture, and the typeahead REST endpoints all stay dormant. WooCommerce falls back to its standard built-in checkout fields. Existing order data is never altered either way.
+* **CodeOn hub menu icon redesigned.** The location-pin Dashicon previously shown next to the "CodeOn" top-level admin menu has been replaced with a brand-aligned hub-and-satellite mark — central node connected to six plugin satellites — that signals "ecosystem of plugins" rather than the locations feature alone (Locations is one tab; Extensions and any installed CodeOn premium plugin sit under the same menu).
 
 = 0.2.4 — 2026-05-08 =
 * Bump bundled `codeon/framework` from `^0.3.8` to `^0.3.16`. Picks up framework v0.3.9 through v0.3.16:
