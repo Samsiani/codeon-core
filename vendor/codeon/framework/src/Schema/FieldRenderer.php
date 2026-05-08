@@ -22,13 +22,25 @@ final class FieldRenderer
 {
     /**
      * @param Field[] $schema
+     * @param string  $pluginSlug Plugin slug for the multi-plugin
+     *                            discriminator (`codeon_plugin_slug`
+     *                            hidden field). Pass `manifest->slug`.
+     *                            v0.3.7+: when empty, falls back to
+     *                            stripping the `codeon_admin_` prefix
+     *                            from the nonce action, which is wrong
+     *                            for plugins that override
+     *                            `Manifest::nonce()` and is preserved
+     *                            only for back-compat with external
+     *                            Tab subclasses that haven't been
+     *                            updated.
      */
     public static function renderForm(
         array $schema,
         ?SettingsRepository $repo,
         string $tabSlug,
         string $nonceAction,
-        string $submitLabel = ''
+        string $submitLabel = '',
+        string $pluginSlug = ''
     ): void {
         if ($submitLabel === '') {
             $submitLabel = function_exists('__')
@@ -43,11 +55,22 @@ final class FieldRenderer
         // Slug discriminator — without this, every co-installed framework
         // consumer's Page::handleSave fires on the same admin_post action
         // and the FIRST registered Page's nonceAction check wins (or fails)
-        // regardless of which plugin's form was actually submitted. The
-        // slug pulled from the nonce action lets handleSave bail when
-        // this Page isn't the target.
-        $slug = (string) preg_replace('/^codeon_admin_/', '', $nonceAction);
-        echo '<input type="hidden" name="codeon_plugin_slug" value="' . esc_attr($slug) . '" />';
+        // regardless of which plugin's form was actually submitted.
+        //
+        // v0.3.7+: prefer the explicit `$pluginSlug` plumbed through from
+        // `Page::render()`/`Tab::render()`. The legacy "strip codeon_admin_
+        // prefix from the nonce action" path stays as a fallback for
+        // callers (or external Tab subclasses) that still pass only the
+        // nonce action. That path silently produced the WRONG slug for
+        // any plugin that overrode `Manifest::nonce()` to a non-default
+        // value (codeon-payments → `codeon_payments_admin`; fina-sync →
+        // `fina_sync_admin`); their forms posted a slug that never
+        // matched manifest->slug, so `Page::isOurPost()` returned false
+        // and admin-post.php produced an empty white page.
+        $resolvedSlug = $pluginSlug !== ''
+            ? $pluginSlug
+            : (string) preg_replace('/^codeon_admin_/', '', $nonceAction);
+        echo '<input type="hidden" name="codeon_plugin_slug" value="' . esc_attr($resolvedSlug) . '" />';
 
         self::renderRows($schema, $repo);
 

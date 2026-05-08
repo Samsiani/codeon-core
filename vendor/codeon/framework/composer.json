@@ -2,7 +2,7 @@
     "name": "codeon/framework",
     "description": "Shared admin UI + chrome + hub menu + license/update plumbing for CodeOn WooCommerce plugins (codeon.ge).",
     "type": "library",
-    "version": "0.3.4",
+    "version": "0.3.16",
     "license": "GPL-2.0-or-later",
     "homepage": "https://github.com/Samsiani/codeon-plugin-basic-architecture",
     "require": {

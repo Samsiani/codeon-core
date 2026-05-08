@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cd7253816348744b92ef9e20f1a6e3b9",
+    "content-hash": "ab9aee57efafd5c274c57d1fecc4f793",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -73,16 +73,16 @@
         },
         {
             "name": "codeon/framework",
-            "version": "0.3.8",
+            "version": "0.3.16",
             "source": {
                 "type": "git",
                 "url": "git@github.com:Samsiani/codeon-plugin-basic-architecture.git",
-                "reference": "986bdf031d37c8d23b14fa7273befde38f485a71"
+                "reference": "113de90d98804224dae3cdb831cbe75105563fc0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Samsiani/codeon-plugin-basic-architecture/zipball/986bdf031d37c8d23b14fa7273befde38f485a71",
-                "reference": "986bdf031d37c8d23b14fa7273befde38f485a71",
+                "url": "https://api.github.com/repos/Samsiani/codeon-plugin-basic-architecture/zipball/113de90d98804224dae3cdb831cbe75105563fc0",
+                "reference": "113de90d98804224dae3cdb831cbe75105563fc0",
                 "shasum": ""
             },
             "require": {
@@ -116,7 +116,11 @@
             ],
             "description": "Shared admin UI + chrome + hub menu + license/update plumbing for CodeOn WooCommerce plugins (codeon.ge).",
             "homepage": "https://github.com/Samsiani/codeon-plugin-basic-architecture",
-            "time": "2026-04-30T12:50:43+00:00"
+            "support": {
+                "source": "https://github.com/Samsiani/codeon-plugin-basic-architecture/tree/v0.3.16",
+                "issues": "https://github.com/Samsiani/codeon-plugin-basic-architecture/issues"
+            },
+            "time": "2026-05-04T19:15:08+00:00"
         }
     ],
     "packages-dev": [],

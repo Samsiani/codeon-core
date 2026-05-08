@@ -2,6 +2,8 @@
 
 Step-by-step recipe to start a new plugin built on the framework from day one. Takes ~30 minutes if you have your bank/API credentials ready.
 
+> **AI agents — read [`/CLAUDE.md`](../CLAUDE.md) first.** Every session that touches plugin code starts by invoking the `andrej-karpathy-skills:karpathy-guidelines` skill, and the plugin's `assets/icon/` artwork follows [`docs/ICON_SYSTEM.md`](ICON_SYSTEM.md) — both rules are enforced repo-wide.
+
 ---
 
 ## 0. Prerequisites

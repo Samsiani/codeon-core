@@ -70,17 +70,17 @@
         },
         {
             "name": "codeon/framework",
-            "version": "0.3.4",
-            "version_normalized": "0.3.4.0",
+            "version": "0.3.16",
+            "version_normalized": "0.3.16.0",
             "source": {
                 "type": "git",
                 "url": "git@github.com:Samsiani/codeon-plugin-basic-architecture.git",
-                "reference": "9018d07f8708daa034c3a4877e5810c56a3cfaf4"
+                "reference": "113de90d98804224dae3cdb831cbe75105563fc0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Samsiani/codeon-plugin-basic-architecture/zipball/9018d07f8708daa034c3a4877e5810c56a3cfaf4",
-                "reference": "9018d07f8708daa034c3a4877e5810c56a3cfaf4",
+                "url": "https://api.github.com/repos/Samsiani/codeon-plugin-basic-architecture/zipball/113de90d98804224dae3cdb831cbe75105563fc0",
+                "reference": "113de90d98804224dae3cdb831cbe75105563fc0",
                 "shasum": ""
             },
             "require": {
@@ -90,9 +90,9 @@
                 "phpstan/phpstan": "^1.11",
                 "phpunit/phpunit": "^10.5"
             },
-            "time": "2026-04-25T16:00:11+00:00",
+            "time": "2026-05-04T19:15:08+00:00",
             "type": "library",
-            "installation-source": "source",
+            "installation-source": "dist",
             "autoload": {
                 "psr-4": {
                     "CodeOn\\Framework\\": "src/"
@@ -116,6 +116,10 @@
             ],
             "description": "Shared admin UI + chrome + hub menu + license/update plumbing for CodeOn WooCommerce plugins (codeon.ge).",
             "homepage": "https://github.com/Samsiani/codeon-plugin-basic-architecture",
+            "support": {
+                "source": "https://github.com/Samsiani/codeon-plugin-basic-architecture/tree/v0.3.16",
+                "issues": "https://github.com/Samsiani/codeon-plugin-basic-architecture/issues"
+            },
             "install-path": "../codeon/framework"
         }
     ],

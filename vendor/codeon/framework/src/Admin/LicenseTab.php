@@ -124,7 +124,7 @@ final class LicenseTab extends Tab
         }
         echo '</dl>';
 
-        $this->renderActionForm($nonceAction, $isActive);
+        $this->renderActionForm($nonceAction, $isActive, $this->pluginSlug);
 
         echo '</section>';
 
@@ -149,12 +149,35 @@ final class LicenseTab extends Tab
         echo '</div>';
     }
 
-    private function renderActionForm(string $nonceAction, bool $isActive): void
+    private function renderActionForm(string $nonceAction, bool $isActive, string $pluginSlug = ''): void
     {
         echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '" class="codeon-license-form">';
         wp_nonce_field($nonceAction);
         echo '<input type="hidden" name="action" value="codeon_tab_action" />';
         echo '<input type="hidden" name="codeon_tab" value="' . esc_attr($this->slug()) . '" />';
+        // Plugin-slug discriminator — same purpose as the one
+        // FieldRenderer::renderForm() injects (v0.3.4). Without it,
+        // every co-installed framework consumer's
+        // admin_post_codeon_tab_action handler runs on every License-
+        // tab Refresh / Release / Activate click; the first one wins,
+        // calls guardWriteRequest, and wp_die's on a nonce minted for
+        // a different plugin's form. v0.3.4 fixed the Save form but
+        // missed this one.
+        //
+        // v0.3.7+: take the slug from `Page::render()` directly. The
+        // legacy "strip codeon_admin_ prefix" path was wrong for
+        // plugins that override `Manifest::nonce()` to a non-default
+        // value (codeon-payments → codeon_payments_admin, fina-sync
+        // → fina_sync_admin) — the regex didn't match, the wrong slug
+        // ended up in the field, `Page::isOurPost()` returned false,
+        // every handler bailed, admin-post.php produced an empty
+        // page (the "Refresh now / Release this domain → blank
+        // screen" bug). Fallback regex stays for callers that still
+        // pass only the nonce action.
+        $resolvedSlug = $pluginSlug !== ''
+            ? $pluginSlug
+            : (string) preg_replace('/^codeon_admin_/', '', $nonceAction);
+        echo '<input type="hidden" name="codeon_plugin_slug" value="' . esc_attr($resolvedSlug) . '" />';
 
         if (!$isActive) {
             echo '<label class="codeon-license-key-label" for="codeon_license_key">'

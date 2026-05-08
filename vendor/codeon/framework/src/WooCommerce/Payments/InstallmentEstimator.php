@@ -27,6 +27,12 @@ final class InstallmentEstimator
     public const DEFAULT_PICK = 24;
 
     /**
+     * Cache-bust version for the estimator stylesheet + script.
+     * Bumped when assets/css/codeon-estimator.css or assets/js/codeon-estimator.js change.
+     */
+    private const ASSET_VERSION = '0.3.12';
+
+    /**
      * Standard amortisation: `M = P * r / (1 - (1+r)^-n)`.
      * 0% APR campaigns short-circuit to a flat split.
      */
@@ -63,31 +69,34 @@ final class InstallmentEstimator
         string $textdomain = 'codeon-framework',
         ?string $iconUrl = null
     ): string {
+        self::enqueueAssets();
+
         if ($months === []) {
             $months = self::DEFAULT_MONTHS;
         }
         sort($months, SORT_NUMERIC);
-        $minM    = (int) min($months);
-        $maxM    = (int) max($months);
+        $months  = array_values(array_map('intval', $months));
+        $count   = count($months);
+        $minM    = (int) $months[0];
+        $maxM    = (int) $months[$count - 1];
         $default = in_array($defaultMonths, $months, true)
             ? $defaultMonths
-            : (int) $months[intdiv(count($months), 2)];
+            : (int) $months[intdiv($count, 2)];
 
-        $rows = [];
-        foreach ($months as $m) {
-            $rows[(int) $m] = self::monthlyPayment($principal, (int) $m, $apr);
-        }
-        $startMonthly = $rows[$default];
-        $monthsJson = wp_json_encode($rows, JSON_UNESCAPED_SLASHES);
+        $startMonthly = self::monthlyPayment($principal, $default, $apr);
+        $monthsJson = wp_json_encode($months, JSON_UNESCAPED_SLASHES);
 
-        $iconHtml = '';
-        if ($iconUrl !== null && $iconUrl !== '') {
-            $iconHtml = sprintf(
-                '<img src="%s" alt="%s" class="codeon-est-brand-icon" loading="lazy"/>',
-                esc_url($iconUrl),
-                esc_attr($brandName)
-            );
-        }
+        // Initial fill of the slider's orange progress portion, computed
+        // linearly across the value range so the SSR'd track is correct
+        // before JS runs. JS keeps it in sync afterwards.
+        $initialProgress = ($maxM > $minM)
+            ? (($default - $minM) / ($maxM - $minM)) * 100.0
+            : 50.0;
+
+        // `$brandName` and `$iconUrl` are intentionally unused in the new
+        // minimal layout — the consumer's existing call sites still pass them
+        // for API compatibility, but the design no longer renders an icon.
+        unset($brandName, $iconUrl);
 
         ob_start();
         ?>
@@ -96,41 +105,19 @@ final class InstallmentEstimator
             data-principal="<?php echo esc_attr((string) $principal); ?>"
             data-apr="<?php echo esc_attr((string) $apr); ?>"
             data-months='<?php echo esc_attr((string) $monthsJson); ?>'
-            data-default="<?php echo esc_attr((string) $default); ?>">
-            <div class="codeon-est-head">
-                <div class="codeon-est-title-block">
-                    <span class="codeon-est-eyebrow"><?php echo esc_html(__('Estimated monthly payment', $textdomain)); ?></span>
-                    <div class="codeon-est-amount-row">
-                        <span class="codeon-est-amount" data-codeon-est-monthly>
-                            <?php echo esc_html(self::formatMoney($startMonthly)); ?>
-                        </span>
-                        <span class="codeon-est-currency">₾</span>
-                        <span class="codeon-est-permo"><?php echo esc_html(__('/ month', $textdomain)); ?></span>
-                    </div>
-                    <div class="codeon-est-term-line">
-                        <?php
-                        printf(
-                            /* translators: 1: months count, 2: total payable */
-                            esc_html(__('over %1$s · total %2$s ₾', $textdomain)),
-                            sprintf('<strong data-codeon-est-months>%d</strong> ' . esc_html(__('months', $textdomain)), $default), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-                            sprintf('<strong data-codeon-est-total>%s</strong>', esc_html(self::formatMoney($startMonthly * $default))) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-                        );
-                        ?>
-                    </div>
-                </div>
-                <?php echo $iconHtml; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- already escaped ?>
-            </div>
+            data-default="<?php echo esc_attr((string) $default); ?>"
+            style="--codeon-est-progress: <?php echo esc_attr(number_format($initialProgress, 4, '.', '')); ?>%">
 
-            <div class="codeon-est-pills" role="radiogroup" aria-label="<?php echo esc_attr(__('Pick a term', $textdomain)); ?>">
-                <?php foreach ($months as $m) : ?>
-                    <?php $isActive = ((int) $m === $default); ?>
-                    <button type="button"
-                        class="codeon-est-pill <?php echo $isActive ? 'is-active' : ''; ?>"
-                        data-codeon-est-pill="<?php echo esc_attr((string) $m); ?>"
-                        aria-pressed="<?php echo $isActive ? 'true' : 'false'; ?>">
-                        <?php echo (int) $m; ?>
-                    </button>
-                <?php endforeach; ?>
+            <div class="codeon-est-summary">
+                <div class="codeon-est-stat">
+                    <strong class="codeon-est-stat-num" data-codeon-est-months><?php echo (int) $default; ?></strong>
+                    <span class="codeon-est-stat-unit"><?php echo esc_html(__('Month', $textdomain)); ?></span>
+                </div>
+                <div class="codeon-est-stat codeon-est-stat--amount">
+                    <strong class="codeon-est-stat-num" data-codeon-est-monthly><?php echo esc_html(self::formatMoney($startMonthly)); ?></strong>
+                    <span class="codeon-est-stat-currency">₾</span>
+                    <span class="codeon-est-stat-unit"><?php echo esc_html(__('Per Month', $textdomain)); ?></span>
+                </div>
             </div>
 
             <input type="range"
@@ -142,20 +129,18 @@ final class InstallmentEstimator
                 data-codeon-est-slider
                 aria-label="<?php echo esc_attr(__('Months', $textdomain)); ?>"/>
 
-            <div class="codeon-est-meta">
-                <span class="codeon-est-meta-item">
+            <div class="codeon-est-marks" role="radiogroup" aria-label="<?php echo esc_attr(__('Pick a term', $textdomain)); ?>">
+                <?php foreach ($months as $m) : ?>
                     <?php
-                    printf(
-                        /* translators: %s effective annual percent rate */
-                        esc_html(__('Effective rate from %s%% APR', $textdomain)),
-                        esc_html(rtrim(rtrim(number_format($apr, 2, '.', ''), '0'), '.'))
-                    );
+                    $isActive = ($m === $default);
+                    $fraction = ($maxM > $minM) ? ($m - $minM) / ($maxM - $minM) : 0.5;
                     ?>
-                </span>
-                <span class="codeon-est-meta-sep">·</span>
-                <span class="codeon-est-meta-item"><?php echo esc_html(__('Apply in under a minute', $textdomain)); ?></span>
-                <span class="codeon-est-meta-sep">·</span>
-                <span class="codeon-est-meta-item"><?php echo esc_html(__('Decision in real time', $textdomain)); ?></span>
+                    <button type="button"
+                        class="codeon-est-mark<?php echo $isActive ? ' is-active' : ''; ?>"
+                        data-codeon-est-pill="<?php echo esc_attr((string) $m); ?>"
+                        aria-pressed="<?php echo $isActive ? 'true' : 'false'; ?>"
+                        style="left: calc(var(--codeon-est-thumb-w) / 2 + (100% - var(--codeon-est-thumb-w)) * <?php echo esc_attr(number_format($fraction, 6, '.', '')); ?>);"><?php echo (int) $m; ?></button>
+                <?php endforeach; ?>
             </div>
         </div>
         <?php
@@ -165,5 +150,67 @@ final class InstallmentEstimator
     private static function formatMoney(float $value): string
     {
         return number_format($value, 2, '.', ',');
+    }
+
+    /**
+     * Enqueue the estimator stylesheet + script.
+     *
+     * Called from `render()` so consumer plugins don't have to wire anything
+     * — the moment a gateway calls `InstallmentEstimator::render()` from its
+     * `payment_fields()` or PDP badge, the assets become available on the page.
+     *
+     * Safe to call multiple times: `wp_enqueue_*` is idempotent on handle.
+     * Safe to call late (during `the_content` or `payment_fields()` output) —
+     * styles/scripts queued at that point are still printed in the footer.
+     */
+    private static function enqueueAssets(): void
+    {
+        if (!function_exists('wp_enqueue_style') || !function_exists('wp_enqueue_script')) {
+            return;
+        }
+
+        $base = self::assetsBaseUrl();
+        if ($base === '') {
+            return;
+        }
+
+        wp_enqueue_style(
+            'codeon-estimator',
+            $base . 'css/codeon-estimator.css',
+            [],
+            self::ASSET_VERSION
+        );
+
+        wp_enqueue_script(
+            'codeon-estimator',
+            $base . 'js/codeon-estimator.js',
+            [],
+            self::ASSET_VERSION,
+            true
+        );
+    }
+
+    /**
+     * Resolve the absolute URL of the framework's `assets/` directory.
+     *
+     * The framework lives at `<plugin>/vendor/codeon/framework/` inside any
+     * consumer plugin, so we walk up three levels from this file
+     * (`src/WooCommerce/Payments/InstallmentEstimator.php` → framework root)
+     * and append `assets/`.
+     */
+    private static function assetsBaseUrl(): string
+    {
+        static $cached = null;
+        if ($cached !== null) {
+            return $cached;
+        }
+        if (!function_exists('plugin_dir_url')) {
+            return $cached = '';
+        }
+        // plugin_dir_url(__FILE__) → .../<plugin>/vendor/codeon/framework/src/WooCommerce/Payments/
+        $here = plugin_dir_url(__FILE__);
+        // dirname N=3 strips Payments/, WooCommerce/, src/ — leaves the framework root.
+        $frameworkRoot = rtrim((string) dirname($here, 3), '/');
+        return $cached = $frameworkRoot . '/assets/';
     }
 }

@@ -111,6 +111,7 @@ final class Page
         $this->renderTabNav($active);
         Notices::flush();
         echo '<div class="codeon-content">';
+        $active->setPluginSlug($this->manifest->slug);
         $active->render($this->nonceAction());
         echo '</div>';
 
