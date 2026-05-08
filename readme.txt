@@ -5,7 +5,7 @@ Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 8.1
 Requires Plugins: woocommerce
-Stable tag: 0.2.7
+Stable tag: 0.2.8
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,9 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 3. CodeOn hub menu with installed plugins listed underneath.
 
 == Changelog ==
+
+= 0.2.8 — 2026-05-08 =
+* Verification release — confirms the v0.2.7 PUC integration successfully surfaces a new GitHub release in WordPress's Plugins → Updates UI. No code changes besides the version bump.
 
 = 0.2.7 — 2026-05-08 =
 * **Self-hosted update channel restored** via the bundled `yahnis-elsts/plugin-update-checker` library (PUC v5). The plugin now polls `github.com/Samsiani/codeon-core` for new tags every ~12h and surfaces matching `codeon-core-vX.Y.Z.zip` release assets to WordPress's native Plugins → Updates UI — same one-click update UX as a WP.org plugin, but without WP.org as the channel. Reverses the v0.2.0 PUC removal that was made specifically to comply with WP.org hosting rules; codeon-core no longer ships through WP.org, so that constraint no longer applies.
