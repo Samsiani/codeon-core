@@ -5,7 +5,7 @@ Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 8.1
 Requires Plugins: woocommerce
-Stable tag: 0.2.5
+Stable tag: 0.2.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,11 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 3. CodeOn hub menu with installed plugins listed underneath.
 
 == Changelog ==
+
+= 0.2.6 — 2026-05-08 =
+* **Dashboard redesign for the CodeOn ecosystem.** The CodeOn top-level admin page now leads with an ecosystem-first welcome card and adds a new "The CodeOn ecosystem" section that lists every plugin in the family — Core (free), Fina Sync, QuickShipper Delivery, the four Georgian payment-card gateways (TBC, BOG, Flitt) and the three installment gateways (TBC, BOG, Credo). Each plugin is shown with its tagline, category, and a status badge (Installed v0.x.x · Free · Available). The list is sourced from the live codeon.ge catalog (cached for 6h via the framework's `CatalogClient`) with a hardcoded fallback so the section never renders empty on first install or when offline.
+* **CSS: dropped the 760px `max-width` cap on `.codeon-dashboard .codeon-card`.** Cards now use the full width of WP's content area on large screens, which makes the new ecosystem grid (`auto-fill, minmax(280px, 1fr)`) actually have room to breathe. The Georgian Locations dataset card and the Installed-plugins card were unchanged structurally — only the width cap was lifted.
+* The "Georgian Locations dataset" card (13 regions / 77 municipalities / 4,394 settlements + bundle-built timestamp) is unchanged and still renders below the ecosystem section.
 
 = 0.2.5 — 2026-05-08 =
 * **Master Enable / Disable toggle for the Locations feature.** New first field on Settings → CodeOn → Locations: "Enable Georgian Locations cascade at checkout" — default ON so existing merchants are unaffected on update. When OFF, none of the WC-side hooks register: classic checkout, block checkout, address-format override, order-meta capture, and the typeahead REST endpoints all stay dormant. WooCommerce falls back to its standard built-in checkout fields. Existing order data is never altered either way.
