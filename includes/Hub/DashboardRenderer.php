@@ -52,10 +52,13 @@ final class DashboardRenderer
             <div class="codeon-card codeon-welcome">
                 <h2><?php esc_html_e('Welcome to CodeOn', 'codeon-core'); ?></h2>
                 <p class="codeon-welcome-lede">
-                    <?php esc_html_e('A complete plugin family for Georgian WooCommerce stores.', 'codeon-core'); ?>
+                    <?php esc_html_e('CodeOn is a plugin family for Georgian WooCommerce stores. Every plugin shares this admin hub, the same License & Updates flow, and the same design language — install one, the next feels familiar.', 'codeon-core'); ?>
                 </p>
                 <p>
-                    <?php esc_html_e('CodeOn Core (this plugin, free on WordPress.org) ships the Georgian address hierarchy as a checkout cascade — 13 regions, 77 municipalities, 4,394 settlements, validated server-side. The premium plugins sold at codeon.ge plug in beneath it as siblings: every major Georgian payment method (TBC, BOG, Flitt, Credo) with their card and installment variants, the Fina ↔ WooCommerce accounting sync, and QuickShipper courier delivery — all sharing this admin hub, the same License & Updates flow, and the same design language.', 'codeon-core'); ?>
+                    <?php esc_html_e('CodeOn Core (this plugin, free) ships the Georgian address hierarchy as a cascading WooCommerce checkout picker — 13 regions, 77 municipalities, 4,394 settlements, validated server-side. It is also the canonical home for the rest of the family.', 'codeon-core'); ?>
+                </p>
+                <p>
+                    <?php esc_html_e('The premium plugins sold at codeon.ge plug in beneath Core: every major Georgian payment method (TBC, BOG, Flitt, Credo) with their card and installment variants, the Fina ↔ WooCommerce accounting sync, and QuickShipper courier delivery.', 'codeon-core'); ?>
                 </p>
                 <p class="codeon-welcome-actions">
                     <?php if ($hasWc): ?>
@@ -108,18 +111,6 @@ final class DashboardRenderer
                             <?php if ($plugin['category'] !== ''): ?>
                                 <div class="codeon-ecosystem-category"><?php echo esc_html($plugin['category']); ?></div>
                             <?php endif; ?>
-                            <p class="codeon-ecosystem-tagline"><?php echo esc_html($plugin['tagline']); ?></p>
-                            <p class="codeon-ecosystem-cta">
-                                <?php if ($plugin['installed'] && $plugin['admin_url'] !== ''): ?>
-                                    <a href="<?php echo esc_url($plugin['admin_url']); ?>">
-                                        <?php esc_html_e('Manage', 'codeon-core'); ?> &rarr;
-                                    </a>
-                                <?php elseif ($plugin['url'] !== ''): ?>
-                                    <a href="<?php echo esc_url($plugin['url']); ?>" target="_blank" rel="noopener">
-                                        <?php esc_html_e('Learn more', 'codeon-core'); ?> &rarr;
-                                    </a>
-                                <?php endif; ?>
-                            </p>
                         </div>
                     <?php endforeach; ?>
                 </div>
@@ -203,39 +194,36 @@ final class DashboardRenderer
 
             .codeon-dashboard .codeon-ecosystem-grid {
                 display: grid;
-                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-                gap: 14px;
-                margin-top: 14px;
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+                gap: 8px;
+                margin-top: 12px;
             }
             .codeon-dashboard .codeon-ecosystem-item {
                 background: #fafafb;
                 border: 1px solid #dcdcde;
-                border-radius: 6px;
-                padding: 14px 16px;
+                border-radius: 5px;
+                padding: 8px 10px;
                 display: flex;
                 flex-direction: column;
-                gap: 6px;
+                gap: 3px;
             }
-            .codeon-dashboard .codeon-ecosystem-item.is-installed { border-color: #2a4080; box-shadow: inset 3px 0 0 #2a4080; }
-            .codeon-dashboard .codeon-ecosystem-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
-            .codeon-dashboard .codeon-ecosystem-head h4 { margin: 0; font-size: 15px; line-height: 1.3; }
+            .codeon-dashboard .codeon-ecosystem-item.is-installed { border-color: #2a4080; box-shadow: inset 3px 0 0 #2a4080; padding-left: 12px; }
+            .codeon-dashboard .codeon-ecosystem-head { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+            .codeon-dashboard .codeon-ecosystem-head h4 { margin: 0; font-size: 13px; line-height: 1.25; font-weight: 600; }
             .codeon-dashboard .codeon-ecosystem-badge {
-                font-size: 11px;
+                font-size: 10px;
                 font-weight: 600;
                 text-transform: uppercase;
-                letter-spacing: 0.4px;
-                padding: 2px 8px;
-                border-radius: 10px;
+                letter-spacing: 0.3px;
+                padding: 1px 6px;
+                border-radius: 9px;
                 white-space: nowrap;
             }
-            .codeon-dashboard .codeon-ecosystem-badge .dashicons { font-size: 12px; width: 12px; height: 12px; line-height: 1; vertical-align: -1px; margin-right: 2px; }
+            .codeon-dashboard .codeon-ecosystem-badge .dashicons { font-size: 10px; width: 10px; height: 10px; line-height: 1; vertical-align: -1px; margin-right: 1px; }
             .codeon-dashboard .codeon-ecosystem-badge--active { background: #d4edda; color: #155724; }
             .codeon-dashboard .codeon-ecosystem-badge--free { background: #fff3cd; color: #856404; }
             .codeon-dashboard .codeon-ecosystem-badge--available { background: #e2e3e5; color: #383d41; }
-            .codeon-dashboard .codeon-ecosystem-category { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #646970; font-weight: 600; }
-            .codeon-dashboard .codeon-ecosystem-tagline { margin: 4px 0 0; font-size: 13px; color: #50575e; line-height: 1.45; }
-            .codeon-dashboard .codeon-ecosystem-cta { margin: 6px 0 0; }
-            .codeon-dashboard .codeon-ecosystem-cta a { font-size: 13px; text-decoration: none; }
+            .codeon-dashboard .codeon-ecosystem-category { font-size: 10px; text-transform: uppercase; letter-spacing: 0.4px; color: #646970; font-weight: 600; }
         </style>
         <?php
     }
@@ -254,10 +242,11 @@ final class DashboardRenderer
 
         // codeon-core itself (this plugin) — always first, always installed.
         $rows[] = [
+            'slug'      => 'codeon-core',
             'name'      => __('CodeOn Core', 'codeon-core'),
-            'tagline'   => __('Georgian address hierarchy as a cascading WooCommerce checkout picker — 13 regions, 77 municipalities, 4,394 settlements. Free on WordPress.org. Also the canonical hub for the rest of the family.', 'codeon-core'),
+            'tagline'   => __('Georgian address hierarchy as a cascading WooCommerce checkout picker — 13 regions, 77 municipalities, 4,394 settlements. Also the canonical hub for the rest of the family.', 'codeon-core'),
             'category'  => __('Free · Locations', 'codeon-core'),
-            'url'       => 'https://wordpress.org/plugins/codeon-core/',
+            'url'       => 'https://codeon.ge',
             'admin_url' => admin_url('admin.php?page=codeon-core'),
             'installed' => true,
             'version'   => defined('CODEON_CORE_VERSION') ? (string) CODEON_CORE_VERSION : '',
@@ -273,6 +262,7 @@ final class DashboardRenderer
             foreach ($catalog->plugins as $plugin) {
                 $installed = isset($installedSlugs[$plugin->pluginSlug]);
                 $rows[] = [
+                    'slug'      => $plugin->pluginSlug,
                     'name'      => $plugin->name,
                     'tagline'   => $plugin->tagline !== '' ? $plugin->tagline : $plugin->description,
                     'category'  => self::categoryLabel($catalog, $plugin->category),
@@ -283,7 +273,7 @@ final class DashboardRenderer
                     'free'      => false,
                 ];
             }
-            return $rows;
+            return self::sortByFamily($rows);
         }
 
         // Offline / first-load fallback. Hand-curated to match the
@@ -304,6 +294,7 @@ final class DashboardRenderer
         foreach ($fallback as [$slug, $name, $category, $tagline, $url]) {
             $installed = isset($installedSlugs[$slug]);
             $rows[] = [
+                'slug'      => $slug,
                 'name'      => $name,
                 'tagline'   => $tagline,
                 'category'  => $category,
@@ -315,7 +306,42 @@ final class DashboardRenderer
             ];
         }
 
-        return $rows;
+        return self::sortByFamily($rows);
+    }
+
+    /**
+     * Sort the ecosystem rows so plugins from the same bank/family
+     * sit side-by-side (BoG card ↔ BoG installments, TBC card ↔ TBC
+     * installments). Unknown slugs fall to the end alphabetically.
+     *
+     * @param list<array<string,mixed>> $rows
+     * @return list<array<string,mixed>>
+     */
+    private static function sortByFamily(array $rows): array
+    {
+        $priority = [
+            'codeon-core'                 => 0,   // host plugin always first
+            'codeon-bog-card-payment'     => 10,  // BoG family
+            'codeon-bog-installments'     => 11,
+            'codeon-tbc-card-payment'     => 20,  // TBC family
+            'codeon-tbc-installments'     => 21,
+            'codeon-flitt-payment'        => 30,
+            'codeon-credo-installments'   => 40,
+            'fina-sync'                   => 50,  // sync family
+            'codeon-1c-sync'              => 51,
+            'quickshipper-delivery'       => 60,  // shipping
+        ];
+
+        usort($rows, static function (array $a, array $b) use ($priority): int {
+            $pa = $priority[$a['slug'] ?? ''] ?? 99;
+            $pb = $priority[$b['slug'] ?? ''] ?? 99;
+            if ($pa !== $pb) {
+                return $pa <=> $pb;
+            }
+            return strcmp((string) ($a['name'] ?? ''), (string) ($b['name'] ?? ''));
+        });
+
+        return array_values($rows);
     }
 
     /** Resolve a category id to its human label via the catalog manifest. */

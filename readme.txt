@@ -5,7 +5,7 @@ Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 8.1
 Requires Plugins: woocommerce
-Stable tag: 0.2.8
+Stable tag: 0.2.9
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,13 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 3. CodeOn hub menu with installed plugins listed underneath.
 
 == Changelog ==
+
+= 0.2.9 — 2026-05-08 =
+* **Dashboard refinements.**
+    * Welcome card now opens with a project-level paragraph (what CodeOn is, why every plugin shares the hub), then explains what Core itself ships, then introduces the rest of the family. Three short paragraphs instead of one long one.
+    * Removed "on WordPress.org" from the welcome and from the CodeOn Core ecosystem-card description — the plugin no longer ships through WP.org, so the phrasing was stale.
+    * Ecosystem cards now show only **plugin name + status badge + category** — taglines and Manage / Learn more action links are dropped. Cards are noticeably more compact (smaller font, tighter padding, smaller minimum column width) so a typical WP admin width fits ~5 cards per row.
+    * Cards now sort by family so related plugins sit side-by-side: CodeOn Core first, then BOG Card + BOG Installments, then TBC Card + TBC Installments, then Flitt, then Credo, then sync plugins (Fina, 1C), then QuickShipper. Unknown slugs sink to the end alphabetically.
 
 = 0.2.8 — 2026-05-08 =
 * Verification release — confirms the v0.2.7 PUC integration successfully surfaces a new GitHub release in WordPress's Plugins → Updates UI. No code changes besides the version bump.
