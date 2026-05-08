@@ -1,0 +1,240 @@
+/*
+ * CodeOn Installment Estimator — minimal monthly-payment widget.
+ *
+ * Layout: two stat blocks (months + monthly amount) on top, the orange-themed
+ * <input type=range> in the middle, allowed-term labels at the bottom — each
+ * label absolutely positioned at its actual fraction of the value range so it
+ * sits directly under the thumb when that term is selected.
+ *
+ * Theme-agnostic: own font stack, no theme tokens, defensive resets on the
+ * range input + label buttons we render. High-specificity selectors so theme
+ * `button { ... }` rules can't out-rank ours.
+ */
+
+.codeon-est-card,
+.codeon-est-card *,
+.codeon-est-card *::before,
+.codeon-est-card *::after {
+    box-sizing: border-box;
+}
+
+.codeon-est-card {
+    /* Bank-of-Georgia accent. Override inline on `.codeon-est-card` for a
+       different bank if a future caller needs one. */
+    --codeon-est-accent: #ff671d;
+    --codeon-est-accent-hover: #e55a14;
+    --codeon-est-accent-soft: rgba(255, 103, 29, 0.18);
+    --codeon-est-progress: 50%;
+    /* Thumb diameter — referenced by both the slider thumb rules and the
+       absolutely-positioned mark labels. Keep changes coordinated. */
+    --codeon-est-thumb-w: 20px;
+
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.4;
+    color: #0f172a;
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 12px 0;
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    box-shadow: none;
+}
+
+/* Top summary row */
+
+.codeon-est-card .codeon-est-summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 28px;
+    margin: 0 0 14px 0;
+}
+
+.codeon-est-card .codeon-est-stat {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    margin: 0;
+}
+
+.codeon-est-card .codeon-est-stat-num {
+    font-size: 28px;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+}
+
+.codeon-est-card .codeon-est-stat-currency {
+    font-size: 22px;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.1;
+}
+
+.codeon-est-card .codeon-est-stat-unit {
+    font-size: 14px;
+    font-weight: 500;
+    color: #64748b;
+}
+
+/* Slider */
+
+.codeon-est-card .codeon-est-slider {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    /* Filled portion (orange) up to the thumb, unfilled (slate) after. JS
+       keeps `--codeon-est-progress` synced with the current value. */
+    background: linear-gradient(
+        to right,
+        var(--codeon-est-accent) 0%,
+        var(--codeon-est-accent) var(--codeon-est-progress),
+        #e2e8f0 var(--codeon-est-progress),
+        #e2e8f0 100%
+    );
+    border: none;
+    border-radius: 9999px;
+    outline: none;
+    margin: 4px 0 8px 0;
+    padding: 0;
+    cursor: pointer;
+    box-shadow: none;
+}
+
+.codeon-est-card .codeon-est-slider:focus-visible {
+    outline: 2px solid var(--codeon-est-accent);
+    outline-offset: 4px;
+}
+
+.codeon-est-card .codeon-est-slider::-webkit-slider-runnable-track {
+    height: 6px;
+    background: transparent;
+    border: none;
+    border-radius: 9999px;
+}
+
+.codeon-est-card .codeon-est-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: var(--codeon-est-thumb-w);
+    height: var(--codeon-est-thumb-w);
+    margin-top: -7px;
+    border-radius: 50%;
+    background: var(--codeon-est-accent);
+    border: 3px solid #ffffff;
+    box-shadow: 0 1px 4px var(--codeon-est-accent-soft), 0 1px 3px rgba(15, 23, 42, 0.20);
+    cursor: pointer;
+    transition: transform 120ms ease, background-color 120ms ease;
+}
+
+.codeon-est-card .codeon-est-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.10);
+    background: var(--codeon-est-accent-hover);
+}
+
+.codeon-est-card .codeon-est-slider::-moz-range-track {
+    height: 6px;
+    background: transparent;
+    border: none;
+    border-radius: 9999px;
+}
+
+.codeon-est-card .codeon-est-slider::-moz-range-progress {
+    height: 6px;
+    background: var(--codeon-est-accent);
+    border-radius: 9999px;
+}
+
+.codeon-est-card .codeon-est-slider::-moz-range-thumb {
+    width: var(--codeon-est-thumb-w);
+    height: var(--codeon-est-thumb-w);
+    border-radius: 50%;
+    background: var(--codeon-est-accent);
+    border: 3px solid #ffffff;
+    box-shadow: 0 1px 4px var(--codeon-est-accent-soft), 0 1px 3px rgba(15, 23, 42, 0.20);
+    cursor: pointer;
+}
+
+/* Mark labels — plain text positioned at each allowed term's actual fraction
+   of the value range. Thumb travel range is `[thumb_w/2, w − thumb_w/2]`, so
+   each mark is placed via `calc(thumb_w/2 + (100% − thumb_w) * fraction)`
+   with `transform: translateX(-50%)` to centre on that point. PHP emits the
+   `fraction` per term inline. */
+
+.codeon-est-card .codeon-est-marks {
+    position: relative;
+    width: 100%;
+    height: 18px;
+    margin: 0;
+    padding: 0;
+}
+
+.codeon-est-card .codeon-est-mark {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    padding: 0 2px;
+    margin: 0;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.4;
+    color: #94a3b8;
+    text-align: center;
+    text-transform: none;
+    letter-spacing: 0;
+    box-shadow: none;
+    text-shadow: none;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color 120ms ease, font-weight 120ms ease;
+}
+
+.codeon-est-card .codeon-est-mark:hover {
+    color: var(--codeon-est-accent);
+}
+
+.codeon-est-card .codeon-est-mark:focus {
+    outline: none;
+}
+
+.codeon-est-card .codeon-est-mark:focus-visible {
+    outline: 2px solid var(--codeon-est-accent);
+    outline-offset: 2px;
+}
+
+.codeon-est-card .codeon-est-mark.is-active {
+    color: #0f172a;
+    font-weight: 700;
+}
+
+@media (max-width: 480px) {
+    .codeon-est-card .codeon-est-stat-num {
+        font-size: 22px;
+    }
+    .codeon-est-card .codeon-est-stat-currency {
+        font-size: 18px;
+    }
+    .codeon-est-card .codeon-est-stat-unit {
+        font-size: 12px;
+    }
+    .codeon-est-card .codeon-est-summary {
+        gap: 4px 20px;
+    }
+    .codeon-est-card .codeon-est-mark {
+        font-size: 11px;
+    }
+}

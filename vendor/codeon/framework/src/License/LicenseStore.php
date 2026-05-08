@@ -15,9 +15,17 @@ namespace CodeOn\Framework\License;
  * shared (14 days, matching codeon.ge `GRACE_PERIOD_HOURS`) so every
  * plugin treats expiry the same way.
  *
- * Two options per plugin:
+ * Three options per plugin:
  *   - `<slug>_license_key`        — the merchant's pasted key
  *   - `<slug>_license_snapshot`   — last validated response (array)
+ *   - `<slug>_license_check`      — last heartbeat record, success or
+ *                                   failure. Lets the License tab
+ *                                   surface the real "last checked"
+ *                                   time and last error, and lets
+ *                                   {@see effectiveStatus()} flip
+ *                                   the plugin to revoked the moment
+ *                                   codeon.ge stops recognising the
+ *                                   key. v0.3.6+.
  *
  * The snapshot doubles as the cache. Its `cached_at` field gates
  * the in-grace fallback when the customer's DNS is broken or
@@ -50,6 +58,9 @@ final class LicenseStore
     /**
      * Persist a successful validation. Adds a `cached_at` timestamp
      * the rest of the framework uses for grace-period evaluation.
+     * Also records a successful heartbeat so the License tab's
+     * "Last checked" reflects the current time and any prior error
+     * is cleared.
      *
      * @param array<string,mixed> $response Signed response body.
      */
@@ -57,6 +68,7 @@ final class LicenseStore
     {
         $response['cached_at'] = time();
         update_option($this->pluginSlug . '_license_snapshot', $response, false);
+        $this->recordCheck(true, false, '');
     }
 
     /**
@@ -71,6 +83,48 @@ final class LicenseStore
     public function clearSnapshot(): void
     {
         delete_option($this->pluginSlug . '_license_snapshot');
+        $this->clearCheck();
+    }
+
+    /**
+     * Record a heartbeat (success OR failure). Always overwrites the
+     * previous record — the tab only ever displays the latest.
+     *
+     * Plugins should call this from their `LicenseGate::revalidate()`
+     * on every cron tick, including failures, so the merchant sees
+     * the truth about what's happening even when validation fails.
+     * `setSnapshot()` calls this with `(true, false, '')` automatically;
+     * adapters only call it directly on failures.
+     *
+     * @param bool   $ok          Did validation succeed?
+     * @param bool   $definitive  Is the failure a server-side rejection
+     *                            (key unknown / revoked / domain
+     *                            mismatch) vs. a transient error?
+     * @param string $error       Human-readable error message; '' on
+     *                            success.
+     */
+    public function recordCheck(bool $ok, bool $definitive, string $error = ''): void
+    {
+        update_option($this->pluginSlug . '_license_check', [
+            'checked_at' => time(),
+            'ok'         => $ok,
+            'definitive' => $definitive,
+            'error'      => $error,
+        ], false);
+    }
+
+    /**
+     * @return array{checked_at?:int, ok?:bool, definitive?:bool, error?:string}
+     */
+    public function getCheck(): array
+    {
+        $stored = get_option($this->pluginSlug . '_license_check', []);
+        return is_array($stored) ? $stored : [];
+    }
+
+    public function clearCheck(): void
+    {
+        delete_option($this->pluginSlug . '_license_check');
     }
 
     /**
@@ -82,7 +136,9 @@ final class LicenseStore
      *   - 'grace'    — past expiry but inside the grace window;
      *                  plugin keeps running, admin shows banner
      *   - 'expired'  — past expiry AND grace window
-     *   - 'revoked'  — codeon.ge marked the license suspended
+     *   - 'revoked'  — codeon.ge marked the license suspended,
+     *                  removed it, or refused this domain on the
+     *                  last heartbeat (definitive failure). v0.3.6+.
      *   - 'inactive' — never activated (no key / no snapshot)
      */
     public function effectiveStatus(?int $now = null): string
@@ -94,6 +150,21 @@ final class LicenseStore
         if ($key === '' || $snap === []) {
             return 'inactive';
         }
+
+        // Definitive rejection from the last heartbeat trumps every
+        // cached field. The previous snapshot's `expires` may be
+        // years out, but if codeon.ge just told us the key is gone
+        // / suspended / bound to a different domain, the merchant
+        // is no longer entitled — flip immediately.
+        $check = $this->getCheck();
+        if (
+            isset($check['ok'])
+            && $check['ok'] === false
+            && ($check['definitive'] ?? false) === true
+        ) {
+            return 'revoked';
+        }
+
         $serverStatus = (string) ($snap['status'] ?? '');
         if ($serverStatus === 'suspended' || $serverStatus === 'revoked') {
             return 'revoked';

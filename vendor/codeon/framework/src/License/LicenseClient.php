@@ -40,12 +40,23 @@ final class LicenseClient
     }
 
     /**
-     * @return array{ok:bool, response?:array<string,mixed>, error?:string}
+     * Validate a key against codeon.ge.
+     *
+     * The `definitive` flag on a non-OK return tells callers whether
+     * the failure is the server actively saying "no" (key not found,
+     * suspended, bound to another domain) — in which case the local
+     * snapshot should be treated as revoked immediately — versus a
+     * transient failure (network, 5xx, signature mismatch, malformed
+     * body) where the local snapshot should be preserved and the
+     * heartbeat retried later. See LicenseStore::effectiveStatus()
+     * for how this is consumed.
+     *
+     * @return array{ok:bool, response?:array<string,mixed>, error?:string, definitive?:bool}
      */
     public function validate(string $licenseKey, string $siteUrl, string $pluginVersion): array
     {
         if ($licenseKey === '') {
-            return ['ok' => false, 'error' => __('License key is empty.', 'codeon-framework')];
+            return ['ok' => false, 'error' => __('License key is empty.', 'codeon-framework'), 'definitive' => true];
         }
 
         $nonce = wp_generate_password(16, false, false);
@@ -71,21 +82,37 @@ final class LicenseClient
 
         if (is_wp_error($response)) {
             $this->logger->warning('License validation transport error: ' . $response->get_error_message());
-            return ['ok' => false, 'error' => $response->get_error_message()];
+            return ['ok' => false, 'error' => $response->get_error_message(), 'definitive' => false];
         }
 
         $status = (int) wp_remote_retrieve_response_code($response);
         $body   = wp_remote_retrieve_body($response);
         $data   = json_decode($body, true);
         if (!is_array($data)) {
-            return ['ok' => false, 'error' => __('Invalid response from license server.', 'codeon-framework')];
+            return [
+                'ok'         => false,
+                'error'      => __('Invalid response from license server.', 'codeon-framework'),
+                // Non-JSON could be an HTML error page from a CDN/proxy;
+                // treat as transient and let the next cron retry.
+                'definitive' => false,
+            ];
         }
         if ($status < 200 || $status >= 300) {
             $msg = (string) ($data['error'] ?? $data['message'] ?? "HTTP {$status}");
-            return ['ok' => false, 'error' => $msg];
+            // 4xx with a parseable JSON body is the server actively
+            // rejecting the request (unknown key, revoked, domain
+            // mismatch). 5xx is a transient server-side failure —
+            // preserve the local snapshot so a brief codeon.ge outage
+            // doesn't take every licensed merchant offline.
+            $definitive = $status >= 400 && $status < 500;
+            return ['ok' => false, 'error' => $msg, 'definitive' => $definitive];
         }
         if (($data['nonce'] ?? null) !== $nonce) {
-            return ['ok' => false, 'error' => __('License nonce mismatch — request/response pair rejected.', 'codeon-framework')];
+            return [
+                'ok'         => false,
+                'error'      => __('License nonce mismatch — request/response pair rejected.', 'codeon-framework'),
+                'definitive' => false,
+            ];
         }
 
         // codeon.ge strips any trailing slash before signing the
@@ -96,11 +123,19 @@ final class LicenseClient
         $expectedSite = untrailingslashit($siteUrl);
         $receivedSite = untrailingslashit((string) ($data['site_url'] ?? ''));
         if ($expectedSite !== $receivedSite) {
-            return ['ok' => false, 'error' => __('License site URL mismatch — response was not signed for this domain.', 'codeon-framework')];
+            return [
+                'ok'         => false,
+                'error'      => __('License site URL mismatch — response was not signed for this domain.', 'codeon-framework'),
+                'definitive' => false,
+            ];
         }
 
         if (!$this->verifySignature($data)) {
-            return ['ok' => false, 'error' => __('License signature invalid — ignoring response.', 'codeon-framework')];
+            return [
+                'ok'         => false,
+                'error'      => __('License signature invalid — ignoring response.', 'codeon-framework'),
+                'definitive' => false,
+            ];
         }
 
         return ['ok' => true, 'response' => $data];

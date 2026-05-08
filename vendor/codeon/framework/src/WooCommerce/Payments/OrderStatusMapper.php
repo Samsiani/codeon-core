@@ -63,7 +63,38 @@ final class OrderStatusMapper
         };
     }
 
-    public static function fromBogIpayEvent(string $event, string $status): string
+    /**
+     * Map a status returned by the BOG Payments API
+     * (`api.bog.ge/payments/v1/...`) to a canonical result.
+     *
+     * Single mapper for every product served from that API: card
+     * (iPay), Apple Pay, Google Pay, BoG P2P, BoG Loyalty, gift card,
+     * `bog_loan` (regular installments), and `bnpl` (Buy Now Pay Later).
+     * The receipt response carries `order_status.key` from the same
+     * enum regardless of which `payment_method` the order used.
+     *
+     * `order_status.key` enum (BOG docs): `created | processing |
+     * auth_requested | blocked | partial_completed | completed |
+     * rejected | refund_requested | refunded | refunded_partially`.
+     *
+     * Notes:
+     *  - `auth_requested` is loan-specific — the application has been
+     *    submitted, awaiting bank decision; map to PENDING.
+     *  - `refund_requested` precedes the actual `refunded` event;
+     *    map to PENDING so the order isn't double-transitioned.
+     *  - `partial_completed` is normal for split-capture cards but
+     *    anomalous for loan products (loans are atomic). Caller may
+     *    add a warning log when it sees it on a loan order; the
+     *    mapping itself stays SUCCESS so the order doesn't stall.
+     *
+     * @param string $event  Optional event label from the callback
+     *                       envelope; only consulted for legacy
+     *                       compatibility (e.g. an explicit "refund"
+     *                       event without a refund-flavoured status).
+     * @param string $status Value of `order_status.key` from the
+     *                       callback body or receipt response.
+     */
+    public static function fromBogPaymentsStatus(string $event, string $status): string
     {
         $s = strtolower($status);
         $e = strtolower($event);
@@ -71,9 +102,9 @@ final class OrderStatusMapper
         if ($s === 'completed' || $s === 'partial_completed') {
             return self::RESULT_SUCCESS;
         }
-        // Pre-authorised (MANUAL capture) — held but not captured.
-        // Pending; admin must capture or cancel.
-        if ($s === 'blocked') {
+        // Pre-authorised card (MANUAL capture) held but not captured;
+        // also where a loan order parks while the bank decides.
+        if ($s === 'blocked' || $s === 'auth_requested') {
             return self::RESULT_PENDING;
         }
         if ($s === 'rejected') {
@@ -82,7 +113,23 @@ final class OrderStatusMapper
         if ($s === 'refunded' || $s === 'refunded_partially' || $e === 'refund') {
             return self::RESULT_REFUND;
         }
+        // `refund_requested` is a transient state — the real refund
+        // event will follow. Stay pending; don't annotate yet.
+        if ($s === 'refund_requested') {
+            return self::RESULT_PENDING;
+        }
         return self::RESULT_PENDING;
+    }
+
+    /**
+     * @deprecated since 0.3.13. Use {@see fromBogPaymentsStatus()}
+     *             instead — same enum, broader coverage. Kept as a
+     *             thin alias so plugins that haven't migrated (notably
+     *             `codeon-bog-card-payment`) continue to build.
+     */
+    public static function fromBogIpayEvent(string $event, string $status): string
+    {
+        return self::fromBogPaymentsStatus($event, $status);
     }
 
     public static function fromBogInstallmentEvent(string $event, string $status): string

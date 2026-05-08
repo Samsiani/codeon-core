@@ -5,7 +5,7 @@ Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 8.1
 Requires Plugins: woocommerce
-Stable tag: 0.2.3
+Stable tag: 0.2.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,14 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 3. CodeOn hub menu with installed plugins listed underneath.
 
 == Changelog ==
+
+= 0.2.4 — 2026-05-08 =
+* Bump bundled `codeon/framework` from `^0.3.8` to `^0.3.16`. Picks up framework v0.3.9 through v0.3.16:
+    * **v0.3.9–v0.3.12** — `InstallmentEstimator` widget asset auto-enqueue + visual polish (BoG accent, uniform pill geometry, index-based slider, value-aligned labels). No consumer impact for Core (no estimator usage).
+    * **v0.3.13** — New `Http\RsaCallbackSignature` primitive + `OrderStatusMapper::fromBogIpayEvent()` deprecated alias renamed to `fromBogPaymentsStatus()`. No consumer impact for Core.
+    * **v0.3.14–v0.3.15** — Shared `WooCommerce\Payments\BogPayments\Client` lifted from per-plugin clients; `enableSaveCard()` added. No consumer impact for Core.
+    * **v0.3.16** — Mandatory WPML/i18n compatibility bar documented in `docs/I18N_AND_WPML.md`. `InstallmentEstimator::render()` gained an optional `$textdomain` parameter (defaults to `codeon-framework`).
+* No code changes in Core itself — `LocationsTab` / `DiagnosticsTab` / `ExtensionsTab` keep working unchanged because every framework change between 0.3.9 and 0.3.16 is either additive or a deprecated-alias path.
 
 = 0.2.3 — 2026-04-30 =
 * Bump bundled `codeon/framework` from `^0.3.4` to `^0.3.8`. Picks up two framework fixes (none of them critical to Core itself, since Core has no License module — but they matter when Core is co-installed alongside any of the licensed CodeOn plugins, which is the common deployment):

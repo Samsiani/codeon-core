@@ -35,9 +35,45 @@ interface LicenseAdapter
 | `key_masked` | string | `XXXX-XXXX-1234` — never the full key |
 | `plan` | string | License plan name |
 | `expires_at` | int | Unix timestamp; 0 = perpetual |
-| `last_check` | int | Unix timestamp of last successful validate |
+| `last_check` | int | Unix timestamp of the **last heartbeat attempt** (success or failure) — read this from `LicenseStore::getCheck()['checked_at']`, not from the snapshot's `cached_at`, so the merchant sees the real cadence even when codeon.ge is rejecting the key |
 | `bound_domain` | string | Domain the license is bound to |
-| `last_error` | string | Human-readable last failure ('' if none) |
+| `last_error` | string | Human-readable last failure (`LicenseStore::getCheck()['error']`); `''` if the last heartbeat succeeded |
+
+## Heartbeat: handle ok=false (v0.3.6+)
+
+The framework's `LicenseClient::validate()` returns a `definitive` flag on failure. Definitive failures (key unknown, revoked, bound to another domain — any HTTP 4xx with a parseable body) flip `LicenseStore::effectiveStatus()` to `'revoked'` immediately, before the snapshot's `expires` is even consulted. Transient failures (network, 5xx, signature mismatch) are silent on the gating side — the local snapshot is preserved so a brief codeon.ge outage doesn't take licensed merchants offline.
+
+Your `LicenseGate::revalidate()` (or whatever cron-driven re-validator you wire) **must** record the failure into the store, or the License tab will lie to the merchant about when the cron last ran:
+
+```php
+public function revalidate(): void
+{
+    $store = self::store();
+    $key = $store->getKey();
+    if ($key === '') {
+        return;
+    }
+    $client = new LicenseClient(new Logger(self::PLUGIN_SLUG), 'YOUR_PLUGIN_BUILD_ID');
+    $result = $client->validate($key, home_url('/'), YOUR_PLUGIN_VERSION);
+
+    if ($result['ok'] ?? false) {
+        $store->setSnapshot((array) $result['response']); // also records success check
+        return;
+    }
+    $store->recordCheck(
+        false,
+        (bool) ($result['definitive'] ?? false),
+        (string) ($result['error'] ?? '')
+    );
+}
+```
+
+`setSnapshot()` calls `recordCheck(true, false, '')` automatically, so success paths never need to touch it directly.
+
+Concretely, that means:
+
+- A merchant whose key is deleted on codeon.ge sees `Active → Revoked` on the next cron tick (or as soon as they click *Refresh now* in the License tab). Gateways stop offering checkout immediately because `AbstractGateway::licenseModuleActive()` gates on `effectiveStatus() in ['active','grace']`.
+- A merchant on codeon.ge during a brief outage sees their plugin keep working — the snapshot's `expires` is still good, the heartbeat records the transient error, the next successful tick clears it.
 
 ---
 
@@ -117,14 +153,15 @@ final class FrameworkLicenseAdapter implements LicenseAdapter
 
     public function snapshot(): array
     {
-        $row = LicenseStore::get() ?? [];
+        $row   = LicenseStore::get() ?? [];
+        $check = LicenseGate::store()->getCheck();
         return [
             'key_masked'   => $this->mask($row['key'] ?? ''),
             'plan'         => $row['response']['plan']['name'] ?? '',
             'expires_at'   => (int) ($row['response']['expires_at'] ?? 0),
-            'last_check'   => (int) get_option('fina_sync_license_last_check', 0),
+            'last_check'   => isset($check['checked_at']) ? (int) $check['checked_at'] : 0,
             'bound_domain' => $row['response']['domain'] ?? home_url(),
-            'last_error'   => (string) ($row['last_error'] ?? ''),
+            'last_error'   => (string) ($check['error'] ?? ''),
         ];
     }
 

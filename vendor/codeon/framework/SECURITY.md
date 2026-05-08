@@ -55,6 +55,19 @@ Email **support@codeon.ge** with:
 ### Logging
 
 - Plugins use `WC_Logger` (or equivalent). Never log raw credentials, signed payloads, or auth headers — redact before write.
+- Never log raw bank/payment-gateway responses. Whitelist the diagnostic keys you actually need (e.g. `array_keys($response)`, `isset($response['_links']['redirect']['href'])`). See [`docs/PAYMENT_GATEWAY_HARDENING.md`](docs/PAYMENT_GATEWAY_HARDENING.md) §7.
+
+### Payment gateway plugins
+
+Payment plugins have a stricter mandatory baseline on top of everything above. See [`docs/PAYMENT_GATEWAY_HARDENING.md`](docs/PAYMENT_GATEWAY_HARDENING.md). Highlights:
+
+- Webhooks bind to the **bank-side order id** (constant-time compare), not the WC order id.
+- Success transitions re-fetch the bank's receipt before applying — webhook is a notification, receipt is the source of truth. Return 503 on transient failure.
+- Webhook + reconcile cron share a canonical event id and a per-order lock so concurrent paths can't both call `OrderStatusMapper::apply()`.
+- Reconcile cron fans out via Action Scheduler — never an inline 50-call loop.
+- OAuth token refresh runs through a `wp_cache_add` single-flight mutex.
+- Amounts crossing the wire go through `Money::toApiDecimal` + `number_format(…, 2, '.', '')`. Never `(string) $float`.
+- Partial pre-auth captures record the un-captured remainder via `wc_create_refund([…, refund_payment => false])` so the WC ledger matches the bank.
 
 ---
 

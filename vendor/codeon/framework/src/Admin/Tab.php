@@ -82,6 +82,33 @@ abstract class Tab
     }
 
     /**
+     * Plugin slug, set by {@see Page::render()} before invoking
+     * {@see render()}. Read by the default schema-walking impl + by
+     * {@see LicenseTab::render()} so the multi-plugin form
+     * discriminator (`codeon_plugin_slug` hidden field) carries the
+     * actual `Manifest::slug` rather than a value derived by stripping
+     * the `codeon_admin_` prefix from the nonce action — a
+     * derivation that silently produced the wrong slug for plugins
+     * that override `Manifest::nonce()` and broke their Save /
+     * License-tab forms (admin-post.php returned an empty page).
+     *
+     * This is a setter on the base class rather than an extra
+     * parameter on `render()` because subclass overrides of
+     * `render(string $nonceAction): void` already exist in the wild
+     * (DashboardTab, SettingsTab, etc.) and PHP's covariance rules
+     * reject an override with a different parameter count even when
+     * the new parameter has a default value.
+     *
+     * v0.3.7+.
+     */
+    protected string $pluginSlug = '';
+
+    public function setPluginSlug(string $slug): void
+    {
+        $this->pluginSlug = $slug;
+    }
+
+    /**
      * Default render: walk the schema. Override for custom UI.
      */
     public function render(string $nonceAction): void
@@ -90,7 +117,9 @@ abstract class Tab
             $this->schema(),
             $this->repository(),
             $this->slug(),
-            $nonceAction
+            $nonceAction,
+            '',
+            $this->pluginSlug
         );
     }
 }

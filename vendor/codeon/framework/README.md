@@ -70,6 +70,7 @@ A `Tab` subclass that uses the schema DSL is ~30 lines — see `docs/FIELD_SCHEM
 | [`docs/LICENSE_INTEGRATION.md`](docs/LICENSE_INTEGRATION.md) | Wire your existing License code into the framework's License tab |
 | [`docs/WATERMARK.md`](docs/WATERMARK.md) | Scatter sites, verification, recovery-mode contract |
 | [`docs/MIGRATION_PLAYBOOK.md`](docs/MIGRATION_PLAYBOOK.md) | Recipe for porting an existing plugin |
+| [`docs/PAYMENT_GATEWAY_HARDENING.md`](docs/PAYMENT_GATEWAY_HARDENING.md) | **Mandatory** webhook / concurrency / money-handling patterns for every payment plugin |
 | [`SECURITY.md`](SECURITY.md) | Security posture; vulnerability disclosure |
 | [`CHANGELOG.md`](CHANGELOG.md) | Strict Keep-a-Changelog + semver |
 

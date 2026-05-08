@@ -6,8 +6,340 @@ $vendorDir = dirname(__DIR__);
 $baseDir   = dirname($vendorDir);
 
 return array(
+	'Autoloader' => array(
+		'version' => '5.0.16',
+		'path'    => $vendorDir . '/automattic/jetpack-autoloader/src/class-autoloader.php'
+	),
+	'Autoloader_Handler' => array(
+		'version' => '5.0.16',
+		'path'    => $vendorDir . '/automattic/jetpack-autoloader/src/class-autoloader-handler.php'
+	),
+	'Autoloader_Locator' => array(
+		'version' => '5.0.16',
+		'path'    => $vendorDir . '/automattic/jetpack-autoloader/src/class-autoloader-locator.php'
+	),
+	'Automattic\\Jetpack\\Autoloader\\AutoloadFileWriter' => array(
+		'version' => '5.0.16',
+		'path'    => $vendorDir . '/automattic/jetpack-autoloader/src/AutoloadFileWriter.php'
+	),
 	'Automattic\\Jetpack\\Autoloader\\AutoloadGenerator' => array(
 		'version' => '5.0.16',
 		'path'    => $vendorDir . '/automattic/jetpack-autoloader/src/AutoloadGenerator.php'
+	),
+	'Automattic\\Jetpack\\Autoloader\\AutoloadProcessor' => array(
+		'version' => '5.0.16',
+		'path'    => $vendorDir . '/automattic/jetpack-autoloader/src/AutoloadProcessor.php'
+	),
+	'Automattic\\Jetpack\\Autoloader\\CustomAutoloaderPlugin' => array(
+		'version' => '5.0.16',
+		'path'    => $vendorDir . '/automattic/jetpack-autoloader/src/CustomAutoloaderPlugin.php'
+	),
+	'Automattic\\Jetpack\\Autoloader\\ManifestGenerator' => array(
+		'version' => '5.0.16',
+		'path'    => $vendorDir . '/automattic/jetpack-autoloader/src/ManifestGenerator.php'
+	),
+	'CodeOn\\Core\\Activator' => array(
+		'version' => 'dev-main',
+		'path'    => $baseDir . '/includes/Activator.php'
+	),
+	'CodeOn\\Core\\Hub\\CoreHubBoot' => array(
+		'version' => 'dev-main',
+		'path'    => $baseDir . '/includes/Hub/CoreHubBoot.php'
+	),
+	'CodeOn\\Core\\Hub\\DashboardRenderer' => array(
+		'version' => 'dev-main',
+		'path'    => $baseDir . '/includes/Hub/DashboardRenderer.php'
+	),
+	'CodeOn\\Core\\Hub\\ExtensionsTab' => array(
+		'version' => 'dev-main',
+		'path'    => $baseDir . '/includes/Hub/ExtensionsTab.php'
+	),
+	'CodeOn\\Core\\Locations\\Boot' => array(
+		'version' => 'dev-main',
+		'path'    => $baseDir . '/includes/Locations/Boot.php'
+	),
+	'CodeOn\\Core\\Locations\\Data\\DisplayFormatter' => array(
+		'version' => 'dev-main',
+		'path'    => $baseDir . '/includes/Locations/Data/DisplayFormatter.php'
+	),
+	'CodeOn\\Core\\Locations\\Data\\Repository' => array(
+		'version' => 'dev-main',
+		'path'    => $baseDir . '/includes/Locations/Data/Repository.php'
+	),
+	'CodeOn\\Core\\Locations\\Data\\Transliterator' => array(
+		'version' => 'dev-main',
+		'path'    => $baseDir . '/includes/Locations/Data/Transliterator.php'
+	),
+	'CodeOn\\Core\\Locations\\Rest\\Controller' => array(
+		'version' => 'dev-main',
+		'path'    => $baseDir . '/includes/Locations/Rest/Controller.php'
+	),
+	'CodeOn\\Core\\Locations\\Settings\\DiagnosticsTab' => array(
+		'version' => 'dev-main',
+		'path'    => $baseDir . '/includes/Locations/Settings/DiagnosticsTab.php'
+	),
+	'CodeOn\\Core\\Locations\\Settings\\LocationsTab' => array(
+		'version' => 'dev-main',
+		'path'    => $baseDir . '/includes/Locations/Settings/LocationsTab.php'
+	),
+	'CodeOn\\Core\\Locations\\WooIntegration\\AddressFormat' => array(
+		'version' => 'dev-main',
+		'path'    => $baseDir . '/includes/Locations/WooIntegration/AddressFormat.php'
+	),
+	'CodeOn\\Core\\Locations\\WooIntegration\\BlockCheckoutFields' => array(
+		'version' => 'dev-main',
+		'path'    => $baseDir . '/includes/Locations/WooIntegration/BlockCheckoutFields.php'
+	),
+	'CodeOn\\Core\\Locations\\WooIntegration\\ClassicCheckoutFields' => array(
+		'version' => 'dev-main',
+		'path'    => $baseDir . '/includes/Locations/WooIntegration/ClassicCheckoutFields.php'
+	),
+	'CodeOn\\Core\\Locations\\WooIntegration\\OrderMeta' => array(
+		'version' => 'dev-main',
+		'path'    => $baseDir . '/includes/Locations/WooIntegration/OrderMeta.php'
+	),
+	'CodeOn\\Core\\Locations\\WooIntegration\\States' => array(
+		'version' => 'dev-main',
+		'path'    => $baseDir . '/includes/Locations/WooIntegration/States.php'
+	),
+	'CodeOn\\Core\\Plugin' => array(
+		'version' => 'dev-main',
+		'path'    => $baseDir . '/includes/Plugin.php'
+	),
+	'CodeOn\\Framework\\Admin\\Assets' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/Admin/Assets.php'
+	),
+	'CodeOn\\Framework\\Admin\\Footer' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/Admin/Footer.php'
+	),
+	'CodeOn\\Framework\\Admin\\Header' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/Admin/Header.php'
+	),
+	'CodeOn\\Framework\\Admin\\HealthCard' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/Admin/HealthCard.php'
+	),
+	'CodeOn\\Framework\\Admin\\HealthGrid' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/Admin/HealthGrid.php'
+	),
+	'CodeOn\\Framework\\Admin\\LicenseTab' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/Admin/LicenseTab.php'
+	),
+	'CodeOn\\Framework\\Admin\\Notices' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/Admin/Notices.php'
+	),
+	'CodeOn\\Framework\\Admin\\Page' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/Admin/Page.php'
+	),
+	'CodeOn\\Framework\\Admin\\Tab' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/Admin/Tab.php'
+	),
+	'CodeOn\\Framework\\Extensions\\Catalog' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/Extensions/Catalog.php'
+	),
+	'CodeOn\\Framework\\Extensions\\CatalogCategory' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/Extensions/Catalog.php'
+	),
+	'CodeOn\\Framework\\Extensions\\CatalogClient' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/Extensions/CatalogClient.php'
+	),
+	'CodeOn\\Framework\\Extensions\\CatalogPlugin' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/Extensions/Catalog.php'
+	),
+	'CodeOn\\Framework\\Extensions\\CatalogProduct' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/Extensions/Catalog.php'
+	),
+	'CodeOn\\Framework\\Extensions\\ExtensionsTab' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/Extensions/ExtensionsTab.php'
+	),
+	'CodeOn\\Framework\\Extensions\\InstallController' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/Extensions/InstallController.php'
+	),
+	'CodeOn\\Framework\\Http\\AdminPostRouter' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/Http/AdminPostRouter.php'
+	),
+	'CodeOn\\Framework\\Http\\NonceGate' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/Http/NonceGate.php'
+	),
+	'CodeOn\\Framework\\Http\\RsaCallbackSignature' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/Http/RsaCallbackSignature.php'
+	),
+	'CodeOn\\Framework\\License\\KnownPlugins' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/License/KnownPlugins.php'
+	),
+	'CodeOn\\Framework\\License\\LicenseAdapter' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/License/LicenseAdapter.php'
+	),
+	'CodeOn\\Framework\\License\\LicenseClient' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/License/LicenseClient.php'
+	),
+	'CodeOn\\Framework\\License\\LicenseStore' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/License/LicenseStore.php'
+	),
+	'CodeOn\\Framework\\License\\LicenseTabPresenter' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/License/LicenseTabPresenter.php'
+	),
+	'CodeOn\\Framework\\License\\PublicKey' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/License/PublicKey.php'
+	),
+	'CodeOn\\Framework\\License\\TamperHeartbeat' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/License/TamperHeartbeat.php'
+	),
+	'CodeOn\\Framework\\Logging\\Logger' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/Logging/Logger.php'
+	),
+	'CodeOn\\Framework\\Plugin\\Bootstrap' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/Plugin/Bootstrap.php'
+	),
+	'CodeOn\\Framework\\Plugin\\HubRegistry' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/Plugin/HubRegistry.php'
+	),
+	'CodeOn\\Framework\\Plugin\\Manifest' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/Plugin/Manifest.php'
+	),
+	'CodeOn\\Framework\\Schema\\Field' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/Schema/Field.php'
+	),
+	'CodeOn\\Framework\\Schema\\FieldRenderer' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/Schema/FieldRenderer.php'
+	),
+	'CodeOn\\Framework\\Schema\\FieldType' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/Schema/FieldType.php'
+	),
+	'CodeOn\\Framework\\Schema\\FieldValidator' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/Schema/FieldValidator.php'
+	),
+	'CodeOn\\Framework\\Storage\\FlatOptionRepository' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/Storage/FlatOptionRepository.php'
+	),
+	'CodeOn\\Framework\\Storage\\SettingsRepository' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/Storage/SettingsRepository.php'
+	),
+	'CodeOn\\Framework\\Updates\\UpdateChecker' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/Updates/UpdateChecker.php'
+	),
+	'CodeOn\\Framework\\Watermark\\BuildStampContract' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/Watermark/BuildStampContract.php'
+	),
+	'CodeOn\\Framework\\Watermark\\RecoveryMode' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/Watermark/RecoveryMode.php'
+	),
+	'CodeOn\\Framework\\WooCommerce\\AbstractGateway' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/WooCommerce/AbstractGateway.php'
+	),
+	'CodeOn\\Framework\\WooCommerce\\AbstractShippingMethod' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/WooCommerce/AbstractShippingMethod.php'
+	),
+	'CodeOn\\Framework\\WooCommerce\\GatewayRegistrar' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/WooCommerce/GatewayRegistrar.php'
+	),
+	'CodeOn\\Framework\\WooCommerce\\Payments\\BogPayments\\ApiException' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/WooCommerce/Payments/BogPayments/ApiException.php'
+	),
+	'CodeOn\\Framework\\WooCommerce\\Payments\\BogPayments\\Client' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/WooCommerce/Payments/BogPayments/Client.php'
+	),
+	'CodeOn\\Framework\\WooCommerce\\Payments\\InstallmentEstimator' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/WooCommerce/Payments/InstallmentEstimator.php'
+	),
+	'CodeOn\\Framework\\WooCommerce\\Payments\\Money' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/WooCommerce/Payments/Money.php'
+	),
+	'CodeOn\\Framework\\WooCommerce\\Payments\\OrderStatusMapper' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/WooCommerce/Payments/OrderStatusMapper.php'
+	),
+	'CodeOn\\Framework\\WooCommerce\\Payments\\WebhookEvents' => array(
+		'version' => '0.3.16.0',
+		'path'    => $vendorDir . '/codeon/framework/src/WooCommerce/Payments/WebhookEvents.php'
+	),
+	'Container' => array(
+		'version' => '5.0.16',
+		'path'    => $vendorDir . '/automattic/jetpack-autoloader/src/class-container.php'
+	),
+	'Hook_Manager' => array(
+		'version' => '5.0.16',
+		'path'    => $vendorDir . '/automattic/jetpack-autoloader/src/class-hook-manager.php'
+	),
+	'Latest_Autoloader_Guard' => array(
+		'version' => '5.0.16',
+		'path'    => $vendorDir . '/automattic/jetpack-autoloader/src/class-latest-autoloader-guard.php'
+	),
+	'Manifest_Reader' => array(
+		'version' => '5.0.16',
+		'path'    => $vendorDir . '/automattic/jetpack-autoloader/src/class-manifest-reader.php'
+	),
+	'PHP_Autoloader' => array(
+		'version' => '5.0.16',
+		'path'    => $vendorDir . '/automattic/jetpack-autoloader/src/class-php-autoloader.php'
+	),
+	'Path_Processor' => array(
+		'version' => '5.0.16',
+		'path'    => $vendorDir . '/automattic/jetpack-autoloader/src/class-path-processor.php'
+	),
+	'Plugin_Locator' => array(
+		'version' => '5.0.16',
+		'path'    => $vendorDir . '/automattic/jetpack-autoloader/src/class-plugin-locator.php'
+	),
+	'Plugins_Handler' => array(
+		'version' => '5.0.16',
+		'path'    => $vendorDir . '/automattic/jetpack-autoloader/src/class-plugins-handler.php'
+	),
+	'Shutdown_Handler' => array(
+		'version' => '5.0.16',
+		'path'    => $vendorDir . '/automattic/jetpack-autoloader/src/class-shutdown-handler.php'
+	),
+	'Version_Loader' => array(
+		'version' => '5.0.16',
+		'path'    => $vendorDir . '/automattic/jetpack-autoloader/src/class-version-loader.php'
+	),
+	'Version_Selector' => array(
+		'version' => '5.0.16',
+		'path'    => $vendorDir . '/automattic/jetpack-autoloader/src/class-version-selector.php'
 	),
 );
