@@ -1,4 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="20" height="20" fill="#a7aaad" aria-hidden="true">
-  <!-- Pin silhouette + small "C" inset = CodeOn + Locations -->
-  <path d="M10 1.5c-3.04 0-5.5 2.36-5.5 5.27 0 3.95 5.5 11.73 5.5 11.73s5.5-7.78 5.5-11.73c0-2.91-2.46-5.27-5.5-5.27zm0 7.95a2.4 2.4 0 0 1-2.43-2.36A2.4 2.4 0 0 1 10 4.74a2.4 2.4 0 0 1 2.43 2.36A2.4 2.4 0 0 1 10 9.45z"/>
+  <!-- CodeOn ecosystem hub: central node + six connected plugin satellites. -->
+  <!-- Spokes drawn first so the satellite circles overlap the line ends cleanly. -->
+  <path d="M10 10L10 4M10 10L15 7M10 10L15 13M10 10L10 16M10 10L5 13M10 10L5 7" stroke="#a7aaad" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+  <circle cx="10" cy="10" r="2.6"/>
+  <circle cx="10" cy="4" r="1.8"/>
+  <circle cx="15" cy="7" r="1.8"/>
+  <circle cx="15" cy="13" r="1.8"/>
+  <circle cx="10" cy="16" r="1.8"/>
+  <circle cx="5" cy="13" r="1.8"/>
+  <circle cx="5" cy="7" r="1.8"/>
 </svg>

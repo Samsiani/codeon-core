@@ -40,6 +40,12 @@ final class LocationsTab extends Tab
     public function schema(): array
     {
         return [
+            Field::heading('h_master', __('Status', 'codeon-core')),
+
+            Field::checkbox('locations_enabled', __('Enable Georgian Locations cascade at checkout', 'codeon-core'))
+                ->default(true)
+                ->description(__('Master switch for the Locations feature. When ON, the Region → Municipality → Settlement cascade is wired into WooCommerce checkout (classic + block), the address-format on emails / My Account is replaced, and the typeahead REST endpoints are registered. When OFF, none of the above runs and WooCommerce uses its standard built-in checkout fields. Existing order data is never altered either way.', 'codeon-core')),
+
             Field::heading('h_display', __('Display', 'codeon-core')),
 
             Field::select('display_mode', __('Label language', 'codeon-core'))
