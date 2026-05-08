@@ -5,7 +5,7 @@ Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 8.1
 Requires Plugins: woocommerce
-Stable tag: 0.2.6
+Stable tag: 0.2.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,11 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 3. CodeOn hub menu with installed plugins listed underneath.
 
 == Changelog ==
+
+= 0.2.7 — 2026-05-08 =
+* **Self-hosted update channel restored** via the bundled `yahnis-elsts/plugin-update-checker` library (PUC v5). The plugin now polls `github.com/Samsiani/codeon-core` for new tags every ~12h and surfaces matching `codeon-core-vX.Y.Z.zip` release assets to WordPress's native Plugins → Updates UI — same one-click update UX as a WP.org plugin, but without WP.org as the channel. Reverses the v0.2.0 PUC removal that was made specifically to comply with WP.org hosting rules; codeon-core no longer ships through WP.org, so that constraint no longer applies.
+* PUC hits the GitHub API unauthenticated (codeon-core is a public repo). Each WP install consumes ~2 unauthenticated GitHub requests/day (60/h limit per IP), so even on shared hosting with many WP installs the budget is fine.
+* `enableReleaseAssets()` is set so PUC prefers the uploaded release ZIP (which contains the bundled `vendor/`) over the source-tarball that GitHub auto-generates from each tag (which would not contain `vendor/`).
 
 = 0.2.6 — 2026-05-08 =
 * **Dashboard redesign for the CodeOn ecosystem.** The CodeOn top-level admin page now leads with an ecosystem-first welcome card and adds a new "The CodeOn ecosystem" section that lists every plugin in the family — Core (free), Fina Sync, QuickShipper Delivery, the four Georgian payment-card gateways (TBC, BOG, Flitt) and the three installment gateways (TBC, BOG, Credo). Each plugin is shown with its tagline, category, and a status badge (Installed v0.x.x · Free · Available). The list is sourced from the live codeon.ge catalog (cached for 6h via the framework's `CatalogClient`) with a hardcoded fallback so the section never renders empty on first install or when offline.

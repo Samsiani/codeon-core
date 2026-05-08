@@ -3,11 +3,11 @@
         'name' => 'codeon/codeon-core',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '5af5805d2b3ac8c9e20262a931db919f6f49c901',
+        'reference' => '9e47216bb20dc0d34f6151592c7895779b3946e0',
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'dev' => false,
+        'dev' => true,
     ),
     'versions' => array(
         'automattic/jetpack-autoloader' => array(
@@ -22,7 +22,7 @@
         'codeon/codeon-core' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '5af5805d2b3ac8c9e20262a931db919f6f49c901',
+            'reference' => '9e47216bb20dc0d34f6151592c7895779b3946e0',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -34,6 +34,15 @@
             'reference' => '113de90d98804224dae3cdb831cbe75105563fc0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../codeon/framework',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'yahnis-elsts/plugin-update-checker' => array(
+            'pretty_version' => 'v5.6',
+            'version' => '5.6.0.0',
+            'reference' => 'a2db6871deec989a74e1f90fafc6d58ae526a879',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../yahnis-elsts/plugin-update-checker',
             'aliases' => array(),
             'dev_requirement' => false,
         ),
