@@ -18,6 +18,7 @@ defined('ABSPATH') || exit;
 
 use CodeOn\Core\Locations\Data\DisplayFormatter;
 use CodeOn\Core\Locations\Data\Repository;
+use CodeOn\Core\Locations\Settings\TbilisiMode;
 use CodeOn\Framework\Storage\SettingsRepository;
 
 final class States
@@ -40,9 +41,16 @@ final class States
         $opts      = (array) get_option('codeon_core_settings', []);
         $showOccupied = (bool) ($opts['show_occupied'] ?? false);
 
+        $tbilisiActive = TbilisiMode::isActive();
+        $allowed       = $tbilisiActive ? TbilisiMode::allowedStateCodes() : null;
+
         $ge = [];
         foreach ($repo->regions(includeOccupied: $showOccupied) as $region) {
-            $ge[$region['wc_state_code']] = $formatter->label($region);
+            $code = $region['wc_state_code'];
+            if ($allowed !== null && !in_array($code, $allowed, true)) {
+                continue;
+            }
+            $ge[$code] = $formatter->label($region);
         }
         $states['GE'] = $ge;
         return $states;

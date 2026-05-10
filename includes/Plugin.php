@@ -34,6 +34,7 @@ use CodeOn\Core\Hub\CoreHubBoot;
 use CodeOn\Core\Locations\Boot as LocationsBoot;
 use CodeOn\Core\Locations\Settings\DiagnosticsTab;
 use CodeOn\Core\Locations\Settings\LocationsTab;
+use CodeOn\Core\Locations\Settings\TbilisiTab;
 use CodeOn\Framework\Plugin\Bootstrap;
 use CodeOn\Framework\Plugin\Manifest;
 use CodeOn\Framework\Storage\FlatOptionRepository;
@@ -106,6 +107,7 @@ final class Plugin
             $manifest,
             [
                 new LocationsTab($repo),
+                new TbilisiTab($repo),
                 new DiagnosticsTab(),
             ],
             null

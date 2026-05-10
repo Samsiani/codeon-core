@@ -22,6 +22,7 @@ defined('ABSPATH') || exit;
 
 use CodeOn\Core\Locations\Data\Repository;
 use CodeOn\Core\Locations\Settings\FieldMode;
+use CodeOn\Core\Locations\Settings\TbilisiMode;
 use CodeOn\Framework\Extensions\Catalog;
 use CodeOn\Framework\Extensions\CatalogClient;
 use CodeOn\Framework\Plugin\HubRegistry;
@@ -46,8 +47,31 @@ final class DashboardRenderer
         $ecosystem = self::ecosystem($installedSlugs);
 
         // Cascade master switch status pill (Locations ON / OFF).
+        // Tbilisi mode wins — when active, the pill describes the
+        // restricted scope rather than the global on/off.
         $opts             = (array) get_option('codeon_core_settings', []);
         $locationsEnabled = (bool) ($opts['locations_enabled'] ?? true);
+        $tbilisiActive    = TbilisiMode::isActive();
+        if ($tbilisiActive) {
+            $extras = TbilisiMode::scope() === TbilisiMode::SCOPE_PLUS
+                ? count(TbilisiMode::surroundingSettlementIds())
+                : 0;
+            $pillClass = 'on';
+            $pillIcon  = 'location';
+            $pillText  = $extras > 0
+                ? sprintf(
+                    /* translators: %d: number of surrounding settlement areas */
+                    _n('Locations: Tbilisi + %d area', 'Locations: Tbilisi + %d areas', $extras, 'codeon-core'),
+                    $extras
+                )
+                : __('Locations: Tbilisi only', 'codeon-core');
+        } else {
+            $pillClass = $locationsEnabled ? 'on' : 'off';
+            $pillIcon  = $locationsEnabled ? 'yes-alt' : 'marker';
+            $pillText  = $locationsEnabled
+                ? __('Locations cascade is ON', 'codeon-core')
+                : __('Locations cascade is OFF', 'codeon-core');
+        }
 
         ?>
         <div class="wrap codeon-wrap codeon-dashboard">
@@ -57,15 +81,9 @@ final class DashboardRenderer
                 <div class="codeon-welcome-head">
                     <h2><?php esc_html_e('Welcome to CodeOn', 'codeon-core'); ?></h2>
                     <?php if ($hasWc): ?>
-                        <span class="codeon-status-pill codeon-status-pill--<?php echo $locationsEnabled ? 'on' : 'off'; ?>">
-                            <span class="dashicons dashicons-<?php echo $locationsEnabled ? 'yes-alt' : 'marker'; ?>" aria-hidden="true"></span>
-                            <?php
-                            echo esc_html(
-                                $locationsEnabled
-                                    ? __('Locations cascade is ON', 'codeon-core')
-                                    : __('Locations cascade is OFF', 'codeon-core')
-                            );
-                            ?>
+                        <span class="codeon-status-pill codeon-status-pill--<?php echo esc_attr($pillClass); ?>">
+                            <span class="dashicons dashicons-<?php echo esc_attr($pillIcon); ?>" aria-hidden="true"></span>
+                            <?php echo esc_html($pillText); ?>
                         </span>
                     <?php endif; ?>
                 </div>
@@ -109,30 +127,53 @@ final class DashboardRenderer
                     </div>
                     <?php $meta = $repo->meta(); ?>
                     <ul class="codeon-stats">
-                        <li>
-                            <strong><?php echo esc_html(number_format_i18n($meta['region_count'])); ?></strong>
-                            <span><?php esc_html_e('regions', 'codeon-core'); ?></span>
-                        </li>
-                        <li>
-                            <strong><?php echo esc_html(number_format_i18n($meta['municipality_count'])); ?></strong>
-                            <span><?php esc_html_e('municipalities', 'codeon-core'); ?></span>
-                        </li>
-                        <li>
-                            <strong><?php echo esc_html(number_format_i18n($meta['settlement_count'])); ?></strong>
-                            <span><?php esc_html_e('settlements', 'codeon-core'); ?></span>
-                        </li>
-                        <li>
-                            <strong><?php echo esc_html(self::fieldModeLabel(FieldMode::resolve(FieldMode::FIELD_REGION))); ?></strong>
-                            <span><?php esc_html_e('Region field', 'codeon-core'); ?></span>
-                        </li>
-                        <li>
-                            <strong><?php echo esc_html(self::fieldModeLabel(FieldMode::resolve(FieldMode::FIELD_MUNICIPALITY))); ?></strong>
-                            <span><?php esc_html_e('Municipality field', 'codeon-core'); ?></span>
-                        </li>
-                        <li>
-                            <strong><?php echo esc_html(self::fieldModeLabel(FieldMode::resolve(FieldMode::FIELD_SETTLEMENT))); ?></strong>
-                            <span><?php esc_html_e('Settlement field', 'codeon-core'); ?></span>
-                        </li>
+                        <?php if ($tbilisiActive): ?>
+                            <li>
+                                <strong><?php echo esc_html(__('Tbilisi', 'codeon-core')); ?></strong>
+                                <span><?php esc_html_e('coverage scope', 'codeon-core'); ?></span>
+                            </li>
+                            <li>
+                                <strong><?php echo esc_html(number_format_i18n(count(TbilisiMode::areaList()))); ?></strong>
+                                <span><?php esc_html_e('areas at checkout', 'codeon-core'); ?></span>
+                            </li>
+                            <li>
+                                <strong>
+                                    <?php
+                                    echo esc_html(
+                                        TbilisiMode::scope() === TbilisiMode::SCOPE_PLUS
+                                            ? __('Tbilisi + surroundings', 'codeon-core')
+                                            : __('Tbilisi only', 'codeon-core')
+                                    );
+                                    ?>
+                                </strong>
+                                <span><?php esc_html_e('mode', 'codeon-core'); ?></span>
+                            </li>
+                        <?php else: ?>
+                            <li>
+                                <strong><?php echo esc_html(number_format_i18n($meta['region_count'])); ?></strong>
+                                <span><?php esc_html_e('regions', 'codeon-core'); ?></span>
+                            </li>
+                            <li>
+                                <strong><?php echo esc_html(number_format_i18n($meta['municipality_count'])); ?></strong>
+                                <span><?php esc_html_e('municipalities', 'codeon-core'); ?></span>
+                            </li>
+                            <li>
+                                <strong><?php echo esc_html(number_format_i18n($meta['settlement_count'])); ?></strong>
+                                <span><?php esc_html_e('settlements', 'codeon-core'); ?></span>
+                            </li>
+                            <li>
+                                <strong><?php echo esc_html(self::fieldModeLabel(FieldMode::resolve(FieldMode::FIELD_REGION))); ?></strong>
+                                <span><?php esc_html_e('Region field', 'codeon-core'); ?></span>
+                            </li>
+                            <li>
+                                <strong><?php echo esc_html(self::fieldModeLabel(FieldMode::resolve(FieldMode::FIELD_MUNICIPALITY))); ?></strong>
+                                <span><?php esc_html_e('Municipality field', 'codeon-core'); ?></span>
+                            </li>
+                            <li>
+                                <strong><?php echo esc_html(self::fieldModeLabel(FieldMode::resolve(FieldMode::FIELD_SETTLEMENT))); ?></strong>
+                                <span><?php esc_html_e('Settlement field', 'codeon-core'); ?></span>
+                            </li>
+                        <?php endif; ?>
                     </ul>
                 </div>
             <?php else: ?>
@@ -252,7 +293,6 @@ final class DashboardRenderer
                 --shadow-xs: 0 1px 0 rgba(15,23,42,0.04);
 
                 color: var(--fg);
-                max-width: 1180px;
             }
 
             .codeon-dashboard .codeon-card {

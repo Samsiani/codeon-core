@@ -5,7 +5,7 @@ Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 8.1
 Requires Plugins: woocommerce
-Stable tag: 0.3.1
+Stable tag: 0.3.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,17 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 3. CodeOn hub menu with installed plugins listed underneath.
 
 == Changelog ==
+
+= 0.3.2 — 2026-05-11 =
+* **New "Tbilisi & surroundings" settings tab.** A purpose-built override mode for stores that ship to Tbilisi only or to Tbilisi plus a curated list of surrounding villages. When enabled, the entire Region → Municipality → Settlement cascade is replaced and **all** General-tab location rules (the field modes AND the master `locations_enabled` switch) are ignored. Two coverage modes:
+    * **Tbilisi only** — every geographic dropdown disappears from checkout. Customer sees only the address fields (line 1, line 2, postcode, phone). Behind the scenes: state = TB, muni = tbilisi, city = "Tbilisi" — order meta stays consistent for WC reports + shipping zones.
+    * **Tbilisi + surrounding areas** — single Area dropdown replaces the whole cascade. Customer picks "Tbilisi" or one of the merchant-curated surrounding settlements (typeahead-searchable Select2 picker over the 4,394-strong dataset, results labelled `"Settlement — Muni, Region"` for disambiguation). Picking an area silently fills the hidden state field with the resolved WC code, and a server-side `woocommerce_checkout_posted_data` filter translates the chosen area key back to the canonical settlement name + state code on submit so reports / shipping zones see real values, not picker keys.
+* **Override banner on the General tab** — when Tbilisi mode is on, a yellow info-notice renders above the field-mode dropdowns explaining that they're being overridden, with a one-click "Open Tbilisi tab" button. Eliminates the surprise of "I changed Region to Required, why isn't it taking effect?".
+* **Dashboard reflects Tbilisi mode** — the status pill in the welcome card switches from "Locations cascade is ON / OFF" to "Locations: Tbilisi only" or "Locations: Tbilisi + N areas" (singular/plural i18n-aware). The Locations dataset card replaces the 13 / 77 / 4,394 stats with a Tbilisi-mode-aware summary: coverage scope, areas at checkout, mode label.
+* **States filter respects Tbilisi mode** — `woocommerce_states['GE']` is trimmed to the allowed state codes when Tbilisi mode is active, so any third-party code reading WC's state list sees the restricted set.
+* **Block checkout in Tbilisi mode** — graceful fallback: the custom muni / settlement block-checkout fields are not registered, the cascade datalist is not injected, and the cascade JS is not enqueued. Vanilla WC city field stays as a text input. Full Area-picker UX for block-checkout is on the roadmap; classic checkout (the dominant path on Georgian stores using Woodmart and similar themes) is fully covered in this release.
+* **Dashboard width cap dropped.** The 1180px max-width on `.codeon-dashboard` is gone — the page now spans the full WP-admin content area like every other tab.
+* **REST**: the existing `/wp-json/codeon-geo/v1/search` endpoint is reused as the typeahead source for the Tbilisi surroundings picker — no new endpoints, no new permission surfaces.
 
 = 0.3.1 — 2026-05-11 =
 * **Cascade placeholder unification.** Every dropdown in the cascade now uses a consistent "Choose X" placeholder ("Choose Region", "Choose Municipality", "Choose Settlement") in both the static PHP-rendered first option AND the JS-driven post-cascade refresh. The previous wording (mix of "Select municipality…", "Select settlement…", "— pick a Municipality first —") is gone; the Settlement dropdown now reads **"Choose Settlement"** the moment a Municipality is picked, instead of being stuck on "— pick a Municipality first —" until the customer focuses it.
@@ -228,6 +239,9 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 * CodeOn hub claim.
 
 == Upgrade Notice ==
+
+= 0.3.2 =
+New "Tbilisi & surroundings" tab adds a single-area-picker override for stores that ship to Tbilisi only or Tbilisi + curated nearby settlements. Existing checkouts unaffected unless the merchant explicitly enables Tbilisi mode.
 
 = 0.3.1 =
 Cascade placeholders unified to "Choose X" wording, Select2 placeholder transition is now bulletproof, and the CodeOn dashboard adopts the storefront's minimalistic brand palette.

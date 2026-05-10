@@ -37,6 +37,32 @@ final class LocationsTab extends Tab
         return $this->repo;
     }
 
+    /**
+     * Override the framework's default render to inject a Tbilisi-mode
+     * notice banner above the form. Without this, a merchant who
+     * enabled Tbilisi mode on the sibling tab and then comes here
+     * would see the field-mode dropdowns and not realise their
+     * choices are being silently overridden by Tbilisi mode.
+     */
+    public function render(string $nonceAction): void
+    {
+        if (TbilisiMode::isActive()) {
+            $url = admin_url('admin.php?page=codeon-core&tab=tbilisi');
+            ?>
+            <div class="notice notice-warning inline" style="margin: 0 0 16px;">
+                <p>
+                    <strong><?php esc_html_e('Tbilisi mode is active.', 'codeon-core'); ?></strong>
+                    <?php esc_html_e('The Region / Municipality / Settlement field modes below are being overridden — checkout uses the Tbilisi-area picker instead. Adjust on the Tbilisi tab to change the area scope, or disable Tbilisi mode there to use these settings again.', 'codeon-core'); ?>
+                    <a href="<?php echo esc_url($url); ?>" class="button button-secondary" style="margin-left: 8px;">
+                        <?php esc_html_e('Open Tbilisi tab', 'codeon-core'); ?>
+                    </a>
+                </p>
+            </div>
+            <?php
+        }
+        parent::render($nonceAction);
+    }
+
     public function schema(): array
     {
         return [

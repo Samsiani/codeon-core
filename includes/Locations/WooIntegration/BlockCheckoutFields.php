@@ -36,6 +36,7 @@ defined('ABSPATH') || exit;
 use CodeOn\Core\Locations\Data\DisplayFormatter;
 use CodeOn\Core\Locations\Data\Repository;
 use CodeOn\Core\Locations\Settings\FieldMode;
+use CodeOn\Core\Locations\Settings\TbilisiMode;
 
 final class BlockCheckoutFields
 {
@@ -70,6 +71,13 @@ final class BlockCheckoutFields
     {
         if (!function_exists('woocommerce_register_additional_checkout_field')) {
             // WC Blocks < 8.6 — additional checkout field API not available.
+            return;
+        }
+
+        // Tbilisi mode replaces the cascade with either nothing (Mode A)
+        // or a single Area select rendered through the vanilla WC city
+        // field. Either way, no custom block-checkout fields needed.
+        if (TbilisiMode::isActive()) {
             return;
         }
 
@@ -223,6 +231,8 @@ final class BlockCheckoutFields
     public function renderDatalist(): void
     {
         if (!self::isCheckoutOrAddressPage()) return;
+        // Tbilisi mode replaces the cascade — no datalist needed.
+        if (TbilisiMode::isActive()) return;
         // No muni/settlement custom field → no datalist to inject.
         if (FieldMode::isDisabled(FieldMode::FIELD_MUNICIPALITY)) return;
         if (FieldMode::isDisabled(FieldMode::FIELD_SETTLEMENT)) return;
@@ -260,9 +270,10 @@ final class BlockCheckoutFields
             CODEON_CORE_VERSION
         );
 
-        // No cascade work to do when Municipality is disabled — skip
-        // the script payload entirely.
-        if (FieldMode::isDisabled(FieldMode::FIELD_MUNICIPALITY)) {
+        // No cascade work to do when Municipality is disabled OR
+        // when Tbilisi mode is replacing the cascade — skip the
+        // script payload entirely.
+        if (TbilisiMode::isActive() || FieldMode::isDisabled(FieldMode::FIELD_MUNICIPALITY)) {
             return;
         }
 

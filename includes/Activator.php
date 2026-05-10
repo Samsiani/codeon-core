@@ -82,6 +82,10 @@ final class Activator
                 'hide_company_field'       => false,
                 'hide_address_2_field'     => false,
                 'hide_postcode_field'      => false,
+                // Tbilisi-area override mode (off by default; opt-in only).
+                'tbilisi_only_mode'              => false,
+                'tbilisi_scope'                  => \CodeOn\Core\Locations\Settings\TbilisiMode::SCOPE_ONLY,
+                'tbilisi_surrounding_settlements' => [],
             ]);
         }
         if (get_option('codeon_core_activated_at') === false) {
