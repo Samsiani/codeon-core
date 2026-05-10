@@ -5,7 +5,7 @@ Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 8.1
 Requires Plugins: woocommerce
-Stable tag: 0.3.11
+Stable tag: 0.3.12
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,12 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 3. CodeOn hub menu with installed plugins listed underneath.
 
 == Changelog ==
+
+= 0.3.12 — 2026-05-11 =
+* **Area position survives WC's client-side resort.** The previous releases had Area at the correct DOM position (right after Country) — but `assets/js/frontend/address-i18n.js` (shipped by WooCommerce itself) re-sorts checkout fields by `data-priority` on every `country_to_state_changing` event, reading the priorities from `wc_address_i18n_params.locale.default`. Those localised priorities still carried WC's untouched default `city: 70`, so on every country pick WC's own JS re-tagged Area with priority 70 and moved it to between Address-line-2 (60) and State (80). That's what the merchant kept screenshotting.
+
+  Fix: also set the unprefixed `default.city.priority` and `default.state.priority` in the `woocommerce_default_address_fields` filter, AND add a `priority` key to the GE-specific override in `woocommerce_get_country_locale`. Both filters feed `wc_address_i18n_params` directly, so the JS now reads Area at priority `country_priority + 1` and the resort puts it back where the PHP rendered it. Reads country's actual priority at filter time so it works under any theme (Woodmart, default, custom) that may have re-mapped country.
+* Plugin survey: also reviewed every other active hook on `woocommerce_checkout_fields` / `woocommerce_default_address_fields` / `woocommerce_get_country_locale` on the live install. The Personal-ID field plugins (balance-sync, fina-sync) add fields without specifying a priority for the filter callback — they don't re-order, no conflict with Area positioning. Woodmart's checkout-fields-manager hooks at priority 99999 but its frontend JS only modifies the "required" badge, not the DOM order.
 
 = 0.3.11 — 2026-05-11 =
 * **Area now sits truly right-after-Country, even when a theme remaps Country's priority.** On artcase.ge a live `WC_Checkout::get_checkout_fields('billing')` dump showed:
@@ -297,6 +303,9 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 * CodeOn hub claim.
 
 == Upgrade Notice ==
+
+= 0.3.12 =
+The actual fix for Area's position at checkout: WC's own client-side address-i18n.js re-sorts fields by data-priority and was reading WC's default city.priority of 70. Now feeding country_priority+1 into the unprefixed default AND the GE locale override.
 
 = 0.3.11 =
 Area at checkout now lands right after Country regardless of theme re-mapping. Shipping-zone region picker no longer hides 10 of 13 GE regions. Strongly recommended.

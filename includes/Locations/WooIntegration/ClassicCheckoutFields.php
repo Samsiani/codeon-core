@@ -528,12 +528,24 @@ final class ClassicCheckoutFields
      */
     public function extendDefaultFields(array $fields): array
     {
-        // Tbilisi mode short-circuits the cascade entirely — let
-        // enforceFinalFieldSetup do the field surgery. The Area
-        // priority is set there (dynamically tracking whatever priority
-        // Country ends up at) so we don't compete with theme / personal-
-        // ID-plugin re-mappings of country.priority.
+        // Tbilisi mode: also set city + state priority HERE because
+        // WC's address-i18n.js localizes these via `wc_address_i18n_params`
+        // and RE-SORTS the DOM by data-priority on every
+        // `country_to_state_changing` event (see
+        // wc-frontend/address-i18n.js around line 132). If the unprefixed
+        // default city priority stays at 70, the JS will yank Area out
+        // of position 6 and drop it between Address-line-2 (60) and
+        // State (80) — exactly the bug the merchant kept reporting.
+        // Tracking country's actual priority dynamically keeps this
+        // working under any theme that re-maps priorities.
         if (TbilisiMode::isActive()) {
+            $countryPriority = (int) ($fields['country']['priority'] ?? 40);
+            if (isset($fields['city'])) {
+                $fields['city']['priority'] = $countryPriority + 1;
+            }
+            if (isset($fields['state'])) {
+                $fields['state']['priority'] = $countryPriority + 2;
+            }
             return $fields;
         }
 
@@ -594,6 +606,12 @@ final class ClassicCheckoutFields
         // TB and hidden), city is required (Area picker in Mode B,
         // hidden+defaulted in Mode A). Municipality is irrelevant
         // because the field isn't on the form.
+        //
+        // priority is set here too so the GE-specific override flowing
+        // into wc_address_i18n_params.locale.GE carries the same
+        // post-Country position that the unprefixed default carries —
+        // otherwise WC's address-i18n.js could fall back to default
+        // priority on country re-pick.
         if (TbilisiMode::isActive()) {
             $isPlus = TbilisiMode::scope() === TbilisiMode::SCOPE_PLUS;
             $locales['GE'] = array_replace_recursive(
@@ -604,12 +622,14 @@ final class ClassicCheckoutFields
                         'label'       => __('Region', 'codeon-core'),
                         'placeholder' => __('Choose Region', 'codeon-core'),
                         'hidden'      => true,
+                        'priority'    => 42,
                     ],
                     'municipality' => ['hidden' => true, 'required' => false],
                     'city' => [
                         'required'    => true,
                         'label'       => $isPlus ? __('Area', 'codeon-core') : __('City', 'codeon-core'),
                         'placeholder' => $isPlus ? __('— Choose area —', 'codeon-core') : '',
+                        'priority'    => 41,
                     ],
                 ]
             );
