@@ -220,120 +220,221 @@ final class DashboardRenderer
             </div>
         </div>
         <style>
-            .codeon-dashboard { --codeon-deep: #1a2747; --codeon-mid: #2a4080; --codeon-accent: #6c8cff; }
+            /* CodeOn brand palette — mirrors codeon.ge tokens so the WP-admin
+               surface looks like part of the same product. Minimalistic by
+               design: flat surfaces, subtle borders, accent colour used only
+               for primary actions and active states. */
+            .codeon-dashboard {
+                --bg: #fff;
+                --bg-soft: #fafbfc;
+                --bg-muted: #f4f5f7;
+                --border: #e6e8ec;
+                --border-strong: #d4d7de;
+                --border-muted: #eef0f3;
+                --fg: #0b0f19;
+                --fg-strong: #000;
+                --fg-muted: #4b5363;
+                --fg-dim: #5b6270;
+                --fg-faint: #9aa0ab;
+                --brand: #2563eb;
+                --brand-hover: #4779ee;
+                --brand-soft: #eff4ff;
+                --brand-border: #c9d9fe;
+                --success: #0f9d58;
+                --success-soft: #e6f4ec;
+                --warning: #b7791f;
+                --warning-soft: #fdf3e0;
+                --danger: #c4362a;
+                --danger-soft: #fbebe8;
+                --radius-sm: 6px;
+                --radius-md: 8px;
+                --radius-lg: 12px;
+                --shadow-xs: 0 1px 0 rgba(15,23,42,0.04);
+
+                color: var(--fg);
+                max-width: 1180px;
+            }
+
             .codeon-dashboard .codeon-card {
-                background: #fff; border: 1px solid #dcdcde; border-radius: 6px;
-                padding: 18px 22px; margin: 14px 0;
-                box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+                background: var(--bg);
+                border: 1px solid var(--border);
+                border-radius: var(--radius-lg);
+                padding: 20px 22px;
+                margin: 14px 0;
+                box-shadow: var(--shadow-xs);
             }
+
             .codeon-dashboard .codeon-welcome {
-                background: linear-gradient(135deg, var(--codeon-deep) 0%, var(--codeon-mid) 70%, #3856aa 100%);
-                color: #fff; border: none; padding: 28px 30px;
-                position: relative; overflow: hidden;
-            }
-            .codeon-dashboard .codeon-welcome::after {
-                content: ""; position: absolute; right: -120px; top: -120px;
-                width: 380px; height: 380px; border-radius: 50%;
-                background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
-                pointer-events: none;
+                background: var(--bg);
+                color: var(--fg);
+                border: 1px solid var(--border);
+                padding: 22px 24px;
             }
             .codeon-dashboard .codeon-welcome-head {
                 display: flex; justify-content: space-between; align-items: center;
-                gap: 16px; flex-wrap: wrap; margin-bottom: 8px;
+                gap: 12px; flex-wrap: wrap; margin-bottom: 10px;
             }
-            .codeon-dashboard .codeon-welcome h2 { font-size: 26px; margin: 0; color: #fff; line-height: 1.2; }
-            .codeon-dashboard .codeon-welcome p { color: #fff; line-height: 1.55; }
-            .codeon-dashboard .codeon-welcome-lede { font-size: 16px; opacity: 0.94; margin-top: 4px; }
+            .codeon-dashboard .codeon-welcome h2 {
+                font-size: 22px; margin: 0; color: var(--fg-strong);
+                line-height: 1.2; font-weight: 600;
+            }
+            .codeon-dashboard .codeon-welcome p {
+                color: var(--fg-muted); line-height: 1.6; margin: 6px 0;
+                max-width: 780px;
+            }
+            .codeon-dashboard .codeon-welcome-lede {
+                font-size: 15px; color: var(--fg) !important; margin-top: 2px !important;
+            }
             .codeon-dashboard .codeon-welcome-actions { margin-top: 14px; margin-bottom: 0; }
             .codeon-dashboard .codeon-welcome-link {
                 display: inline-flex; align-items: center; gap: 4px;
-                color: #fff; opacity: 0.9; text-decoration: underline; font-weight: 500;
+                color: var(--brand); text-decoration: none; font-weight: 500;
+                font-size: 13px;
             }
-            .codeon-dashboard .codeon-welcome-link:hover { opacity: 1; color: #fff; }
-            .codeon-dashboard .codeon-welcome-link .dashicons { font-size: 14px; width: 14px; height: 14px; line-height: 1.4; vertical-align: -2px; }
+            .codeon-dashboard .codeon-welcome-link:hover {
+                color: var(--brand-hover); text-decoration: underline;
+            }
+            .codeon-dashboard .codeon-welcome-link .dashicons {
+                font-size: 14px; width: 14px; height: 14px; line-height: 1.4; vertical-align: -2px;
+            }
 
             .codeon-dashboard .codeon-status-pill {
                 display: inline-flex; align-items: center; gap: 4px;
                 font-size: 12px; font-weight: 600;
-                padding: 4px 12px; border-radius: 999px;
-                background: rgba(255,255,255,0.16);
-                border: 1px solid rgba(255,255,255,0.2);
-                white-space: nowrap; backdrop-filter: blur(4px);
+                padding: 3px 10px; border-radius: 999px;
+                white-space: nowrap;
+                border: 1px solid transparent;
             }
-            .codeon-dashboard .codeon-status-pill .dashicons { font-size: 14px; width: 14px; height: 14px; line-height: 1; }
-            .codeon-dashboard .codeon-status-pill--on { background: rgba(56, 178, 95, 0.28); border-color: rgba(56, 178, 95, 0.5); }
-            .codeon-dashboard .codeon-status-pill--off { background: rgba(213, 79, 79, 0.28); border-color: rgba(213, 79, 79, 0.5); }
+            .codeon-dashboard .codeon-status-pill .dashicons {
+                font-size: 13px; width: 13px; height: 13px; line-height: 1;
+            }
+            .codeon-dashboard .codeon-status-pill--on {
+                background: var(--success-soft); color: var(--success);
+                border-color: rgba(15,157,88,0.18);
+            }
+            .codeon-dashboard .codeon-status-pill--off {
+                background: var(--danger-soft); color: var(--danger);
+                border-color: rgba(196,54,42,0.18);
+            }
 
             .codeon-dashboard .codeon-card-head {
                 display: flex; justify-content: space-between; align-items: flex-start;
-                gap: 16px; flex-wrap: wrap; margin-bottom: 14px;
+                gap: 16px; flex-wrap: wrap; margin-bottom: 12px;
             }
-            .codeon-dashboard .codeon-card-head h3 { margin: 0 0 4px; font-size: 16px; }
-            .codeon-dashboard .codeon-card-sub { margin: 0; max-width: 720px; }
+            .codeon-dashboard .codeon-card-head h3 {
+                margin: 0 0 4px; font-size: 15px; color: var(--fg-strong); font-weight: 600;
+            }
+            .codeon-dashboard .codeon-card-sub {
+                margin: 0; max-width: 720px; color: var(--fg-dim); font-size: 13px;
+            }
             .codeon-dashboard .codeon-card-cta {
-                display: inline-flex; align-items: center; gap: 4px;
-                white-space: nowrap; flex-shrink: 0;
+                display: inline-flex; align-items: center; gap: 6px;
+                white-space: nowrap; flex-shrink: 0; border-radius: var(--radius-sm);
+                font-size: 13px; font-weight: 500; padding: 6px 14px;
+                line-height: 1.5; min-height: 0; height: auto;
             }
-            .codeon-dashboard .codeon-card-cta .dashicons { font-size: 16px; width: 16px; height: 16px; line-height: 1.4; vertical-align: -3px; }
+            .codeon-dashboard .codeon-card-cta .dashicons {
+                font-size: 14px; width: 14px; height: 14px; line-height: 1; vertical-align: -2px;
+            }
             .codeon-dashboard .button-primary.codeon-card-cta {
-                background: var(--codeon-mid); border-color: var(--codeon-mid);
-                color: #fff; box-shadow: 0 1px 0 #1a2747;
+                background: var(--brand); border-color: var(--brand); color: #fff;
+                box-shadow: none; text-shadow: none;
             }
-            .codeon-dashboard .button-primary.codeon-card-cta:hover {
-                background: #233670; border-color: #233670;
+            .codeon-dashboard .button-primary.codeon-card-cta:hover,
+            .codeon-dashboard .button-primary.codeon-card-cta:focus {
+                background: var(--brand-hover); border-color: var(--brand-hover); color: #fff;
+                box-shadow: 0 0 0 3px rgba(37,99,235,0.14);
+            }
+            .codeon-dashboard .button-secondary.codeon-card-cta {
+                background: var(--bg); border: 1px solid var(--border-strong);
+                color: var(--fg); box-shadow: none;
+            }
+            .codeon-dashboard .button-secondary.codeon-card-cta:hover,
+            .codeon-dashboard .button-secondary.codeon-card-cta:focus {
+                background: var(--bg-soft); border-color: var(--brand-border); color: var(--brand);
             }
 
             .codeon-dashboard .codeon-stats {
-                display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-                gap: 8px; list-style: none; padding: 12px 0 0; margin: 0;
+                display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 10px; list-style: none; padding: 4px 0 0; margin: 0;
             }
             .codeon-dashboard .codeon-stats li {
-                background: #f6f7fb; border: 1px solid #e6e8f0; border-radius: 5px;
-                padding: 10px 12px; display: flex; flex-direction: column; gap: 2px;
-                min-height: 0;
+                background: var(--bg-soft); border: 1px solid var(--border-muted);
+                border-radius: var(--radius-sm); padding: 12px 14px;
+                display: flex; flex-direction: column; gap: 4px;
             }
             .codeon-dashboard .codeon-stats strong {
-                font-size: 20px; line-height: 1.1; color: var(--codeon-deep); font-weight: 700;
+                font-size: 20px; line-height: 1.1; color: var(--fg-strong);
+                font-weight: 600; font-variant-numeric: tabular-nums;
             }
             .codeon-dashboard .codeon-stats span {
                 font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px;
-                color: #4a5060; font-weight: 600;
+                color: var(--fg-faint); font-weight: 500;
             }
 
             .codeon-dashboard .codeon-plugin-list { list-style: none; padding: 0; margin: 0; }
-            .codeon-dashboard .codeon-plugin-list li { padding: 6px 0; }
-            .codeon-dashboard .codeon-version { color: #646970; font-size: 12px; margin-left: 8px; }
+            .codeon-dashboard .codeon-plugin-list li { padding: 4px 0; font-size: 13px; }
+            .codeon-dashboard .codeon-plugin-list a { color: var(--fg); text-decoration: none; }
+            .codeon-dashboard .codeon-plugin-list a:hover { color: var(--brand); }
+            .codeon-dashboard .codeon-version { color: var(--fg-faint); font-size: 12px; margin-left: 8px; }
 
             .codeon-dashboard .codeon-ecosystem-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+                display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
                 gap: 8px; margin-top: 4px;
             }
             .codeon-dashboard .codeon-ecosystem-item {
-                background: #fafbff; border: 1px solid #e2e6f4; border-radius: 5px;
-                padding: 10px 12px; display: flex; flex-direction: column; gap: 4px;
-                transition: border-color 120ms ease, transform 120ms ease;
+                background: var(--bg); border: 1px solid var(--border);
+                border-radius: var(--radius-sm); padding: 12px 14px;
+                display: flex; flex-direction: column; gap: 6px;
+                transition: border-color 120ms ease, background-color 120ms ease;
             }
-            .codeon-dashboard .codeon-ecosystem-item:hover { border-color: #b9c2e3; transform: translateY(-1px); }
+            .codeon-dashboard .codeon-ecosystem-item:hover {
+                border-color: var(--brand-border); background: var(--bg-soft);
+            }
             .codeon-dashboard .codeon-ecosystem-item.is-installed {
-                background: #f1f5ff; border-color: var(--codeon-mid);
-                box-shadow: inset 3px 0 0 var(--codeon-mid); padding-left: 14px;
+                background: var(--brand-soft); border-color: var(--brand-border);
             }
-            .codeon-dashboard .codeon-ecosystem-head { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
-            .codeon-dashboard .codeon-ecosystem-head h4 { margin: 0; font-size: 13px; line-height: 1.25; font-weight: 600; color: var(--codeon-deep); }
+            .codeon-dashboard .codeon-ecosystem-head {
+                display: flex; justify-content: space-between; align-items: center; gap: 8px;
+            }
+            .codeon-dashboard .codeon-ecosystem-head h4 {
+                margin: 0; font-size: 13px; line-height: 1.3;
+                font-weight: 600; color: var(--fg-strong);
+            }
             .codeon-dashboard .codeon-ecosystem-badge {
                 font-size: 10px; font-weight: 600; text-transform: uppercase;
-                letter-spacing: 0.3px; padding: 2px 8px; border-radius: 999px;
+                letter-spacing: 0.4px; padding: 2px 7px; border-radius: 999px;
                 white-space: nowrap; display: inline-flex; align-items: center; gap: 2px;
+                border: 1px solid transparent;
             }
-            .codeon-dashboard .codeon-ecosystem-badge .dashicons { font-size: 10px; width: 10px; height: 10px; line-height: 1; }
-            .codeon-dashboard .codeon-ecosystem-badge--active { background: #d4edda; color: #155724; }
-            .codeon-dashboard .codeon-ecosystem-badge--free { background: #fff3cd; color: #856404; }
-            .codeon-dashboard .codeon-ecosystem-badge--available { background: #e6e8f0; color: #4a5060; }
-            .codeon-dashboard .codeon-ecosystem-category { font-size: 10px; text-transform: uppercase; letter-spacing: 0.4px; color: #646970; font-weight: 600; }
+            .codeon-dashboard .codeon-ecosystem-badge .dashicons {
+                font-size: 10px; width: 10px; height: 10px; line-height: 1;
+            }
+            .codeon-dashboard .codeon-ecosystem-badge--active {
+                background: var(--success-soft); color: var(--success);
+                border-color: rgba(15,157,88,0.18);
+            }
+            .codeon-dashboard .codeon-ecosystem-badge--free {
+                background: var(--brand-soft); color: var(--brand);
+                border-color: var(--brand-border);
+            }
+            .codeon-dashboard .codeon-ecosystem-badge--available {
+                background: var(--bg-muted); color: var(--fg-dim);
+                border-color: var(--border);
+            }
+            .codeon-dashboard .codeon-ecosystem-category {
+                font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;
+                color: var(--fg-faint); font-weight: 500;
+            }
+
+            .codeon-dashboard .codeon-links ul { list-style: none; padding: 0; margin: 4px 0 0; }
+            .codeon-dashboard .codeon-links li { padding: 4px 0; font-size: 13px; }
+            .codeon-dashboard .codeon-links a { color: var(--brand); text-decoration: none; }
+            .codeon-dashboard .codeon-links a:hover { text-decoration: underline; color: var(--brand-hover); }
 
             @media (max-width: 720px) {
                 .codeon-dashboard .codeon-card-cta { width: 100%; justify-content: center; }
+                .codeon-dashboard .codeon-welcome-head { flex-direction: column; align-items: flex-start; }
             }
         </style>
         <?php

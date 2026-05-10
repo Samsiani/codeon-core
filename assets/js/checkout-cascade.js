@@ -62,9 +62,10 @@
     function fillSelect($select, items, currentValue, placeholderText) {
         const dom = $select[0];
         while (dom.firstChild) dom.removeChild(dom.firstChild);
+        const placeholderLabel = placeholderText || cfg.i18n.select;
         const placeholder = document.createElement('option');
         placeholder.value = '';
-        placeholder.textContent = placeholderText || cfg.i18n.select;
+        placeholder.textContent = placeholderLabel;
         dom.appendChild(placeholder);
 
         let matched = false;
@@ -81,18 +82,22 @@
         if (!matched) dom.selectedIndex = 0;
         $select.prop('disabled', items.length === 0);
 
+        // Idempotent Select2 refresh: tear down any existing instance, then
+        // re-enhance with the fresh placeholder. If destroy left stale data
+        // behind, enhance() destroys again before re-initialising — so the
+        // placeholder transition (e.g. "Choose Settlement" after Municipality
+        // is picked) never gets stuck on the previous text.
+        enhanceWithSelect2($select, placeholderLabel);
+    }
+
+    function enhanceWithSelect2($select, placeholderLabel) {
+        if (typeof $.fn.select2 !== 'function') return;
         if ($select.data('select2')) {
             $select.select2('destroy');
         }
-        enhanceWithSelect2($select);
-    }
-
-    function enhanceWithSelect2($select) {
-        if (typeof $.fn.select2 !== 'function') return;
-        if ($select.data('select2')) return;
         $select.select2({
             width: '100%',
-            placeholder: $select.find('option:first').text() || cfg.i18n.select,
+            placeholder: placeholderLabel || $select.find('option:first').text() || cfg.i18n.select,
             allowClear: false,
         });
     }

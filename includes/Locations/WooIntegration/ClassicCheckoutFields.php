@@ -171,7 +171,7 @@ final class ClassicCheckoutFields
                     $checkoutFields[$group][$cityKey]['label']    = __('Settlement', 'codeon-core');
                     $checkoutFields[$group][$cityKey]['type']     = 'select';
                     $checkoutFields[$group][$cityKey]['required'] = $settleMode === FieldMode::REQUIRED;
-                    $checkoutFields[$group][$cityKey]['options']  = ['' => __('— pick a Municipality first —', 'codeon-core')];
+                    $checkoutFields[$group][$cityKey]['options']  = ['' => __('Choose Settlement', 'codeon-core')];
                     $checkoutFields[$group][$cityKey]['class']    = array_merge(
                         (array) ($checkoutFields[$group][$cityKey]['class'] ?? []),
                         ['form-row-wide', 'codeon-geo-field', 'codeon-geo-city']
@@ -199,7 +199,7 @@ final class ClassicCheckoutFields
         $opts = (array) get_option('codeon_core_settings', []);
         $showOccupied = (bool) ($opts['show_occupied'] ?? false);
 
-        $out = ['' => __('Select municipality…', 'codeon-core')];
+        $out = ['' => __('Choose Municipality', 'codeon-core')];
         foreach ($repo->regions(includeOccupied: $showOccupied) as $region) {
             foreach ($region['municipalities'] as $m) {
                 if (!$showOccupied && $m['occupied']) continue;
@@ -323,7 +323,7 @@ final class ClassicCheckoutFields
         // input untouched.
         if (isset($fields['city']) && $cascadeWorks && $settleMode !== FieldMode::DISABLED) {
             $fields['city']['type']    = 'select';
-            $fields['city']['options'] = ['' => __('Select…', 'codeon-core')];
+            $fields['city']['options'] = ['' => __('Choose Settlement', 'codeon-core')];
             $fields['city']['class']   = array_merge(
                 (array) ($fields['city']['class'] ?? []),
                 ['codeon-geo-field', 'codeon-geo-city']
@@ -353,7 +353,7 @@ final class ClassicCheckoutFields
                     'type'     => 'select',
                     'required' => $munMode === FieldMode::REQUIRED,
                     'class'    => ['form-row-wide', 'codeon-geo-field', 'codeon-geo-municipality'],
-                    'options'  => ['' => __('Select…', 'codeon-core')],
+                    'options'  => ['' => __('Choose Municipality', 'codeon-core')],
                     'priority' => 46,
                 ];
             }
@@ -393,13 +393,17 @@ final class ClassicCheckoutFields
             $locales['GE'] ?? [],
             [
                 'state' => [
-                    'required' => $stateRequired,
-                    'label'    => __('Region', 'codeon-core'),
+                    'required'    => $stateRequired,
+                    'label'       => __('Region', 'codeon-core'),
+                    'placeholder' => __('Choose Region', 'codeon-core'),
                 ],
-                'municipality' => $geMuni,
+                'municipality' => $geMuni + ['placeholder' => __('Choose Municipality', 'codeon-core')],
                 'city' => [
-                    'required' => $cityRequired,
-                    'label'    => $cityLabel,
+                    'required'    => $cityRequired,
+                    'label'       => $cityLabel,
+                    'placeholder' => $cascadeWorks
+                        ? __('Choose Settlement', 'codeon-core')
+                        : __('City', 'codeon-core'),
                 ],
             ]
         );
@@ -465,7 +469,7 @@ final class ClassicCheckoutFields
                     'type'     => 'select',
                     'required' => FieldMode::isRequired(FieldMode::FIELD_MUNICIPALITY),
                     'class'    => ['form-row-wide', 'codeon-geo-field', 'codeon-geo-municipality'],
-                    'options'  => ['' => __('Select…', 'codeon-core')],
+                    'options'  => ['' => __('Choose Municipality', 'codeon-core')],
                     'priority' => 46,
                 ];
             }
@@ -515,11 +519,11 @@ final class ClassicCheckoutFields
             'nonce'      => wp_create_nonce('wp_rest'),
             'munToState' => $this->buildMunToStateMap(),
             'i18n'    => [
-                'select'           => __('Select municipality…', 'codeon-core'),
-                'selectSettlement' => __('Select settlement…', 'codeon-core'),
+                'select'           => __('Choose Municipality', 'codeon-core'),
+                'selectSettlement' => __('Choose Settlement', 'codeon-core'),
                 'loading'          => __('Loading…', 'codeon-core'),
                 'noResults'        => __('No matches', 'codeon-core'),
-                'pickMuniFirst'    => __('— pick a Municipality first —', 'codeon-core'),
+                'pickMuniFirst'    => __('Choose Settlement', 'codeon-core'),
             ],
         ]);
     }

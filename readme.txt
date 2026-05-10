@@ -5,7 +5,7 @@ Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 8.1
 Requires Plugins: woocommerce
-Stable tag: 0.3.0
+Stable tag: 0.3.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,17 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 3. CodeOn hub menu with installed plugins listed underneath.
 
 == Changelog ==
+
+= 0.3.1 — 2026-05-11 =
+* **Cascade placeholder unification.** Every dropdown in the cascade now uses a consistent "Choose X" placeholder ("Choose Region", "Choose Municipality", "Choose Settlement") in both the static PHP-rendered first option AND the JS-driven post-cascade refresh. The previous wording (mix of "Select municipality…", "Select settlement…", "— pick a Municipality first —") is gone; the Settlement dropdown now reads **"Choose Settlement"** the moment a Municipality is picked, instead of being stuck on "— pick a Municipality first —" until the customer focuses it.
+* **Bulletproof Select2 placeholder transition.** Refactored `enhanceWithSelect2()` to be idempotent — destroys any pre-existing Select2 instance before re-initialising, and now accepts the placeholder text as an explicit argument (passed straight from `fillSelect()`) instead of inferring it from the first option's text. Eliminates a class of bugs where Select2's internal cache could keep showing the previous placeholder after the underlying option list was rewritten.
+* **Region placeholder via WC locale.** The standard WooCommerce Region (state) field now picks up a "Choose Region" placeholder via the GE locale — same wording family as Municipality + Settlement, no more theme-specific "Select an option…" leakage.
+* **Dashboard restyle: minimalistic + brand-aligned.** Adopted the codeon.ge token palette as scoped CSS variables on `.codeon-dashboard` — same blue (`#2563eb`), success/warning/danger soft tints, and radii/shadows as the storefront. Visible changes:
+    * Welcome card now renders on a flat white surface (border + subtle shadow) instead of the deep-blue gradient. Heading slimmer, body copy in muted-grey for readability, status pill uses the brand `--success-soft` / `--danger-soft` tokens.
+    * Stat tiles (regions / municipalities / settlements / field-modes) sit on `--bg-soft` with quiet `--border-muted` strokes; numbers are tabular-nums in `--fg-strong` instead of a heavy navy blue.
+    * Ecosystem cards lose the hover lift and shadowy navy treatment — clean white on hover (`--bg-soft`), brand-soft tint when installed, brand-border accent. Badges use `--success-soft` / `--brand-soft` / `--bg-muted` for parity with the codeon.ge product-card chips.
+    * Buttons: primary CTA flat brand colour (`--brand`) with focus ring; secondary CTA neutral white with hover tint to brand. No more gradient text-shadow.
+    * Whole layout capped at 1180px so it stops sprawling on ultra-wide admin screens. Mobile breakpoint stacks the welcome head + the card CTA buttons full-width.
 
 = 0.3.0 — 2026-05-11 =
 * **3-state field modes for Region / Municipality / Settlement.** The Locations settings tab replaces the old single "is required" checkboxes with one **Disabled / Optional / Required** dropdown per geo field. *Disabled* hides the field at checkout AND drops all validation against it; *Optional* renders the field but allows an empty value; *Required* renders + enforces.
@@ -217,6 +228,9 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 * CodeOn hub claim.
 
 == Upgrade Notice ==
+
+= 0.3.1 =
+Cascade placeholders unified to "Choose X" wording, Select2 placeholder transition is now bulletproof, and the CodeOn dashboard adopts the storefront's minimalistic brand palette.
 
 = 0.3.0 =
 3-state field modes (Disabled / Optional / Required) for Region, Municipality, and Settlement at checkout. Existing settings migrated automatically — no merchant action required.
