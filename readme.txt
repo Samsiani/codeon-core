@@ -5,7 +5,7 @@ Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 8.1
 Requires Plugins: woocommerce
-Stable tag: 0.3.3
+Stable tag: 0.3.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,9 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 3. CodeOn hub menu with installed plugins listed underneath.
 
 == Changelog ==
+
+= 0.3.4 — 2026-05-11 =
+* **Real fix for the Tbilisi tab conditional fields.** v0.3.3 changed the showWhen operator to `truthy` but the underlying bug was actually in the framework's own admin JS — `inputValue()` did `document.querySelector('[name="codeon[…]"]')` which matched the leading `<input type="hidden" value="0">` that the framework injects alongside every checkbox (so an unchecked box still POSTs `0`). The hidden input came first in DOM order, so the function always returned `'0'` regardless of the checkbox's actual `checked` state, and EVERY `showWhen` predicate gated on a checkbox always evaluated false. Patched the vendored `vendor/codeon/framework/assets/js/codeon-admin.js` to look up the `[type=checkbox]` input directly first, falling through to the original logic for selects, radios, and text inputs. Verified with two unit-style traces (checkbox + radio paths) before tagging this release.
 
 = 0.3.3 — 2026-05-11 =
 * **Hotfix: Tbilisi tab conditional fields not appearing.** The Coverage radio + Surrounding-areas multiselect were gated on `showWhen('tbilisi_only_mode', '=', true)`, but the framework's checkbox value-coercion returns the literal string `'1'` (not `'true'`) — so the comparison always failed and the merchant only ever saw the master checkbox with no way to pick "Tbilisi + surroundings" or add surrounding settlements. Switched the gate to the `truthy` operator, which correctly evaluates the `'1'` value.
@@ -243,6 +246,9 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 * CodeOn hub claim.
 
 == Upgrade Notice ==
+
+= 0.3.4 =
+Real fix for the Tbilisi-tab conditional reveal: framework JS was reading the wrong DOM input for every checkbox-gated showWhen. Strongly recommended for anyone on 0.3.2 or 0.3.3.
 
 = 0.3.3 =
 Hotfix: Tbilisi tab Coverage radio + Surroundings picker were never appearing because of a checkbox-vs-string comparison bug. Strongly recommended for anyone on 0.3.2.
