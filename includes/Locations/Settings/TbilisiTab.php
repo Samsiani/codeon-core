@@ -49,6 +49,38 @@ final class TbilisiTab extends Tab
     }
 
     /**
+     * Manually thread the surroundings multiselect through the save
+     * pipeline. Framework's FieldValidator skips Field::RAW entries
+     * (no built-in sanitizer / validator), so the picker's POST data
+     * never reaches the repository. We pull the raw POST here,
+     * sanitize to a list of positive integers (settlement IDs), and
+     * inject it into the clean payload that the framework persists.
+     *
+     * @param array<string,mixed> $clean
+     * @return array<string,mixed>
+     */
+    public function beforeSave(array $clean): array
+    {
+        $posted = (isset($_POST['codeon']) && is_array($_POST['codeon']))
+            ? wp_unslash($_POST['codeon'])
+            : [];
+        $raw = $posted['tbilisi_surrounding_settlements'] ?? [];
+        if (!is_array($raw)) {
+            $raw = [];
+        }
+        $repo = Repository::instance();
+        $ids  = [];
+        foreach ($raw as $candidate) {
+            $sid = (int) $candidate;
+            if ($sid <= 0) continue;
+            if ($repo->settlement($sid) === null) continue;
+            $ids[] = $sid;
+        }
+        $clean['tbilisi_surrounding_settlements'] = array_values(array_unique($ids));
+        return $clean;
+    }
+
+    /**
      * Render strategy:
      *
      *   1) Emit a tiny inline <style> BEFORE the schema renders so our
@@ -212,6 +244,106 @@ final class TbilisiTab extends Tab
         $id   = 'codeon_tbilisi_surrounding_settlements';
 
         ?>
+        <style>
+            /* Scoped Select2 sizing for the surroundings picker. Lean
+               on Select2's natural inline-block <li> flow so the
+               container grows vertically as pills wrap. `containerCssClass`
+               / `dropdownCssClass` in the init below append these classes
+               to the rendered markup. */
+
+            .select2-container.codeon-tbilisi-picker {
+                min-width: 560px;
+                max-width: 760px;
+            }
+
+            /* The visible "input box" — minimum 120px tall so it reads as
+               a proper multi-line picker. height:auto + content overflow
+               makes it grow as the merchant adds more pills. */
+            .select2-container.codeon-tbilisi-picker .select2-selection--multiple {
+                min-height: 120px !important;
+                height: auto !important;
+                max-height: none !important;
+                border: 1px solid #d4d7de !important;
+                border-radius: 6px !important;
+                padding: 6px 6px 0 !important;
+                background: #fff !important;
+                line-height: 1.4 !important;
+                overflow: visible !important;
+            }
+            .select2-container.codeon-tbilisi-picker.select2-container--focus .select2-selection--multiple {
+                border-color: #2563eb !important;
+                box-shadow: 0 0 0 3px rgba(37,99,235,0.14) !important;
+            }
+
+            /* The <ul> wrapper. Natural inline-block flow with adequate
+               padding-bottom keeps the last row of pills inside the
+               visible border. */
+            .select2-container.codeon-tbilisi-picker .select2-selection__rendered {
+                padding: 0 !important;
+                margin: 0 !important;
+                line-height: 1.4 !important;
+                white-space: normal !important;
+            }
+
+            /* Each picked settlement pill. */
+            .select2-container.codeon-tbilisi-picker .select2-selection__choice {
+                background: #eff4ff !important;
+                border: 1px solid #c9d9fe !important;
+                color: #0b0f19 !important;
+                padding: 5px 10px !important;
+                font-size: 13px !important;
+                border-radius: 4px !important;
+                margin: 0 4px 6px 0 !important;
+                line-height: 1.4 !important;
+                float: none !important;
+                display: inline-block !important;
+                vertical-align: middle !important;
+            }
+            .select2-container.codeon-tbilisi-picker .select2-selection__choice__remove {
+                color: #4b5363 !important;
+                font-size: 16px !important;
+                margin-right: 6px !important;
+                font-weight: 700 !important;
+                vertical-align: -1px;
+            }
+
+            /* The inline search field where you type. */
+            .select2-container.codeon-tbilisi-picker .select2-search--inline {
+                float: none !important;
+                display: inline-block !important;
+                vertical-align: middle !important;
+            }
+            .select2-container.codeon-tbilisi-picker .select2-search--inline .select2-search__field {
+                min-width: 240px !important;
+                min-height: 30px !important;
+                font-size: 14px !important;
+                color: #0b0f19 !important;
+                background: transparent !important;
+                padding: 4px 6px !important;
+                margin: 0 0 6px !important;
+                line-height: 1.4 !important;
+                border: 0 !important;
+            }
+            .select2-container.codeon-tbilisi-picker .select2-search__field::placeholder {
+                color: #9aa0ab;
+            }
+
+            /* Dropdown of search results — readable line-height. */
+            .select2-dropdown.codeon-tbilisi-picker-dropdown {
+                border-color: #d4d7de;
+                box-shadow: 0 8px 24px rgba(15,23,42,0.12);
+                min-width: 480px !important;
+            }
+            .select2-dropdown.codeon-tbilisi-picker-dropdown .select2-results__option {
+                padding: 8px 12px;
+                font-size: 13px;
+                line-height: 1.4;
+            }
+            .select2-dropdown.codeon-tbilisi-picker-dropdown .select2-results__option--highlighted {
+                background: #2563eb;
+                color: #fff;
+            }
+        </style>
         <table class="form-table"><tbody>
             <tr class="codeon-row codeon-row-raw">
                 <th scope="row"><label for="<?php echo esc_attr($id); ?>"><?php esc_html_e('Surrounding areas', 'codeon-core'); ?></label></th>
@@ -219,9 +351,9 @@ final class TbilisiTab extends Tab
                     <select id="<?php echo esc_attr($id); ?>"
                             name="<?php echo esc_attr($name); ?>[]"
                             multiple
-                            class="codeon-input codeon-tbilisi-settlements"
+                            class="codeon-tbilisi-settlements"
                             data-rest-search="<?php echo esc_attr(rest_url('codeon-geo/v1/search')); ?>"
-                            style="min-width: 480px;">
+                            style="min-width: 560px;">
                         <?php
                         foreach ($current as $rawId) {
                             $sid = (int) $rawId;
@@ -290,9 +422,13 @@ final class TbilisiTab extends Tab
                 if (!$sel.length || $sel.data('codeon-init')) return;
                 $sel.data('codeon-init', true);
                 $sel.select2({
-                    width: '480px',
+                    width: '100%',
+                    containerCssClass: 'codeon-tbilisi-picker',
+                    dropdownCssClass:  'codeon-tbilisi-picker-dropdown',
                     placeholder: <?php echo wp_json_encode(__('Type to search settlements…', 'codeon-core')); ?>,
                     minimumInputLength: 2,
+                    allowClear: false,
+                    closeOnSelect: false,
                     ajax: {
                         url: $sel.data('rest-search'),
                         dataType: 'json',

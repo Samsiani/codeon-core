@@ -5,7 +5,7 @@ Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 8.1
 Requires Plugins: woocommerce
-Stable tag: 0.3.5
+Stable tag: 0.3.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,12 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 3. CodeOn hub menu with installed plugins listed underneath.
 
 == Changelog ==
+
+= 0.3.6 — 2026-05-11 =
+* **Surroundings multiselect now actually persists picked settlements.** The framework's `FieldValidator::process()` explicitly skips `Field::RAW` entries (no built-in sanitizer / validator), so the picker rendered fine but the chosen settlement IDs never reached the option. Hooked `Tab::beforeSave()` to pull the raw POST array directly, sanitize each entry to a positive int + validate it exists in the dataset, and inject the result into the clean payload that gets persisted. Settlement IDs that don't resolve are silently dropped (defensive against tampered POSTs).
+* **Bigger, clearer picker UI.** Visible input box is now `min-height: 120px` (was Select2's default ~32px) so it reads as a proper multi-line picker. Search input inside is `min-width: 240px`, `font-size: 14px`, with placeholder colour and a transparent background so typed text is visible against the white pill area. Pills use the brand `--brand-soft` background + `--brand-border` border to match the rest of the dashboard.
+* **Container grows dynamically as more pills are added.** Replaced the earlier `display: flex` rule (which fought Select2's natural `<li>` flow and clipped pills below the visible border) with an inline-block layout + `height: auto` + `overflow: visible` overrides — the box now extends downward smoothly as the merchant adds more surroundings.
+* **Scoped Select2 styling** via `containerCssClass: 'codeon-tbilisi-picker'` + `dropdownCssClass: 'codeon-tbilisi-picker-dropdown'` so these overrides only touch the surroundings picker and never bleed into other Select2 instances elsewhere on the page.
 
 = 0.3.5 — 2026-05-11 =
 * **Fully self-contained Tbilisi-tab reveal logic — no FOUC, no framework dependency.** v0.3.4 patched the framework's own `inputValue()`, but on stores with multiple CodeOn plugins co-installed, WordPress only registers the `codeon-framework-admin` script handle ONCE — whichever plugin loads first wins. If a co-installed plugin still ships the stale (broken) framework JS, codeon-core's patched copy is never loaded. v0.3.5 sidesteps the problem entirely:
@@ -254,6 +260,9 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 * CodeOn hub claim.
 
 == Upgrade Notice ==
+
+= 0.3.6 =
+Surroundings picker now actually saves selected settlements, has a tall + clear input area, and grows dynamically as you add more pills. Strongly recommended.
 
 = 0.3.5 =
 The actual fix: Tbilisi tab reveals its conditional fields via fully self-contained inline JS, bypassing the framework's broken showWhen entirely. No more FOUC, works regardless of co-installed plugins. Strongly recommended.
