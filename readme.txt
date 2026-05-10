@@ -5,7 +5,7 @@ Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 8.1
 Requires Plugins: woocommerce
-Stable tag: 0.3.2
+Stable tag: 0.3.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,10 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 3. CodeOn hub menu with installed plugins listed underneath.
 
 == Changelog ==
+
+= 0.3.3 — 2026-05-11 =
+* **Hotfix: Tbilisi tab conditional fields not appearing.** The Coverage radio + Surrounding-areas multiselect were gated on `showWhen('tbilisi_only_mode', '=', true)`, but the framework's checkbox value-coercion returns the literal string `'1'` (not `'true'`) — so the comparison always failed and the merchant only ever saw the master checkbox with no way to pick "Tbilisi + surroundings" or add surrounding settlements. Switched the gate to the `truthy` operator, which correctly evaluates the `'1'` value.
+* **Hotfix: Diagnostics tab leaked a local filesystem path.** The "Source" line read `"ka.wikipedia.org via /Users/george/Documents/georgian-data/scraper.py"` — the source string got captured from the bundler's environment when the dataset was built. Cleaned the bundled `data/locations.php`, the regenerator script `build/sync-from-georgian-data.php`, AND added a defensive display-time strip in DiagnosticsTab so any merchant still on an older bundle gets a clean value too.
 
 = 0.3.2 — 2026-05-11 =
 * **New "Tbilisi & surroundings" settings tab.** A purpose-built override mode for stores that ship to Tbilisi only or to Tbilisi plus a curated list of surrounding villages. When enabled, the entire Region → Municipality → Settlement cascade is replaced and **all** General-tab location rules (the field modes AND the master `locations_enabled` switch) are ignored. Two coverage modes:
@@ -239,6 +243,9 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 * CodeOn hub claim.
 
 == Upgrade Notice ==
+
+= 0.3.3 =
+Hotfix: Tbilisi tab Coverage radio + Surroundings picker were never appearing because of a checkbox-vs-string comparison bug. Strongly recommended for anyone on 0.3.2.
 
 = 0.3.2 =
 New "Tbilisi & surroundings" tab adds a single-area-picker override for stores that ship to Tbilisi only or Tbilisi + curated nearby settlements. Existing checkouts unaffected unless the merchant explicitly enables Tbilisi mode.

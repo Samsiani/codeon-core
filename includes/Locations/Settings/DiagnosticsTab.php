@@ -60,7 +60,14 @@ final class DiagnosticsTab extends Tab
                     </tr>
                     <tr>
                         <th><?php esc_html_e('Source', 'codeon-core'); ?></th>
-                        <td><code><?php echo esc_html($meta['source']); ?></code></td>
+                        <td><code><?php
+                            // Defensive: strip the legacy " via /…/scraper.py"
+                            // suffix some older bundles carried — it leaked
+                            // a local path in the admin UI.
+                            $source = (string) ($meta['source'] ?? '');
+                            $source = (string) preg_replace('/\s+via\s+\/.*$/u', '', $source);
+                            echo esc_html($source);
+                        ?></code></td>
                     </tr>
                     <tr>
                         <th><?php esc_html_e('Regions', 'codeon-core'); ?></th>

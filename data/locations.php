@@ -3,7 +3,7 @@
  * AUTO-GENERATED. Do not edit by hand.
  * Regenerate with: php build/sync-from-georgian-data.php
  *
- * Source: /Users/george/Documents/georgian-data/output/hierarchy.json
+ * Source: ka.wikipedia.org
  * Built:  2026-04-25T14:51:34+00:00
  *
  * @package CodeOn\Core
@@ -14,7 +14,7 @@ return array (
   array (
     'version' => '0.1.0',
     'built_at' => '2026-04-25T14:51:34+00:00',
-    'source' => 'ka.wikipedia.org via /Users/george/Documents/georgian-data/scraper.py',
+    'source' => 'ka.wikipedia.org',
     'region_count' => 13,
     'municipality_count' => 77,
     'settlement_count' => 4394,

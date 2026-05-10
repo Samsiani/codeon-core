@@ -64,7 +64,7 @@ final class TbilisiTab extends Tab
                     TbilisiMode::SCOPE_PLUS => __('Tbilisi + surrounding areas — customer picks an Area from a single dropdown (Tbilisi or one of the settlements you select below).', 'codeon-core'),
                 ])
                 ->default(TbilisiMode::SCOPE_ONLY)
-                ->showWhen('tbilisi_only_mode', '=', true),
+                ->showWhen('tbilisi_only_mode', 'truthy', ''),
 
             Field::raw('tbilisi_surrounding_settlements', function ($value): void {
                 $this->renderSettlementsPicker((array) ($value ?? []));
