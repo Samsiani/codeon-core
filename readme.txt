@@ -5,7 +5,7 @@ Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 8.1
 Requires Plugins: woocommerce
-Stable tag: 0.3.8
+Stable tag: 0.3.9
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,13 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 3. CodeOn hub menu with installed plugins listed underneath.
 
 == Changelog ==
+
+= 0.3.9 — 2026-05-11 =
+* **Surroundings-picker pill polish** per merchant feedback:
+    * Removed `line-height: 1` from the scoped remove-× rule so the × is no longer cropped vertically (was overriding the natural pill line-height).
+    * Neutralised Select2 v4.1.0-rc.0's default `border-right: 1px solid #aaa` on `.select2-selection__choice__remove` — the ugly faux-separator between × and pill text is gone.
+    * Bumped the choice's `padding-left` to `20px !important` so the × has visible breathing room from the pill's left edge.
+* Headless-verified the three computed values before tagging (`paddingLeft: 20px`, `borderRight: 0px none`, `lineHeight: normal`).
 
 = 0.3.8 — 2026-05-11 =
 * **Surroundings picker pills no longer spill outside the box.** Root cause was twofold:
@@ -276,6 +283,9 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 * CodeOn hub claim.
 
 == Upgrade Notice ==
+
+= 0.3.9 =
+Pill polish on the Surroundings picker: remove-× no longer cropped, default separator border dropped, 20px left-padding on each pill.
 
 = 0.3.8 =
 Surroundings picker: pills no longer overflow the container, typed search text is fully visible. Headless-browser verified before tagging. Strongly recommended.

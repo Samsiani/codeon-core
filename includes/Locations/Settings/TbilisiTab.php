@@ -317,7 +317,15 @@ final class TbilisiTab extends Tab
                 font-size: 16px !important;
                 margin-right: 6px !important;
                 font-weight: 700 !important;
-                line-height: 1 !important;
+            }
+            /* Neutralise the Select2 default theme's choice rules
+               (Select2 v4.1.0-rc.0 puts a 1px right-border on the
+               remove × and only 5px padding-left on the pill). */
+            .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+                border-right: 0 !important;
+            }
+            .select2-container--default .select2-selection--multiple .select2-selection__choice {
+                padding-left: 20px !important;
             }
 
             /* THE SEARCH ROW — full-width flex item, breaks to its
