@@ -63,15 +63,23 @@ final class LocationsTab extends Tab
                 ->description(__('Use "k", "p", "t" instead of "kʼ", "pʼ", "tʼ". Most merchants prefer simplified.', 'codeon-core'))
                 ->showWhen('display_mode', 'in', ['en', 'bilingual', 'auto']),
 
-            Field::heading('h_validation', __('Required fields at checkout', 'codeon-core')),
+            Field::heading('h_geo_fields', __('Geographic fields at checkout', 'codeon-core'),
+                __('Pick a mode for each field. Disabled = not shown at all. Optional = shown, blank allowed. Required = shown, customer must fill it. Existing order data is never altered when you change these.', 'codeon-core')),
 
-            Field::checkbox('require_municipality', __('Municipality is required', 'codeon-core'))
-                ->default(true)
-                ->description(__('Customers must select a municipality before placing an order. Recommended for accurate shipping.', 'codeon-core')),
+            Field::select('region_field_mode', __('Region (state) field', 'codeon-core'))
+                ->options(FieldMode::choices())
+                ->default(FieldMode::DISABLED)
+                ->description(__('When Disabled, Region is auto-set from the chosen Municipality (no manual pick needed). When Optional or Required, customers see a Region dropdown and can pick directly — Municipality dropdown then narrows to that region.', 'codeon-core')),
 
-            Field::checkbox('require_settlement', __('Settlement is required', 'codeon-core'))
-                ->default(true)
-                ->description(__('Customers must select a city/town/village (not just a region).', 'codeon-core')),
+            Field::select('municipality_field_mode', __('Municipality field', 'codeon-core'))
+                ->options(FieldMode::choices())
+                ->default(FieldMode::REQUIRED)
+                ->description(__('Municipality is the main cascade anchor. Disabling it falls Settlement back to a plain text field (no cascade). Recommended: Required for accurate shipping.', 'codeon-core')),
+
+            Field::select('settlement_field_mode', __('Settlement (city / town / village) field', 'codeon-core'))
+                ->options(FieldMode::choices())
+                ->default(FieldMode::REQUIRED)
+                ->description(__('When Municipality is Disabled, Settlement reverts to the standard WooCommerce city text input — this mode then only controls whether that text field is required.', 'codeon-core')),
 
             Field::heading('h_scope', __('Geographic scope', 'codeon-core')),
 
@@ -79,12 +87,8 @@ final class LocationsTab extends Tab
                 ->default(false)
                 ->description(__('Adds Abkhazia and the Tskhinvali region to the regions dropdown. Hidden by default since most stores cannot ship there.', 'codeon-core')),
 
-            Field::heading('h_visibility', __('Checkout field visibility', 'codeon-core'),
+            Field::heading('h_visibility', __('Other checkout field visibility', 'codeon-core'),
                 __('Hide standard WooCommerce checkout fields you don\'t need. Hidden fields still record their values (auto-derived where applicable) so tax, shipping zones, and reports continue to work.', 'codeon-core')),
-
-            Field::checkbox('hide_region_field', __('Hide Region (state) field', 'codeon-core'))
-                ->default(true)
-                ->description(__('When hidden, Region is auto-set from the chosen Municipality. Recommended unless you want customers to filter the Municipality dropdown by region first.', 'codeon-core')),
 
             Field::checkbox('hide_country_field', __('Hide Country / Region field', 'codeon-core'))
                 ->default(false)

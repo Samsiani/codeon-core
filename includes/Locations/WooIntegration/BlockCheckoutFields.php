@@ -35,6 +35,7 @@ defined('ABSPATH') || exit;
 
 use CodeOn\Core\Locations\Data\DisplayFormatter;
 use CodeOn\Core\Locations\Data\Repository;
+use CodeOn\Core\Locations\Settings\FieldMode;
 
 final class BlockCheckoutFields
 {
@@ -72,23 +73,27 @@ final class BlockCheckoutFields
             return;
         }
 
+        $munMode    = FieldMode::resolve(FieldMode::FIELD_MUNICIPALITY);
+        $settleMode = FieldMode::resolve(FieldMode::FIELD_SETTLEMENT);
+
+        // If Municipality is Disabled, fall back entirely to vanilla WC
+        // address (no custom muni field, no custom settlement field —
+        // the WC `city` field handles settlement input as plain text).
+        if ($munMode === FieldMode::DISABLED) {
+            return;
+        }
+
         $repo = Repository::instance();
         $fmt  = DisplayFormatter::fromOptions();
         $opts = (array) get_option('codeon_core_settings', []);
         $showOccupied = (bool) ($opts['show_occupied'] ?? false);
-        $munRequired  = (bool) ($opts['require_municipality'] ?? true);
-        $setRequired  = (bool) ($opts['require_settlement']   ?? true);
 
         // Build the municipality options as a flat list — 77 total. JS
         // hides options whose region doesn't match the chosen state.
-        // The `data-region` attribute is set on the option element via
-        // the rendered HTML; WC Blocks supports `options` as [value=>label].
         $munOptions = [];
         foreach ($repo->regions(includeOccupied: $showOccupied) as $region) {
             foreach ($region['municipalities'] as $m) {
                 if (!$showOccupied && $m['occupied']) continue;
-                // Prefix label with region for context — this is the only
-                // way to disambiguate when JS isn't loaded.
                 $munOptions[$m['id']] = sprintf(
                     '%s — %s',
                     $fmt->label(['name_ka' => $region['name_ka'], 'name_en' => $region['name_en']]),
@@ -102,7 +107,7 @@ final class BlockCheckoutFields
             'label'      => __('Municipality', 'codeon-core'),
             'location'   => 'address',
             'type'       => 'select',
-            'required'   => $munRequired,
+            'required'   => $munMode === FieldMode::REQUIRED,
             'options'    => array_map(
                 static fn(string $id, string $label) => ['value' => $id, 'label' => $label],
                 array_keys($munOptions),
@@ -116,22 +121,23 @@ final class BlockCheckoutFields
             'sanitize_callback' => static fn(string $v): string => sanitize_key($v),
         ]);
 
-        // WC Blocks rejects most HTML attributes for security. `list` and
-        // `placeholder` are NOT in its allowlist as of WC 10.x — instead
-        // we attach those via JS after render (see assets/js/blocks-cascade.js).
-        woocommerce_register_additional_checkout_field([
-            'id'         => self::FIELD_SET,
-            'label'      => __('Settlement (city / town / village)', 'codeon-core'),
-            'location'   => 'address',
-            'type'       => 'text',
-            'required'   => $setRequired,
-            'attributes' => [
-                'autocomplete'    => 'address-level2',
-                'data-codeon-geo' => 'settlement',
-            ],
-            'validate_callback' => [$this, 'validateSettlement'],
-            'sanitize_callback' => static fn(string $v): string => sanitize_text_field($v),
-        ]);
+        // Settlement: only register when its mode allows. When disabled,
+        // the WC vanilla `city` field carries the value instead.
+        if ($settleMode !== FieldMode::DISABLED) {
+            woocommerce_register_additional_checkout_field([
+                'id'         => self::FIELD_SET,
+                'label'      => __('Settlement (city / town / village)', 'codeon-core'),
+                'location'   => 'address',
+                'type'       => 'text',
+                'required'   => $settleMode === FieldMode::REQUIRED,
+                'attributes' => [
+                    'autocomplete'    => 'address-level2',
+                    'data-codeon-geo' => 'settlement',
+                ],
+                'validate_callback' => [$this, 'validateSettlement'],
+                'sanitize_callback' => static fn(string $v): string => sanitize_text_field($v),
+            ]);
+        }
     }
 
     public function validateMunicipality(mixed $value): \WP_Error|null
@@ -217,6 +223,9 @@ final class BlockCheckoutFields
     public function renderDatalist(): void
     {
         if (!self::isCheckoutOrAddressPage()) return;
+        // No muni/settlement custom field → no datalist to inject.
+        if (FieldMode::isDisabled(FieldMode::FIELD_MUNICIPALITY)) return;
+        if (FieldMode::isDisabled(FieldMode::FIELD_SETTLEMENT)) return;
 
         $repo = Repository::instance();
         $fmt  = DisplayFormatter::fromOptions();
@@ -250,6 +259,13 @@ final class BlockCheckoutFields
             [],
             CODEON_CORE_VERSION
         );
+
+        // No cascade work to do when Municipality is disabled — skip
+        // the script payload entirely.
+        if (FieldMode::isDisabled(FieldMode::FIELD_MUNICIPALITY)) {
+            return;
+        }
+
         wp_enqueue_script(
             'codeon-core-blocks-cascade',
             CODEON_CORE_URL . 'assets/js/blocks-cascade.js',

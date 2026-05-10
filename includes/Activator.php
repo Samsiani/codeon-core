@@ -23,6 +23,7 @@ final class Activator
         self::flushOwnOpcache();
         self::checkPhpVersion();
         self::seedDefaults();
+        self::migrateLegacyFieldModes();
     }
 
     /**
@@ -66,23 +67,69 @@ final class Activator
     {
         if (get_option('codeon_core_settings') === false) {
             add_option('codeon_core_settings', [
-                'display_mode'      => 'auto',
-                'show_occupied'     => false,
-                'require_municipality' => true,
-                'require_settlement'   => true,
-                'simplified_latin'     => true,
-                // Field visibility on classic checkout. Defaults match the
-                // common Georgian-store baseline: only Region is hidden
-                // (auto-derived from muni); everything else stays visible.
-                'hide_region_field'    => true,
-                'hide_country_field'   => false,
-                'hide_company_field'   => false,
-                'hide_address_2_field' => false,
-                'hide_postcode_field'  => false,
+                'display_mode'             => 'auto',
+                'locations_enabled'        => true,
+                'show_occupied'            => false,
+                'simplified_latin'         => true,
+                // 3-state field modes. Defaults match the common
+                // Georgian-store baseline: Region auto-derived from muni
+                // (Disabled in UI), Municipality + Settlement required.
+                'region_field_mode'        => \CodeOn\Core\Locations\Settings\FieldMode::DISABLED,
+                'municipality_field_mode'  => \CodeOn\Core\Locations\Settings\FieldMode::REQUIRED,
+                'settlement_field_mode'    => \CodeOn\Core\Locations\Settings\FieldMode::REQUIRED,
+                // Standard WC field visibility toggles (hide/show only).
+                'hide_country_field'       => false,
+                'hide_company_field'       => false,
+                'hide_address_2_field'     => false,
+                'hide_postcode_field'      => false,
             ]);
         }
         if (get_option('codeon_core_activated_at') === false) {
             add_option('codeon_core_activated_at', gmdate('c'));
+        }
+    }
+
+    /**
+     * One-shot migration: convert v0.2.x boolean keys
+     * (hide_region_field, require_municipality, require_settlement) into
+     * the v0.3.x 3-state keys, so merchants upgrading from 0.2.9 keep
+     * their previously chosen behavior verbatim.
+     *
+     * Runs on every activation (idempotent: only writes a key that
+     * isn't already set), so reactivating after a manual edit won't
+     * stomp newer values.
+     */
+    private static function migrateLegacyFieldModes(): void
+    {
+        $opts = get_option('codeon_core_settings');
+        if (!is_array($opts)) {
+            return;
+        }
+        $changed = false;
+
+        // Region: hide_region_field=true → DISABLED, false → REQUIRED.
+        if (!isset($opts['region_field_mode']) && array_key_exists('hide_region_field', $opts)) {
+            $opts['region_field_mode'] = !empty($opts['hide_region_field'])
+                ? \CodeOn\Core\Locations\Settings\FieldMode::DISABLED
+                : \CodeOn\Core\Locations\Settings\FieldMode::REQUIRED;
+            $changed = true;
+        }
+
+        // Municipality / Settlement: require_* checkbox → REQUIRED, false → OPTIONAL.
+        foreach ([
+            'municipality_field_mode' => 'require_municipality',
+            'settlement_field_mode'   => 'require_settlement',
+        ] as $newKey => $oldKey) {
+            if (!isset($opts[$newKey]) && array_key_exists($oldKey, $opts)) {
+                $opts[$newKey] = !empty($opts[$oldKey])
+                    ? \CodeOn\Core\Locations\Settings\FieldMode::REQUIRED
+                    : \CodeOn\Core\Locations\Settings\FieldMode::OPTIONAL;
+                $changed = true;
+            }
+        }
+
+        if ($changed) {
+            update_option('codeon_core_settings', $opts, false);
         }
     }
 }

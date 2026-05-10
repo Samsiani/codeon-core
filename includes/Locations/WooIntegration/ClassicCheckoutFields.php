@@ -20,6 +20,7 @@ namespace CodeOn\Core\Locations\WooIntegration;
 
 defined('ABSPATH') || exit;
 
+use CodeOn\Core\Locations\Settings\FieldMode;
 use CodeOn\Framework\Storage\SettingsRepository;
 
 final class ClassicCheckoutFields
@@ -70,12 +71,16 @@ final class ClassicCheckoutFields
      */
     public function enforceFinalFieldSetup(array $checkoutFields): array
     {
-        $munOptions = $this->buildMunicipalityOptions();
-        $opts       = (array) get_option('codeon_core_settings', []);
+        $opts          = (array) get_option('codeon_core_settings', []);
+        $regionMode    = FieldMode::resolve(FieldMode::FIELD_REGION);
+        $munMode       = FieldMode::resolve(FieldMode::FIELD_MUNICIPALITY);
+        $settleMode    = FieldMode::resolve(FieldMode::FIELD_SETTLEMENT);
+        $cascadeWorks  = $munMode !== FieldMode::DISABLED;
+        $munOptions    = $cascadeWorks ? $this->buildMunicipalityOptions() : [];
 
+        // Standard WC field hides (non-geo).
         $hideMap = [
             '_country'   => (bool) ($opts['hide_country_field']   ?? false),
-            '_state'     => (bool) ($opts['hide_region_field']    ?? true),
             '_company'   => (bool) ($opts['hide_company_field']   ?? false),
             '_address_2' => (bool) ($opts['hide_address_2_field'] ?? false),
             '_postcode'  => (bool) ($opts['hide_postcode_field']  ?? false),
@@ -85,9 +90,16 @@ final class ClassicCheckoutFields
             if (!isset($checkoutFields[$group]) || !is_array($checkoutFields[$group])) {
                 continue;
             }
-            $checkoutFields[$group] = $this->ensureMunicipalityField($checkoutFields[$group], $group . '_');
 
-            // Apply visibility-hiding class to user-toggled fields.
+            if ($cascadeWorks) {
+                $checkoutFields[$group] = $this->ensureMunicipalityField($checkoutFields[$group], $group . '_');
+            } else {
+                // Muni disabled → strip our muni field if a previous boot
+                // injected it. Belt & suspenders against stale state.
+                unset($checkoutFields[$group][$group . '_municipality']);
+            }
+
+            // Apply visibility-hiding class to user-toggled WC fields.
             foreach ($hideMap as $suffix => $hide) {
                 if (!$hide) continue;
                 $key = $group . $suffix;
@@ -96,11 +108,10 @@ final class ClassicCheckoutFields
                         (array) ($checkoutFields[$group][$key]['class'] ?? []),
                         ['codeon-hidden-row']
                     );
-                    // Drop required flag — a hidden field that's required
-                    // and empty would block checkout. Country/state stay
-                    // required because they have values (preselected /
-                    // auto-derived).
-                    if (!in_array($suffix, ['_country', '_state'], true)) {
+                    // Drop required flag for hidden fields that don't have
+                    // an auto-derived value. Country stays required because
+                    // WC preselects "Georgia" when the only allowed country.
+                    if ($suffix !== '_country') {
                         $checkoutFields[$group][$key]['required'] = false;
                     }
                 }
@@ -110,19 +121,32 @@ final class ClassicCheckoutFields
             $munKey   = $group . '_municipality';
             $cityKey  = $group . '_city';
 
-            // Region (state): priority 45, label "Region". Always required
-            // (value is auto-derived from muni). Visibility per setting.
+            // Region (state): visibility + required-ness driven by mode.
             if (isset($checkoutFields[$group][$stateKey])) {
                 $checkoutFields[$group][$stateKey]['priority'] = 45;
-                $checkoutFields[$group][$stateKey]['required'] = true;
                 $checkoutFields[$group][$stateKey]['label']    = __('Region', 'codeon-core');
+
+                if ($regionMode === FieldMode::DISABLED) {
+                    $checkoutFields[$group][$stateKey]['class'] = array_merge(
+                        (array) ($checkoutFields[$group][$stateKey]['class'] ?? []),
+                        ['codeon-hidden-row']
+                    );
+                    // When Muni is also disabled there's no auto-derivation
+                    // source — drop required so empty state doesn't block
+                    // checkout. When Muni is shown, JS auto-fills state,
+                    // so required=true is safe and matches WC expectations.
+                    $checkoutFields[$group][$stateKey]['required'] = $cascadeWorks;
+                } else {
+                    $checkoutFields[$group][$stateKey]['required'] = $regionMode === FieldMode::REQUIRED;
+                }
             }
 
-            // Municipality: priority 46, all 77 muns pre-loaded.
-            if (isset($checkoutFields[$group][$munKey])) {
+            // Municipality (custom field). Only render when mode != disabled.
+            if ($munMode !== FieldMode::DISABLED && isset($checkoutFields[$group][$munKey])) {
                 $checkoutFields[$group][$munKey]['priority'] = 46;
                 $checkoutFields[$group][$munKey]['label']    = __('Municipality', 'codeon-core');
                 $checkoutFields[$group][$munKey]['type']     = 'select';
+                $checkoutFields[$group][$munKey]['required'] = $munMode === FieldMode::REQUIRED;
                 $checkoutFields[$group][$munKey]['options']  = $munOptions;
                 $checkoutFields[$group][$munKey]['class']    = array_merge(
                     (array) ($checkoutFields[$group][$munKey]['class'] ?? []),
@@ -130,16 +154,32 @@ final class ClassicCheckoutFields
                 );
             }
 
-            // Settlement (city): priority 47, options cascade from muni.
+            // Settlement (city). Treatment depends on combination:
+            //  - settle=disabled      → hide city field entirely
+            //  - settle != disabled + cascade works (muni shown) → select that cascades
+            //  - settle != disabled + cascade dead (muni disabled) → vanilla WC city text
             if (isset($checkoutFields[$group][$cityKey])) {
                 $checkoutFields[$group][$cityKey]['priority'] = 47;
-                $checkoutFields[$group][$cityKey]['label']    = __('Settlement', 'codeon-core');
-                $checkoutFields[$group][$cityKey]['type']     = 'select';
-                $checkoutFields[$group][$cityKey]['options']  = ['' => __('— pick a Municipality first —', 'codeon-core')];
-                $checkoutFields[$group][$cityKey]['class']    = array_merge(
-                    (array) ($checkoutFields[$group][$cityKey]['class'] ?? []),
-                    ['form-row-wide', 'codeon-geo-field', 'codeon-geo-city']
-                );
+
+                if ($settleMode === FieldMode::DISABLED) {
+                    $checkoutFields[$group][$cityKey]['class'] = array_merge(
+                        (array) ($checkoutFields[$group][$cityKey]['class'] ?? []),
+                        ['codeon-hidden-row']
+                    );
+                    $checkoutFields[$group][$cityKey]['required'] = false;
+                } elseif ($cascadeWorks) {
+                    $checkoutFields[$group][$cityKey]['label']    = __('Settlement', 'codeon-core');
+                    $checkoutFields[$group][$cityKey]['type']     = 'select';
+                    $checkoutFields[$group][$cityKey]['required'] = $settleMode === FieldMode::REQUIRED;
+                    $checkoutFields[$group][$cityKey]['options']  = ['' => __('— pick a Municipality first —', 'codeon-core')];
+                    $checkoutFields[$group][$cityKey]['class']    = array_merge(
+                        (array) ($checkoutFields[$group][$cityKey]['class'] ?? []),
+                        ['form-row-wide', 'codeon-geo-field', 'codeon-geo-city']
+                    );
+                } else {
+                    // Vanilla WC city: text input, only mode-driven required.
+                    $checkoutFields[$group][$cityKey]['required'] = $settleMode === FieldMode::REQUIRED;
+                }
             }
         }
         return $checkoutFields;
@@ -184,17 +224,12 @@ final class ClassicCheckoutFields
         $opts = (array) get_option('codeon_core_settings', []);
         $rules = [];
 
-        // Map of setting key → array of CSS selectors to hide.
-        $map = [
+        // Standard WC field hide toggles (boolean) → CSS selectors.
+        $boolMap = [
             'hide_country_field' => [
                 '#billing_country_field',
                 '#shipping_country_field',
                 '.wc-block-components-address-form__country',
-            ],
-            'hide_region_field' => [
-                '#billing_state_field',
-                '#shipping_state_field',
-                '.wc-block-components-address-form__state',
             ],
             'hide_company_field' => [
                 '#billing_company_field',
@@ -212,12 +247,41 @@ final class ClassicCheckoutFields
                 '.wc-block-components-address-form__postcode',
             ],
         ];
-
-        foreach ($map as $key => $selectors) {
+        foreach ($boolMap as $key => $selectors) {
             if (!empty($opts[$key])) {
                 $rules[] = implode(', ', $selectors) . ' { display: none !important; }';
             }
         }
+
+        // 3-state geo fields. Disabled mode hides via CSS in BOTH classic
+        // and block checkout. Region is the typical one (auto-derived
+        // from muni) but Muni/Settlement can also be disabled.
+        $modeMap = [
+            FieldMode::FIELD_REGION => [
+                '#billing_state_field',
+                '#shipping_state_field',
+                '.wc-block-components-address-form__state',
+            ],
+            FieldMode::FIELD_MUNICIPALITY => [
+                '#billing_municipality_field',
+                '#shipping_municipality_field',
+                '.wc-block-components-address-form__codeon\\/municipality',
+                '[id*="codeon-municipality"]',
+            ],
+            FieldMode::FIELD_SETTLEMENT => [
+                '#billing_city_field',
+                '#shipping_city_field',
+                '.wc-block-components-address-form__city',
+                '.wc-block-components-address-form__codeon\\/settlement',
+                '[id*="codeon-settlement"]',
+            ],
+        ];
+        foreach ($modeMap as $field => $selectors) {
+            if (FieldMode::isDisabled($field)) {
+                $rules[] = implode(', ', $selectors) . ' { display: none !important; }';
+            }
+        }
+
         return implode("\n", $rules);
     }
 
@@ -250,24 +314,24 @@ final class ClassicCheckoutFields
      */
     public function extendDefaultFields(array $fields): array
     {
-        // Convert city to a select. Options are populated by
-        // checkout-cascade.js based on the chosen state+municipality.
-        if (isset($fields['city'])) {
+        $munMode    = FieldMode::resolve(FieldMode::FIELD_MUNICIPALITY);
+        $settleMode = FieldMode::resolve(FieldMode::FIELD_SETTLEMENT);
+        $cascadeWorks = $munMode !== FieldMode::DISABLED;
+
+        // Convert city to a select only when cascade is viable AND the
+        // settlement field is shown. Otherwise leave WC's vanilla text
+        // input untouched.
+        if (isset($fields['city']) && $cascadeWorks && $settleMode !== FieldMode::DISABLED) {
             $fields['city']['type']    = 'select';
             $fields['city']['options'] = ['' => __('Select…', 'codeon-core')];
             $fields['city']['class']   = array_merge(
                 (array) ($fields['city']['class'] ?? []),
                 ['codeon-geo-field', 'codeon-geo-city']
             );
-            // Priority 47 puts City (Settlement) RIGHT after Municipality (46),
-            // before address_1 (default 50). Keeps the geographic cascade
-            // visually grouped at the top of the form.
             $fields['city']['priority'] = 47;
         }
 
-        // Move state up too. WC default priority is 80 — way below city.
-        // For the cascade to read top-to-bottom (Region → Municipality →
-        // Settlement → Address) we need state right under country (40).
+        // Move state up so it renders top-to-bottom in cascade order.
         if (isset($fields['state'])) {
             $fields['state']['priority'] = 45;
             $fields['state']['class']    = array_merge(
@@ -276,9 +340,10 @@ final class ClassicCheckoutFields
             );
         }
 
-        // Insert municipality right after state. The priority chain is
-        // country(40) → state(45) → municipality(46) → city(47) →
-        // address_1(50) → address_2(60) → postcode(90).
+        // Inject our `municipality` field only when its mode allows it.
+        if (!$cascadeWorks) {
+            return $fields;
+        }
         $rebuilt = [];
         foreach ($fields as $key => $cfg) {
             $rebuilt[$key] = $cfg;
@@ -286,7 +351,7 @@ final class ClassicCheckoutFields
                 $rebuilt['municipality'] = [
                     'label'    => __('Municipality', 'codeon-core'),
                     'type'     => 'select',
-                    'required' => false,
+                    'required' => $munMode === FieldMode::REQUIRED,
                     'class'    => ['form-row-wide', 'codeon-geo-field', 'codeon-geo-municipality'],
                     'options'  => ['' => __('Select…', 'codeon-core')],
                     'priority' => 46,
@@ -302,24 +367,39 @@ final class ClassicCheckoutFields
      */
     public function extendGeorgiaLocale(array $locales): array
     {
-        $opts = (array) get_option('codeon_core_settings', []);
-        $munRequired   = (bool) ($opts['require_municipality'] ?? true);
-        $cityRequired  = (bool) ($opts['require_settlement']   ?? true);
+        $regionMode   = FieldMode::resolve(FieldMode::FIELD_REGION);
+        $munMode      = FieldMode::resolve(FieldMode::FIELD_MUNICIPALITY);
+        $settleMode   = FieldMode::resolve(FieldMode::FIELD_SETTLEMENT);
+        $cascadeWorks = $munMode !== FieldMode::DISABLED;
+
+        $stateRequired = match ($regionMode) {
+            FieldMode::REQUIRED => true,
+            FieldMode::OPTIONAL => false,
+            // Disabled + cascade alive → JS auto-fills state, so we can
+            // still treat it as required and pass WC validation.
+            // Disabled + cascade dead → empty state would block checkout,
+            // so relax required.
+            default => $cascadeWorks,
+        };
+
+        $geMuni = $cascadeWorks
+            ? ['required' => $munMode === FieldMode::REQUIRED, 'hidden' => false]
+            : ['required' => false, 'hidden' => true];
+
+        $cityLabel    = $cascadeWorks ? __('Settlement', 'codeon-core') : __('City', 'codeon-core');
+        $cityRequired = $settleMode === FieldMode::REQUIRED;
 
         $locales['GE'] = array_replace_recursive(
             $locales['GE'] ?? [],
             [
                 'state' => [
-                    'required' => true,
+                    'required' => $stateRequired,
                     'label'    => __('Region', 'codeon-core'),
                 ],
-                'municipality' => [
-                    'required' => $munRequired,
-                    'hidden'   => false,
-                ],
+                'municipality' => $geMuni,
                 'city' => [
                     'required' => $cityRequired,
-                    'label'    => __('Settlement', 'codeon-core'),
+                    'label'    => $cityLabel,
                 ],
             ]
         );
@@ -355,12 +435,15 @@ final class ClassicCheckoutFields
      */
     private function ensureMunicipalityField(array $fields, string $prefix): array
     {
+        // Guard: never inject the municipality field if its mode is Disabled.
+        if (FieldMode::isDisabled(FieldMode::FIELD_MUNICIPALITY)) {
+            return $fields;
+        }
+
         $key      = $prefix . 'municipality';
         $stateKey = $prefix . 'state';
         $cityKey  = $prefix . 'city';
 
-        // Apply the same priority overrides on the prefixed copies of state
-        // and city so billing/shipping fields match.
         if (isset($fields[$stateKey])) {
             $fields[$stateKey]['priority'] = 45;
         }
@@ -380,7 +463,7 @@ final class ClassicCheckoutFields
                 $rebuilt[$key] = [
                     'label'    => __('Municipality', 'codeon-core'),
                     'type'     => 'select',
-                    'required' => false,
+                    'required' => FieldMode::isRequired(FieldMode::FIELD_MUNICIPALITY),
                     'class'    => ['form-row-wide', 'codeon-geo-field', 'codeon-geo-municipality'],
                     'options'  => ['' => __('Select…', 'codeon-core')],
                     'priority' => 46,
@@ -392,8 +475,6 @@ final class ClassicCheckoutFields
 
     public function enqueue(): void
     {
-        // Only on pages where address fields render: checkout, cart (with
-        // shipping calculator), edit-address account page.
         if (!function_exists('is_checkout') || !function_exists('is_account_page')) {
             return;
         }
@@ -407,13 +488,21 @@ final class ClassicCheckoutFields
             CODEON_CORE_VERSION
         );
 
-        // Inline CSS targets BOTH classic and block-checkout selectors so a
-        // single setting hides the field everywhere. Block-checkout doesn't
-        // expose a hide-core-field API, so CSS is the practical option.
+        // Hide CSS still useful even when cascade is dead — it carries
+        // the country/company/address_2/postcode hides plus the geo-
+        // disabled hides for region/settlement.
         $extra = $this->buildHideCss();
         if ($extra !== '') {
             wp_add_inline_style('codeon-core-checkout', $extra);
         }
+
+        // Skip the cascade JS payload entirely when Municipality is
+        // disabled — the script would be a no-op (no muni element to
+        // bind to) but we save a request + parse cost.
+        if (FieldMode::isDisabled(FieldMode::FIELD_MUNICIPALITY)) {
+            return;
+        }
+
         wp_enqueue_script(
             'codeon-core-checkout-cascade',
             CODEON_CORE_URL . 'assets/js/checkout-cascade.js',

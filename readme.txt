@@ -5,7 +5,7 @@ Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 8.1
 Requires Plugins: woocommerce
-Stable tag: 0.2.9
+Stable tag: 0.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,20 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 3. CodeOn hub menu with installed plugins listed underneath.
 
 == Changelog ==
+
+= 0.3.0 — 2026-05-11 =
+* **3-state field modes for Region / Municipality / Settlement.** The Locations settings tab replaces the old single "is required" checkboxes with one **Disabled / Optional / Required** dropdown per geo field. *Disabled* hides the field at checkout AND drops all validation against it; *Optional* renders the field but allows an empty value; *Required* renders + enforces.
+    * **Region:** the merchant can now choose whether the Region (state) dropdown is shown to the customer or auto-derived from the chosen Municipality (the previous "Hide Region" toggle now lives as the Disabled mode of this dropdown).
+    * **Municipality:** disabling it removes the muni dropdown entirely. When disabled, the cascade JS, datalist, REST scripts and inline CSS targeting the muni field are all skipped — Settlement automatically falls back to the standard WooCommerce free-text city field (its required-ness still tracks the Settlement mode).
+    * **Settlement:** disabling it hides the city field entirely (and drops it from validation).
+    * Backwards compatibility: existing v0.2.x option keys (`hide_region_field`, `require_municipality`, `require_settlement`) are read transparently as fallback, and migrated to the new keys on the next activation. Live merchants on 0.2.9 keep their exact behavior after the update.
+    * Cross-field guard: combinations that would break checkout (e.g. Region hidden + Municipality disabled → no source for state value) are detected and the state field's `required` flag is relaxed automatically. No combination should be able to brick the checkout form.
+* **Dashboard redesign (visual + structural).**
+    * The Welcome card no longer carries the **Configure Locations** and **Browse Extensions** buttons. The card now has a status pill in the header showing whether the Locations cascade is ON / OFF at a glance, and only a quiet "Visit codeon.ge" link below the copy.
+    * **Configure Locations** moved into the **Georgian Locations dataset** card — right next to the 13 / 77 / 4,394 stats, so the merchant sees the dataset they're configuring and the button at the same time.
+    * **Browse Extensions** moved into the **CodeOn ecosystem** card header — sits next to the section title, exactly where a merchant looking at "the rest of the family" expects to find the catalog link.
+    * The Locations card now also surfaces the three field-mode values at a glance (Disabled / Optional / Required) alongside the dataset numbers, so the merchant can see at a glance how the checkout cascade is configured without having to open the settings tab.
+    * Visual polish: softer card shadow + rounded corners, subtle hover lift on ecosystem cards, deeper blue brand-accent on stats, status pill in the welcome header, mobile-stacked CTA buttons.
 
 = 0.2.9 — 2026-05-08 =
 * **Dashboard refinements.**
@@ -203,6 +217,9 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 * CodeOn hub claim.
 
 == Upgrade Notice ==
+
+= 0.3.0 =
+3-state field modes (Disabled / Optional / Required) for Region, Municipality, and Settlement at checkout. Existing settings migrated automatically — no merchant action required.
 
 = 0.1.4 =
 Critical fixes for "Security check failed" on save and missing block-checkout fields. Strongly recommended.
