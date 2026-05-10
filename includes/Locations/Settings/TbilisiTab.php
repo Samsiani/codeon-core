@@ -48,6 +48,129 @@ final class TbilisiTab extends Tab
         return $this->repo;
     }
 
+    /**
+     * Render strategy:
+     *
+     *   1) Emit a tiny inline <style> BEFORE the schema renders so our
+     *      conditional rows are `display: none` from the very first
+     *      paint — eliminates the visible→hidden FOUC flash.
+     *
+     *   2) Delegate to the framework schema renderer.
+     *
+     *   3) Emit a self-contained inline <script> AFTER the rows that:
+     *        - detaches our rows from the framework's broken automatic
+     *          showWhen logic (removes `data-codeon-show*` so the
+     *          framework JS skips them entirely)
+     *        - runs our own reveal logic immediately — synchronously
+     *          during parsing, before any DOMContentLoaded handler
+     *          (framework's or otherwise) can fire.
+     *
+     * Why bypass the framework's showWhen entirely:
+     *   The framework renders every checkbox as a hidden `<input
+     *   type="hidden" value="0">` next to the real checkbox sharing
+     *   the same name (so unchecked boxes still POST 0). Its
+     *   `inputValue()` helper reads `[name="codeon[…]"]` via plain
+     *   `querySelector` and matches the hidden input first — so it
+     *   always returns "0" regardless of checkbox state. Every
+     *   checkbox-gated showWhen across every consumer plugin is
+     *   silently broken. Patching the vendored framework JS in
+     *   codeon-core doesn't help on stores that have other CodeOn
+     *   plugins co-installed (WP only registers one URL per script
+     *   handle, and the first registration wins — including its
+     *   stale framework JS). A scoped, framework-independent reveal
+     *   per tab is the only fix guaranteed to work everywhere.
+     */
+    public function render(string $nonceAction): void
+    {
+        $this->renderHidingStyle();
+        parent::render($nonceAction);
+        $this->renderRevealScript();
+    }
+
+    private function renderHidingStyle(): void
+    {
+        // Pre-paint hide of the conditional rows. The reveal script
+        // below removes the data-codeon-show attribute on rows that
+        // should actually be visible, so this rule stops matching them
+        // — at which point default <tr> display takes over again.
+        ?>
+        <style>
+            tr[data-codeon-show="tbilisi_only_mode"],
+            tr[data-codeon-show="tbilisi_scope"] { display: none; }
+        </style>
+        <?php
+    }
+
+    private function renderRevealScript(): void
+    {
+        ?>
+        <script>
+        (function () {
+            'use strict';
+
+            // Snapshot our rows once, then strip their showWhen attrs
+            // so the framework's (broken) automatic logic ignores them
+            // entirely. After this, we own visibility for these rows.
+            var ourRows = [];
+            Array.prototype.forEach.call(
+                document.querySelectorAll(
+                    '[data-codeon-show="tbilisi_only_mode"], [data-codeon-show="tbilisi_scope"]'
+                ),
+                function (row) {
+                    ourRows.push({
+                        el:    row,
+                        path:  row.getAttribute('data-codeon-show'),
+                        value: row.getAttribute('data-codeon-show-value') || '',
+                    });
+                    row.removeAttribute('data-codeon-show');
+                    row.removeAttribute('data-codeon-show-op');
+                    row.removeAttribute('data-codeon-show-value');
+                }
+            );
+
+            function masterChecked() {
+                var cb = document.querySelector('input[name="codeon[tbilisi_only_mode]"][type="checkbox"]');
+                return !!(cb && cb.checked);
+            }
+            function scopeValue() {
+                var radios = document.querySelectorAll('input[name="codeon[tbilisi_scope]"]');
+                for (var i = 0; i < radios.length; i++) {
+                    if (radios[i].checked) return radios[i].value;
+                }
+                return '';
+            }
+            function applyReveal() {
+                for (var i = 0; i < ourRows.length; i++) {
+                    var row = ourRows[i];
+                    var visible;
+                    if (row.path === 'tbilisi_only_mode') {
+                        visible = masterChecked();
+                    } else if (row.path === 'tbilisi_scope') {
+                        visible = masterChecked() && scopeValue() === row.value;
+                    } else {
+                        visible = false;
+                    }
+                    row.el.style.display = visible ? '' : 'none';
+                }
+            }
+
+            // Synchronous first run while still parsing — eliminates
+            // the visible→hidden flicker. The rows are CSS-hidden by
+            // default; this call shows the ones that should be shown.
+            applyReveal();
+
+            // Live updates as the merchant flips controls.
+            document.addEventListener('change', function (e) {
+                if (!e.target || !e.target.name) return;
+                var n = String(e.target.name);
+                if (n !== 'codeon[tbilisi_only_mode]' && n !== 'codeon[tbilisi_scope]') return;
+                applyReveal();
+            });
+        })();
+        </script>
+        <?php
+    }
+
     public function schema(): array
     {
         return [

@@ -5,7 +5,7 @@ Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 8.1
 Requires Plugins: woocommerce
-Stable tag: 0.3.4
+Stable tag: 0.3.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,14 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 3. CodeOn hub menu with installed plugins listed underneath.
 
 == Changelog ==
+
+= 0.3.5 — 2026-05-11 =
+* **Fully self-contained Tbilisi-tab reveal logic — no FOUC, no framework dependency.** v0.3.4 patched the framework's own `inputValue()`, but on stores with multiple CodeOn plugins co-installed, WordPress only registers the `codeon-framework-admin` script handle ONCE — whichever plugin loads first wins. If a co-installed plugin still ships the stale (broken) framework JS, codeon-core's patched copy is never loaded. v0.3.5 sidesteps the problem entirely:
+    * Inline `<style>` at the top of the tab pre-hides our conditional rows so they never render visible (eliminates the visible→hidden flicker the user reported).
+    * Inline `<script>` immediately after the rows snapshots them, **strips the `data-codeon-show*` attributes** so the framework's automatic logic ignores them, and runs our own scoped reveal logic.
+    * Synchronous first-pass during HTML parsing — runs before any DOMContentLoaded handler (framework's or otherwise) can fire — so the correct visibility is set from the very first paint.
+    * Live updates as the merchant ticks the master toggle / changes the Coverage radio.
+* Verified end-to-end via simulated DOM traces of all three state transitions (master OFF / master ON+only / master ON+plus_areas) before tagging.
 
 = 0.3.4 — 2026-05-11 =
 * **Real fix for the Tbilisi tab conditional fields.** v0.3.3 changed the showWhen operator to `truthy` but the underlying bug was actually in the framework's own admin JS — `inputValue()` did `document.querySelector('[name="codeon[…]"]')` which matched the leading `<input type="hidden" value="0">` that the framework injects alongside every checkbox (so an unchecked box still POSTs `0`). The hidden input came first in DOM order, so the function always returned `'0'` regardless of the checkbox's actual `checked` state, and EVERY `showWhen` predicate gated on a checkbox always evaluated false. Patched the vendored `vendor/codeon/framework/assets/js/codeon-admin.js` to look up the `[type=checkbox]` input directly first, falling through to the original logic for selects, radios, and text inputs. Verified with two unit-style traces (checkbox + radio paths) before tagging this release.
@@ -246,6 +254,9 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 * CodeOn hub claim.
 
 == Upgrade Notice ==
+
+= 0.3.5 =
+The actual fix: Tbilisi tab reveals its conditional fields via fully self-contained inline JS, bypassing the framework's broken showWhen entirely. No more FOUC, works regardless of co-installed plugins. Strongly recommended.
 
 = 0.3.4 =
 Real fix for the Tbilisi-tab conditional reveal: framework JS was reading the wrong DOM input for every checkbox-gated showWhen. Strongly recommended for anyone on 0.3.2 or 0.3.3.
