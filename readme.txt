@@ -5,7 +5,7 @@ Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 8.1
 Requires Plugins: woocommerce
-Stable tag: 0.3.10
+Stable tag: 0.3.11
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,16 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 3. CodeOn hub menu with installed plugins listed underneath.
 
 == Changelog ==
+
+= 0.3.11 — 2026-05-11 =
+* **Area now sits truly right-after-Country, even when a theme remaps Country's priority.** On artcase.ge a live `WC_Checkout::get_checkout_fields('billing')` dump showed:
+
+  - `billing_first_name` priority **10** (was 20 by default — Woodmart / Personal-ID plugin remapped it)
+  - `billing_city` (Area) priority **11** (our v0.3.10 value)
+  - `billing_country` priority **40** (was 10 by default — also remapped)
+
+  My hard-coded `priority = 11` put Area between first_name (10) and last_name (20) — visually "right after first name", not what the merchant wanted. Fix: read whatever priority Country ended up at AFTER all other filters have run (we still hook `woocommerce_checkout_fields` at priority 100000, and the WC 10.7 source confirms `uasort()` runs AFTER our filter) and set Area to `country.priority + 1`. State (hidden, auto-filled) gets `country.priority + 2`. Now Area renders immediately under Country regardless of what other plugins decided Country's priority should be.
+* **Shipping-zone "Add region" no longer hides 10 of the 13 Georgian regions.** v0.3.2's Tbilisi-mode override trimmed `woocommerce_states['GE']` to only the merchant's allowed area codes — which also applied to WP-admin → WC → Settings → Shipping → Add region. Removed the filter; the GE state catalog stays intact globally. The state field at checkout is still hidden via CSS + auto-filled, which is all Tbilisi mode actually needs.
 
 = 0.3.10 — 2026-05-11 =
 * **Area field now renders immediately under Country / Region on checkout.** Previously the `priority = 11` change was applied in `enforceFinalFieldSetup` (hooked at `woocommerce_checkout_fields` priority 100000) — but WC's `WC_Checkout::get_checkout_fields()` runs `uasort()` on each fieldset BEFORE applying that filter, so the late priority change had no effect on render order. Moved the priority assignment to the earlier `woocommerce_default_address_fields` + `woocommerce_billing_fields` / `woocommerce_shipping_fields` filters, which run before WC's sort, so Area now lands right after Country exactly as configured.
@@ -287,6 +297,9 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 * CodeOn hub claim.
 
 == Upgrade Notice ==
+
+= 0.3.11 =
+Area at checkout now lands right after Country regardless of theme re-mapping. Shipping-zone region picker no longer hides 10 of 13 GE regions. Strongly recommended.
 
 = 0.3.10 =
 Area field now sits right after Country/Region on checkout. Admin Surroundings picker shows Georgian-only labels (no redundant Latin transliteration).

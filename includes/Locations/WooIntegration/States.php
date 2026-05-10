@@ -41,16 +41,17 @@ final class States
         $opts      = (array) get_option('codeon_core_settings', []);
         $showOccupied = (bool) ($opts['show_occupied'] ?? false);
 
-        $tbilisiActive = TbilisiMode::isActive();
-        $allowed       = $tbilisiActive ? TbilisiMode::allowedStateCodes() : null;
-
+        // NOTE: we deliberately do NOT trim the state list when Tbilisi
+        // mode is active. The state list backs admin screens too (the
+        // most visible being Settings → WC → Shipping → "Add region"
+        // when defining a shipping zone). Filtering the list there
+        // would hide 10 of the 13 GE regions from the merchant. Tbilisi
+        // mode hides the state FIELD at checkout via CSS + auto-fills
+        // the value — that's all that's needed; the catalog of GE
+        // regions should stay intact globally.
         $ge = [];
         foreach ($repo->regions(includeOccupied: $showOccupied) as $region) {
-            $code = $region['wc_state_code'];
-            if ($allowed !== null && !in_array($code, $allowed, true)) {
-                continue;
-            }
-            $ge[$code] = $formatter->label($region);
+            $ge[$region['wc_state_code']] = $formatter->label($region);
         }
         $states['GE'] = $ge;
         return $states;

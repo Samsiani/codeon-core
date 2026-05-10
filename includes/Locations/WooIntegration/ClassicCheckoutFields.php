@@ -315,13 +315,23 @@ final class ClassicCheckoutFields
             $stateKey = $group . '_state';
             $cityKey  = $group . '_city';
 
+            // Country / Region priority depends on what theme / other
+            // plugins set — Woodmart's checkout-fields-manager (and
+            // similar Personal-ID add-ons) routinely re-map priorities
+            // (e.g. country → 40, first_name → 10). Position Area
+            // immediately AFTER country by reading whatever priority
+            // ended up on the country field. If country is missing,
+            // fall back to 11 so Area still lands early in the form.
+            $countryPriority = (int) ($checkoutFields[$group][$group . '_country']['priority'] ?? 10);
+            $areaPriority    = $countryPriority + 1;
+            $statePriority   = $countryPriority + 2;
+
             // State (Region): always hidden in Tbilisi mode. Kept on
-            // the form (priority 12 so it stays right next to country
-            // in case any theme still renders hidden rows) so WC
-            // tax/shipping has a value, defaulted to TB and overwritten
-            // by JS when the customer picks an area in Mode B.
+            // the form so WC tax/shipping has a value, defaulted to TB
+            // and overwritten by JS when the customer picks an area in
+            // Mode B.
             if (isset($checkoutFields[$group][$stateKey])) {
-                $checkoutFields[$group][$stateKey]['priority'] = 12;
+                $checkoutFields[$group][$stateKey]['priority'] = $statePriority;
                 $checkoutFields[$group][$stateKey]['class']    = array_merge(
                     (array) ($checkoutFields[$group][$stateKey]['class'] ?? []),
                     ['codeon-hidden-row', 'codeon-tbilisi-state']
@@ -331,14 +341,10 @@ final class ClassicCheckoutFields
             }
 
             // City: in Mode A hidden + defaulted to Tbilisi. In Mode B
-            // becomes the Area picker.
-            //
-            // Priority 11: places the field RIGHT after Country/Region
-            // (which is priority 10 in WC's default address fields).
-            // Country → Area → first_name (20) → last_name (20) → ... is
-            // the visible cascade order the merchant requested.
+            // becomes the Area picker. Renders immediately after
+            // whatever priority country ended up at.
             if (isset($checkoutFields[$group][$cityKey])) {
-                $checkoutFields[$group][$cityKey]['priority'] = 11;
+                $checkoutFields[$group][$cityKey]['priority'] = $areaPriority;
                 if ($isPlus) {
                     $checkoutFields[$group][$cityKey]['type']     = 'select';
                     $checkoutFields[$group][$cityKey]['label']    = __('Area', 'codeon-core');
@@ -523,19 +529,11 @@ final class ClassicCheckoutFields
     public function extendDefaultFields(array $fields): array
     {
         // Tbilisi mode short-circuits the cascade entirely — let
-        // enforceFinalFieldSetup do the field surgery. We still need
-        // to set the geo-field priorities HERE though, because WC's
-        // get_checkout_fields() runs `uasort` on each fieldset BEFORE
-        // applying our priority-100000 `woocommerce_checkout_fields`
-        // filter — so a late priority change there is ignored when
-        // determining render order.
+        // enforceFinalFieldSetup do the field surgery. The Area
+        // priority is set there (dynamically tracking whatever priority
+        // Country ends up at) so we don't compete with theme / personal-
+        // ID-plugin re-mappings of country.priority.
         if (TbilisiMode::isActive()) {
-            if (isset($fields['city'])) {
-                $fields['city']['priority'] = 11;
-            }
-            if (isset($fields['state'])) {
-                $fields['state']['priority'] = 12;
-            }
             return $fields;
         }
 
@@ -691,18 +689,11 @@ final class ClassicCheckoutFields
     private function ensureMunicipalityField(array $fields, string $prefix): array
     {
         // Tbilisi mode never wants a municipality field on the form.
-        // Also set the city + state priorities HERE (prefixed copies)
-        // so they land before WC's uasort. enforceFinalFieldSetup
-        // sets them too but runs after the sort — too late for
-        // render-order purposes.
+        // City + state priorities are set later in enforceFinalFieldSetup
+        // (relative to the post-theme-remap country priority) — setting
+        // them here would race with Woodmart's checkout-fields-manager.
         if (TbilisiMode::isActive()) {
             unset($fields[$prefix . 'municipality']);
-            if (isset($fields[$prefix . 'city'])) {
-                $fields[$prefix . 'city']['priority'] = 11;
-            }
-            if (isset($fields[$prefix . 'state'])) {
-                $fields[$prefix . 'state']['priority'] = 12;
-            }
             return $fields;
         }
         // Guard: never inject the municipality field if its mode is Disabled.
