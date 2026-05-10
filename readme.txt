@@ -5,7 +5,7 @@ Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 8.1
 Requires Plugins: woocommerce
-Stable tag: 0.3.7
+Stable tag: 0.3.8
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,13 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 3. CodeOn hub menu with installed plugins listed underneath.
 
 == Changelog ==
+
+= 0.3.8 — 2026-05-11 =
+* **Surroundings picker pills no longer spill outside the box.** Root cause was twofold:
+    1. `Select2 v4.1.0-rc.0`'s `containerCssClass` option silently dropped on init — so every CSS rule I'd scoped to `.codeon-tbilisi-picker` never matched the rendered container, and Select2's tight defaults applied unmodified. Now adding the scoping class **manually** via `$sel.next('.select2-container').addClass(...)` immediately after init, guaranteed to take effect.
+    2. The fallback CSS used `float: left` on pills with a `display: block` parent `<ul>` — classic float-containment problem (parent height collapses, pills overflow downward). Switched to `display: flex; flex-wrap: wrap; gap: 6px` on the `<ul>` with `float: none; flex: 0 0 auto` on the pills. Parent now grows organically as pills wrap.
+* **Typed text in the search input is now unambiguously visible.** The search `<li>` is `flex: 1 0 100%` so it always wraps to its own line below the pills. The `<input>` inside is `width: 100%`, `min-height: 40px`, `font-size: 14px`, `color: #0b0f19`, `background: #fff`, with a 1px visible border and brand focus ring. No more typing into invisible 0-px inputs.
+* **Headless verified before tagging.** Built a puppeteer rig that loads the picker with 10 pre-selected pills, then types "gant" into the empty-state search field. Measured: 0 pills outside the container bounds, search input box is 684×40px, typed text colour is `rgb(11,15,25)`, background `rgb(255,255,255)`, font size 14px. Both screenshots inspected (`/tmp/picker-1-initial.png`, `/tmp/picker-2-typing-empty.png`) — pills wrap inside, typed text is clearly readable.
 
 = 0.3.7 — 2026-05-11 =
 * **Surroundings picker UX polish, modelled after WooCommerce's country selector.**
@@ -269,6 +276,9 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 * CodeOn hub claim.
 
 == Upgrade Notice ==
+
+= 0.3.8 =
+Surroundings picker: pills no longer overflow the container, typed search text is fully visible. Headless-browser verified before tagging. Strongly recommended.
 
 = 0.3.7 =
 Surroundings picker now mirrors the WC country-selector look — dedicated search row, visible typed text, clean labels. Area field moved to right after Country / Region on checkout. Recommended.

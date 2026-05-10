@@ -245,55 +245,59 @@ final class TbilisiTab extends Tab
 
         ?>
         <style>
-            /* Scoped Select2 styling for the surroundings picker.
-               Modelled after WooCommerce's country-selector multiselect:
-               light-grey container, pills floated above, dedicated
-               search-input row at the bottom with a visible white
-               background + border so typed text is unambiguously
-               readable. `containerCssClass` / `dropdownCssClass` in
-               the init below append these classes to the rendered
-               markup so the rules don't bleed into other Select2
-               instances. */
+            /* Scoped Select2 styling — `containerCssClass` and
+               `dropdownCssClass` in the init below append these
+               classes to the rendered markup so these rules don't
+               bleed into other Select2 instances elsewhere on the
+               page. */
 
             .select2-container.codeon-tbilisi-picker {
-                min-width: 560px;
+                width: 100% !important;
                 max-width: 820px;
+                min-width: 560px;
             }
 
-            /* The visible picker box. Light-grey background ("inkwell"
-               area for pills) with a thin outer border. min-height makes
-               it generously tall on first paint; height:auto + visible
-               overflow grow it downward as pills wrap. */
+            /* THE PICKER BOX. Two critical correctness rules vs the
+               previous attempts:
+                 - `height: auto` (no fixed height) so the box grows
+                   downward as pills wrap.
+                 - `display: flex; flex-wrap: wrap` on the inner <ul>
+                   (see below) — flex naturally contains its children's
+                   height; float-based layouts collapse the parent. */
             .select2-container.codeon-tbilisi-picker .select2-selection--multiple {
-                min-height: 140px !important;
+                min-height: 130px !important;
                 height: auto !important;
                 max-height: none !important;
                 border: 1px solid #d4d7de !important;
                 border-radius: 6px !important;
-                padding: 10px 10px 6px !important;
+                padding: 10px !important;
                 background: #f4f5f7 !important;
-                line-height: 1.4 !important;
                 overflow: visible !important;
-                cursor: text;
+                cursor: text !important;
+                box-sizing: border-box !important;
             }
             .select2-container.codeon-tbilisi-picker.select2-container--focus .select2-selection--multiple {
                 border-color: #2563eb !important;
                 box-shadow: 0 0 0 3px rgba(37,99,235,0.14) !important;
             }
 
-            /* The <ul> wrapper. Block-level so the dedicated search row
-               below it stacks naturally underneath the pill rows. */
+            /* THE INNER <ul> — flexbox with wrap. Pills are flex items
+               that wrap to subsequent rows; the search row sets
+               flex-basis 100% so it forces itself to its own line. */
             .select2-container.codeon-tbilisi-picker .select2-selection__rendered {
-                display: block !important;
+                display: flex !important;
+                flex-wrap: wrap !important;
+                align-items: center !important;
+                gap: 6px !important;
                 padding: 0 !important;
                 margin: 0 !important;
+                list-style: none !important;
                 line-height: 1.4 !important;
-                white-space: normal !important;
             }
 
-            /* Each picked settlement pill. Floated left so they wrap
-               naturally; brand-soft fill so they read as interactive
-               but quiet. */
+            /* Pills — content-sized flex items. `float: none` is
+               critical: Select2's default CSS sets float:left which
+               breaks flex layout. */
             .select2-container.codeon-tbilisi-picker .select2-selection__choice {
                 background: #fff !important;
                 border: 1px solid #d4d7de !important;
@@ -301,44 +305,50 @@ final class TbilisiTab extends Tab
                 padding: 4px 10px !important;
                 font-size: 13px !important;
                 border-radius: 4px !important;
-                margin: 0 6px 6px 0 !important;
+                margin: 0 !important;
                 line-height: 1.4 !important;
-                float: left !important;
-                display: inline-block !important;
-                vertical-align: middle !important;
+                float: none !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                flex: 0 0 auto !important;
             }
             .select2-container.codeon-tbilisi-picker .select2-selection__choice__remove {
                 color: #4b5363 !important;
                 font-size: 16px !important;
                 margin-right: 6px !important;
                 font-weight: 700 !important;
-                vertical-align: -1px;
+                line-height: 1 !important;
             }
 
-            /* THE FIX FOR THE USER COMPLAINT: dedicated search row,
-               on its own line below the pills, full-width, white
-               background, visible border, larger font. Typed text
-               can't get lost in the pill area. */
+            /* THE SEARCH ROW — full-width flex item, breaks to its
+               own line. Visible white background + dark text + border
+               so typed text is unambiguously visible regardless of
+               what's already picked. */
             .select2-container.codeon-tbilisi-picker .select2-search--inline {
-                display: block !important;
+                flex: 1 0 100% !important;
                 width: 100% !important;
                 float: none !important;
-                clear: both !important;
                 margin: 4px 0 0 !important;
                 padding: 0 !important;
+                list-style: none !important;
             }
             .select2-container.codeon-tbilisi-picker .select2-search--inline .select2-search__field {
                 box-sizing: border-box !important;
                 width: 100% !important;
-                min-height: 38px !important;
+                min-width: 100% !important;
+                min-height: 40px !important;
                 font-size: 14px !important;
                 color: #0b0f19 !important;
                 background: #fff !important;
                 border: 1px solid #d4d7de !important;
                 border-radius: 4px !important;
-                padding: 8px 12px !important;
+                padding: 9px 12px !important;
                 margin: 0 !important;
                 line-height: 1.4 !important;
+                display: block !important;
+                /* Defeat Select2's inline width-resizing JS that sets
+                   element.style.width based on typed content. */
+                font-family: inherit !important;
             }
             .select2-container.codeon-tbilisi-picker .select2-search--inline .select2-search__field:focus {
                 border-color: #2563eb !important;
@@ -346,14 +356,16 @@ final class TbilisiTab extends Tab
                 outline: none !important;
             }
             .select2-container.codeon-tbilisi-picker .select2-search__field::placeholder {
-                color: #9aa0ab;
+                color: #9aa0ab !important;
             }
 
-            /* Dropdown of search results — readable line-height. */
+            /* Dropdown of search results — z-index high enough to clear
+               sticky admin bars / other floating elements. */
             .select2-dropdown.codeon-tbilisi-picker-dropdown {
-                border-color: #d4d7de;
-                box-shadow: 0 8px 24px rgba(15,23,42,0.12);
+                border-color: #d4d7de !important;
+                box-shadow: 0 8px 24px rgba(15,23,42,0.12) !important;
                 min-width: 480px !important;
+                z-index: 999999 !important;
             }
             .select2-dropdown.codeon-tbilisi-picker-dropdown .select2-results__option {
                 padding: 8px 12px;
@@ -361,8 +373,8 @@ final class TbilisiTab extends Tab
                 line-height: 1.4;
             }
             .select2-dropdown.codeon-tbilisi-picker-dropdown .select2-results__option--highlighted {
-                background: #2563eb;
-                color: #fff;
+                background: #2563eb !important;
+                color: #fff !important;
             }
         </style>
         <table class="form-table"><tbody>
@@ -440,7 +452,7 @@ final class TbilisiTab extends Tab
                     minimumInputLength: 2,
                     allowClear: false,
                     closeOnSelect: false,
-                    ajax: {
+                    ajax: {<?php // containerCssClass is unreliable in Select2 v4.1.0-rc.0 ?>
                         url: $sel.data('rest-search'),
                         dataType: 'json',
                         delay: 200,
@@ -463,6 +475,17 @@ final class TbilisiTab extends Tab
                         cache: true,
                     },
                 });
+                // Force-apply our scoping class. Select2 v4.1.0-rc.0's
+                // `containerCssClass` option is unreliable (silently
+                // dropped on init), so we add the class directly to the
+                // rendered container after the widget mounts. All our
+                // CSS rules key off this class — without it, NONE of
+                // the overrides match and the picker falls back to
+                // Select2's tight defaults.
+                var $container = $sel.next('.select2-container');
+                if ($container.length) {
+                    $container.addClass('codeon-tbilisi-picker');
+                }
             }
         })(window.jQuery);
         </script>
