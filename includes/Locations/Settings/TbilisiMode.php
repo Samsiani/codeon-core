@@ -131,19 +131,13 @@ final class TbilisiMode
                 continue;
             }
             $mun = $repo->municipality((string) $s['municipality_id']);
-            $munLabel = $mun !== null ? $fmt->label($mun) : '';
 
-            // "Kondoli — Telavi muni, Kakheti" so customer can disambiguate.
-            $contextSuffix = trim(implode(', ', array_filter([
-                $munLabel,
-                $fmt->label(['name_ka' => $region['name_ka'], 'name_en' => $region['name_en']]),
-            ])));
-
+            // The dataset's name_ka already appends "(<muni>)" for
+            // disambiguated settlements (ka.wikipedia convention), so
+            // the formatter-resolved label is already self-contained.
             $areas[] = [
                 'key'             => 's' . (int) $s['id'],
-                'label'           => $contextSuffix !== ''
-                    ? $fmt->label($s) . ' — ' . $contextSuffix
-                    : $fmt->label($s),
+                'label'           => $fmt->label($s),
                 'state'           => (string) $region['wc_state_code'],
                 'muni_id'         => (string) ($mun['id'] ?? ''),
                 'settlement_id'   => (int) $s['id'],

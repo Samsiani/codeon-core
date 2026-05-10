@@ -245,57 +245,65 @@ final class TbilisiTab extends Tab
 
         ?>
         <style>
-            /* Scoped Select2 sizing for the surroundings picker. Lean
-               on Select2's natural inline-block <li> flow so the
-               container grows vertically as pills wrap. `containerCssClass`
-               / `dropdownCssClass` in the init below append these classes
-               to the rendered markup. */
+            /* Scoped Select2 styling for the surroundings picker.
+               Modelled after WooCommerce's country-selector multiselect:
+               light-grey container, pills floated above, dedicated
+               search-input row at the bottom with a visible white
+               background + border so typed text is unambiguously
+               readable. `containerCssClass` / `dropdownCssClass` in
+               the init below append these classes to the rendered
+               markup so the rules don't bleed into other Select2
+               instances. */
 
             .select2-container.codeon-tbilisi-picker {
                 min-width: 560px;
-                max-width: 760px;
+                max-width: 820px;
             }
 
-            /* The visible "input box" — minimum 120px tall so it reads as
-               a proper multi-line picker. height:auto + content overflow
-               makes it grow as the merchant adds more pills. */
+            /* The visible picker box. Light-grey background ("inkwell"
+               area for pills) with a thin outer border. min-height makes
+               it generously tall on first paint; height:auto + visible
+               overflow grow it downward as pills wrap. */
             .select2-container.codeon-tbilisi-picker .select2-selection--multiple {
-                min-height: 120px !important;
+                min-height: 140px !important;
                 height: auto !important;
                 max-height: none !important;
                 border: 1px solid #d4d7de !important;
                 border-radius: 6px !important;
-                padding: 6px 6px 0 !important;
-                background: #fff !important;
+                padding: 10px 10px 6px !important;
+                background: #f4f5f7 !important;
                 line-height: 1.4 !important;
                 overflow: visible !important;
+                cursor: text;
             }
             .select2-container.codeon-tbilisi-picker.select2-container--focus .select2-selection--multiple {
                 border-color: #2563eb !important;
                 box-shadow: 0 0 0 3px rgba(37,99,235,0.14) !important;
             }
 
-            /* The <ul> wrapper. Natural inline-block flow with adequate
-               padding-bottom keeps the last row of pills inside the
-               visible border. */
+            /* The <ul> wrapper. Block-level so the dedicated search row
+               below it stacks naturally underneath the pill rows. */
             .select2-container.codeon-tbilisi-picker .select2-selection__rendered {
+                display: block !important;
                 padding: 0 !important;
                 margin: 0 !important;
                 line-height: 1.4 !important;
                 white-space: normal !important;
             }
 
-            /* Each picked settlement pill. */
+            /* Each picked settlement pill. Floated left so they wrap
+               naturally; brand-soft fill so they read as interactive
+               but quiet. */
             .select2-container.codeon-tbilisi-picker .select2-selection__choice {
-                background: #eff4ff !important;
-                border: 1px solid #c9d9fe !important;
+                background: #fff !important;
+                border: 1px solid #d4d7de !important;
                 color: #0b0f19 !important;
-                padding: 5px 10px !important;
+                padding: 4px 10px !important;
                 font-size: 13px !important;
                 border-radius: 4px !important;
-                margin: 0 4px 6px 0 !important;
+                margin: 0 6px 6px 0 !important;
                 line-height: 1.4 !important;
-                float: none !important;
+                float: left !important;
                 display: inline-block !important;
                 vertical-align: middle !important;
             }
@@ -307,22 +315,35 @@ final class TbilisiTab extends Tab
                 vertical-align: -1px;
             }
 
-            /* The inline search field where you type. */
+            /* THE FIX FOR THE USER COMPLAINT: dedicated search row,
+               on its own line below the pills, full-width, white
+               background, visible border, larger font. Typed text
+               can't get lost in the pill area. */
             .select2-container.codeon-tbilisi-picker .select2-search--inline {
+                display: block !important;
+                width: 100% !important;
                 float: none !important;
-                display: inline-block !important;
-                vertical-align: middle !important;
+                clear: both !important;
+                margin: 4px 0 0 !important;
+                padding: 0 !important;
             }
             .select2-container.codeon-tbilisi-picker .select2-search--inline .select2-search__field {
-                min-width: 240px !important;
-                min-height: 30px !important;
+                box-sizing: border-box !important;
+                width: 100% !important;
+                min-height: 38px !important;
                 font-size: 14px !important;
                 color: #0b0f19 !important;
-                background: transparent !important;
-                padding: 4px 6px !important;
-                margin: 0 0 6px !important;
+                background: #fff !important;
+                border: 1px solid #d4d7de !important;
+                border-radius: 4px !important;
+                padding: 8px 12px !important;
+                margin: 0 !important;
                 line-height: 1.4 !important;
-                border: 0 !important;
+            }
+            .select2-container.codeon-tbilisi-picker .select2-search--inline .select2-search__field:focus {
+                border-color: #2563eb !important;
+                box-shadow: 0 0 0 2px rgba(37,99,235,0.18) !important;
+                outline: none !important;
             }
             .select2-container.codeon-tbilisi-picker .select2-search__field::placeholder {
                 color: #9aa0ab;
@@ -364,22 +385,12 @@ final class TbilisiTab extends Tab
                             if ($s === null) {
                                 continue;
                             }
-                            $region = $repo->region((string) $s['region_id']);
-                            $mun    = $repo->municipality((string) $s['municipality_id']);
-                            $context = trim(implode(', ', array_filter([
-                                $mun !== null ? $fmt->label($mun) : '',
-                                $region !== null ? $fmt->label([
-                                    'name_ka' => $region['name_ka'],
-                                    'name_en' => $region['name_en'],
-                                ]) : '',
-                            ])));
-                            $label = $context !== ''
-                                ? $fmt->label($s) . ' — ' . $context
-                                : $fmt->label($s);
+                            // Dataset's name_ka already appends the
+                            // muni in parens for disambiguated entries.
                             printf(
                                 '<option value="%d" selected>%s</option>',
                                 $sid,
-                                esc_html($label)
+                                esc_html($fmt->label($s))
                             );
                         }
                         ?>
@@ -437,10 +448,15 @@ final class TbilisiTab extends Tab
                         processResults: function (data) {
                             return {
                                 results: (data || []).map(function (row) {
-                                    return {
-                                        id: row.id,
-                                        text: row.name + (row.municipality_id ? ' — ' + row.municipality_id + ', ' + row.region_id : ''),
-                                    };
+                                    // The dataset's name_ka already
+                                    // appends the muni in parens for
+                                    // settlements that need
+                                    // disambiguation (ka.wikipedia
+                                    // convention), so row.name is
+                                    // already self-contained — no
+                                    // need to append region/muni
+                                    // slugs again.
+                                    return { id: row.id, text: row.name };
                                 }),
                             };
                         },

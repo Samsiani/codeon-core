@@ -315,12 +315,13 @@ final class ClassicCheckoutFields
             $stateKey = $group . '_state';
             $cityKey  = $group . '_city';
 
-            // State (Region): always hidden in Tbilisi mode. Kept on the
-            // form so WC tax/shipping has a value, defaulted to TB and
-            // overwritten by JS when the customer picks an area in
-            // Mode B.
+            // State (Region): always hidden in Tbilisi mode. Kept on
+            // the form (priority 12 so it stays right next to country
+            // in case any theme still renders hidden rows) so WC
+            // tax/shipping has a value, defaulted to TB and overwritten
+            // by JS when the customer picks an area in Mode B.
             if (isset($checkoutFields[$group][$stateKey])) {
-                $checkoutFields[$group][$stateKey]['priority'] = 45;
+                $checkoutFields[$group][$stateKey]['priority'] = 12;
                 $checkoutFields[$group][$stateKey]['class']    = array_merge(
                     (array) ($checkoutFields[$group][$stateKey]['class'] ?? []),
                     ['codeon-hidden-row', 'codeon-tbilisi-state']
@@ -331,8 +332,13 @@ final class ClassicCheckoutFields
 
             // City: in Mode A hidden + defaulted to Tbilisi. In Mode B
             // becomes the Area picker.
+            //
+            // Priority 11: places the field RIGHT after Country/Region
+            // (which is priority 10 in WC's default address fields).
+            // Country → Area → first_name (20) → last_name (20) → ... is
+            // the visible cascade order the merchant requested.
             if (isset($checkoutFields[$group][$cityKey])) {
-                $checkoutFields[$group][$cityKey]['priority'] = 47;
+                $checkoutFields[$group][$cityKey]['priority'] = 11;
                 if ($isPlus) {
                     $checkoutFields[$group][$cityKey]['type']     = 'select';
                     $checkoutFields[$group][$cityKey]['label']    = __('Area', 'codeon-core');

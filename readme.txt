@@ -5,7 +5,7 @@ Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 8.1
 Requires Plugins: woocommerce
-Stable tag: 0.3.6
+Stable tag: 0.3.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,15 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 3. CodeOn hub menu with installed plugins listed underneath.
 
 == Changelog ==
+
+= 0.3.7 — 2026-05-11 =
+* **Surroundings picker UX polish, modelled after WooCommerce's country selector.**
+    * Search input now sits on its own full-width row below the pills with a visible white background + light border. Typed text is unambiguously readable — fixes the "I can't see what I'm typing" report.
+    * Container background is light grey (`--bg-muted`) so the white pills + white search row read as distinct surfaces inside the picker.
+    * Container grows downward smoothly as pills wrap; no more pills falling outside the visible border.
+    * Dropped the redundant `" — Muni, Region"` suffix that the picker was appending to every result. The dataset's `name_ka` already disambiguates similarly-named villages with `(<muni>)` in parens — appending the slugs on top produced labels like *"არაშენდა (მცხეთის მუნიციპალიტეტი) — მცხეთის მუნიციპალიტეტი, მცხეთა-მთიანეთი"*. Now you just get *"არაშენდა (მცხეთის მუნიციპალიტეტი)"*.
+* **Area field repositioned on checkout.** Was rendering at priority 47 (between Company and Address line 1). Moved to priority 11 — sits immediately after Country / Region as the merchant requested. Hidden state field moved to priority 12 to stay paired with country in case any theme renders hidden rows.
+* The customer-facing Area dropdown labels also lost the redundant *" — Muni, Region"* suffix for the same dataset-disambiguation reason.
 
 = 0.3.6 — 2026-05-11 =
 * **Surroundings multiselect now actually persists picked settlements.** The framework's `FieldValidator::process()` explicitly skips `Field::RAW` entries (no built-in sanitizer / validator), so the picker rendered fine but the chosen settlement IDs never reached the option. Hooked `Tab::beforeSave()` to pull the raw POST array directly, sanitize each entry to a positive int + validate it exists in the dataset, and inject the result into the clean payload that gets persisted. Settlement IDs that don't resolve are silently dropped (defensive against tampered POSTs).
@@ -260,6 +269,9 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 * CodeOn hub claim.
 
 == Upgrade Notice ==
+
+= 0.3.7 =
+Surroundings picker now mirrors the WC country-selector look — dedicated search row, visible typed text, clean labels. Area field moved to right after Country / Region on checkout. Recommended.
 
 = 0.3.6 =
 Surroundings picker now actually saves selected settlements, has a tall + clear input area, and grows dynamically as you add more pills. Strongly recommended.
