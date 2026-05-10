@@ -238,7 +238,13 @@ final class TbilisiTab extends Tab
     private function renderSettlementsPicker(array $current): void
     {
         $repo = Repository::instance();
-        $fmt  = DisplayFormatter::fromOptions();
+        // Admin-side picker is always Georgian-only — Latin
+        // transliteration in the dropdown is noise for merchants and
+        // produces redundant labels like "ნორიო (გარდაბნის
+        // მუნიციპალიტეტი) (Norio (gardabnis munitsipaliteti))".
+        // The customer-facing Area dropdown still follows the merchant's
+        // display_mode (resolved in TbilisiMode::areaList).
+        $fmt  = new DisplayFormatter(['display_mode' => 'ka']);
 
         $name = 'codeon[tbilisi_surrounding_settlements]';
         $id   = 'codeon_tbilisi_surrounding_settlements';
@@ -464,7 +470,13 @@ final class TbilisiTab extends Tab
                         url: $sel.data('rest-search'),
                         dataType: 'json',
                         delay: 200,
-                        data: function (params) { return { q: params.term, limit: 30 }; },
+                        data: function (params) {
+                            // Force Georgian-only labels — same rationale as
+                            // the pre-rendered <option> labels above. The
+                            // REST controller honours ?display=ka and skips
+                            // the bilingual " (Latin)" suffix.
+                            return { q: params.term, limit: 30, display: 'ka' };
+                        },
                         processResults: function (data) {
                             return {
                                 results: (data || []).map(function (row) {

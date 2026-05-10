@@ -523,8 +523,19 @@ final class ClassicCheckoutFields
     public function extendDefaultFields(array $fields): array
     {
         // Tbilisi mode short-circuits the cascade entirely — let
-        // enforceFinalFieldSetup do all the field surgery.
+        // enforceFinalFieldSetup do the field surgery. We still need
+        // to set the geo-field priorities HERE though, because WC's
+        // get_checkout_fields() runs `uasort` on each fieldset BEFORE
+        // applying our priority-100000 `woocommerce_checkout_fields`
+        // filter — so a late priority change there is ignored when
+        // determining render order.
         if (TbilisiMode::isActive()) {
+            if (isset($fields['city'])) {
+                $fields['city']['priority'] = 11;
+            }
+            if (isset($fields['state'])) {
+                $fields['state']['priority'] = 12;
+            }
             return $fields;
         }
 
@@ -680,8 +691,18 @@ final class ClassicCheckoutFields
     private function ensureMunicipalityField(array $fields, string $prefix): array
     {
         // Tbilisi mode never wants a municipality field on the form.
+        // Also set the city + state priorities HERE (prefixed copies)
+        // so they land before WC's uasort. enforceFinalFieldSetup
+        // sets them too but runs after the sort — too late for
+        // render-order purposes.
         if (TbilisiMode::isActive()) {
             unset($fields[$prefix . 'municipality']);
+            if (isset($fields[$prefix . 'city'])) {
+                $fields[$prefix . 'city']['priority'] = 11;
+            }
+            if (isset($fields[$prefix . 'state'])) {
+                $fields[$prefix . 'state']['priority'] = 12;
+            }
             return $fields;
         }
         // Guard: never inject the municipality field if its mode is Disabled.

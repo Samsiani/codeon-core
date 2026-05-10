@@ -5,7 +5,7 @@ Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 8.1
 Requires Plugins: woocommerce
-Stable tag: 0.3.9
+Stable tag: 0.3.10
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,10 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 3. CodeOn hub menu with installed plugins listed underneath.
 
 == Changelog ==
+
+= 0.3.10 — 2026-05-11 =
+* **Area field now renders immediately under Country / Region on checkout.** Previously the `priority = 11` change was applied in `enforceFinalFieldSetup` (hooked at `woocommerce_checkout_fields` priority 100000) — but WC's `WC_Checkout::get_checkout_fields()` runs `uasort()` on each fieldset BEFORE applying that filter, so the late priority change had no effect on render order. Moved the priority assignment to the earlier `woocommerce_default_address_fields` + `woocommerce_billing_fields` / `woocommerce_shipping_fields` filters, which run before WC's sort, so Area now lands right after Country exactly as configured.
+* **Admin Surroundings picker is Georgian-only.** No more redundant labels like *"ნორიო (გარდაბნის მუნიციპალიტეტი) (Norio (gardabnis munitsipaliteti))"* — the trailing Latin transliteration is dropped both for pre-rendered selected pills AND for AJAX search results. The customer-facing Area dropdown still honours the merchant's `display_mode` setting; this change only affects the admin picker.
 
 = 0.3.9 — 2026-05-11 =
 * **Surroundings-picker pill polish** per merchant feedback:
@@ -283,6 +287,9 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 * CodeOn hub claim.
 
 == Upgrade Notice ==
+
+= 0.3.10 =
+Area field now sits right after Country/Region on checkout. Admin Surroundings picker shows Georgian-only labels (no redundant Latin transliteration).
 
 = 0.3.9 =
 Pill polish on the Surroundings picker: remove-× no longer cropped, default separator border dropped, 20px left-padding on each pill.
