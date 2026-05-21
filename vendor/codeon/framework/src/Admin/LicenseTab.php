@@ -92,37 +92,73 @@ final class LicenseTab extends Tab
     public function render(string $nonceAction): void
     {
         $snap = $this->adapter->snapshot();
-        $isActive = $this->adapter->status() === LicenseAdapter::STATUS_ACTIVE;
+        $status = $this->adapter->status();
+        $isActive = $status === LicenseAdapter::STATUS_ACTIVE;
+        // Grace counts as "currently usable" for the action-form
+        // branch (we don't want to hide the Release/Refresh buttons),
+        // but expired/revoked is "blocked" — those drop the meta dl
+        // and surface a renewal prompt instead.
+        $isBlocked = $status === LicenseAdapter::STATUS_EXPIRED;
 
         // One section: status meta + actions + (conditional) key input.
         echo '<section class="codeon-section codeon-license-section">';
 
-        echo '<dl class="codeon-license-meta">';
-        if (!empty($snap['key_masked'])) {
-            $this->renderMetaRow(__('Key', 'codeon-framework'), (string) $snap['key_masked']);
+        if ($isBlocked) {
+            // Honor user request (2026-05-21): when license is fully
+            // expired or revoked, replace the "Plan: Active" meta dl
+            // with an unambiguous notice. The action form below still
+            // renders so the merchant can paste a fresh key.
+            $message = match (true) {
+                !empty($snap['last_error'])
+                    => sprintf(
+                        __('License is no longer active. %s', 'codeon-framework'),
+                        (string) $snap['last_error']
+                    ),
+                default
+                    => __(
+                        'License is no longer active. Plugin functionality is suspended until you renew or paste a new key.',
+                        'codeon-framework'
+                    ),
+            };
+            echo '<div class="codeon-license-blocked notice notice-error inline" style="margin:0 0 12px;padding:10px 14px;">';
+            echo '<p style="margin:0;">' . esc_html($message) . '</p>';
+            if (!empty($snap['key_masked'])) {
+                echo '<p style="margin:6px 0 0;color:#646970;font-size:12.5px;">';
+                echo esc_html(sprintf(
+                    __('Previously bound key: %s', 'codeon-framework'),
+                    (string) $snap['key_masked']
+                ));
+                echo '</p>';
+            }
+            echo '</div>';
+        } else {
+            echo '<dl class="codeon-license-meta">';
+            if (!empty($snap['key_masked'])) {
+                $this->renderMetaRow(__('Key', 'codeon-framework'), (string) $snap['key_masked']);
+            }
+            if (!empty($snap['plan'])) {
+                $this->renderMetaRow(__('Plan', 'codeon-framework'), (string) $snap['plan']);
+            }
+            if (!empty($snap['bound_domain'])) {
+                $this->renderMetaRow(__('Bound domain', 'codeon-framework'), (string) $snap['bound_domain']);
+            }
+            if (!empty($snap['expires_at'])) {
+                $this->renderMetaRow(
+                    __('Expires', 'codeon-framework'),
+                    date_i18n(get_option('date_format'), (int) $snap['expires_at'])
+                );
+            }
+            if (!empty($snap['last_check'])) {
+                $this->renderMetaRow(
+                    __('Last checked', 'codeon-framework'),
+                    human_time_diff((int) $snap['last_check']) . ' ' . __('ago', 'codeon-framework')
+                );
+            }
+            if (!empty($snap['last_error'])) {
+                $this->renderMetaRow(__('Last error', 'codeon-framework'), (string) $snap['last_error']);
+            }
+            echo '</dl>';
         }
-        if (!empty($snap['plan'])) {
-            $this->renderMetaRow(__('Plan', 'codeon-framework'), (string) $snap['plan']);
-        }
-        if (!empty($snap['bound_domain'])) {
-            $this->renderMetaRow(__('Bound domain', 'codeon-framework'), (string) $snap['bound_domain']);
-        }
-        if (!empty($snap['expires_at'])) {
-            $this->renderMetaRow(
-                __('Expires', 'codeon-framework'),
-                date_i18n(get_option('date_format'), (int) $snap['expires_at'])
-            );
-        }
-        if (!empty($snap['last_check'])) {
-            $this->renderMetaRow(
-                __('Last checked', 'codeon-framework'),
-                human_time_diff((int) $snap['last_check']) . ' ' . __('ago', 'codeon-framework')
-            );
-        }
-        if (!empty($snap['last_error'])) {
-            $this->renderMetaRow(__('Last error', 'codeon-framework'), (string) $snap['last_error']);
-        }
-        echo '</dl>';
 
         $this->renderActionForm($nonceAction, $isActive, $this->pluginSlug);
 

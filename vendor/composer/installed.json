@@ -70,17 +70,17 @@
         },
         {
             "name": "codeon/framework",
-            "version": "0.3.16",
-            "version_normalized": "0.3.16.0",
+            "version": "0.3.18",
+            "version_normalized": "0.3.18.0",
             "source": {
                 "type": "git",
                 "url": "git@github.com:Samsiani/codeon-plugin-basic-architecture.git",
-                "reference": "113de90d98804224dae3cdb831cbe75105563fc0"
+                "reference": "2f7b138b3a5037ed24f40126e4b5630a0d4ad4b7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Samsiani/codeon-plugin-basic-architecture/zipball/113de90d98804224dae3cdb831cbe75105563fc0",
-                "reference": "113de90d98804224dae3cdb831cbe75105563fc0",
+                "url": "https://api.github.com/repos/Samsiani/codeon-plugin-basic-architecture/zipball/2f7b138b3a5037ed24f40126e4b5630a0d4ad4b7",
+                "reference": "2f7b138b3a5037ed24f40126e4b5630a0d4ad4b7",
                 "shasum": ""
             },
             "require": {
@@ -90,7 +90,7 @@
                 "phpstan/phpstan": "^1.11",
                 "phpunit/phpunit": "^10.5"
             },
-            "time": "2026-05-04T19:15:08+00:00",
+            "time": "2026-05-21T11:53:52+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -117,7 +117,7 @@
             "description": "Shared admin UI + chrome + hub menu + license/update plumbing for CodeOn WooCommerce plugins (codeon.ge).",
             "homepage": "https://github.com/Samsiani/codeon-plugin-basic-architecture",
             "support": {
-                "source": "https://github.com/Samsiani/codeon-plugin-basic-architecture/tree/v0.3.16",
+                "source": "https://github.com/Samsiani/codeon-plugin-basic-architecture/tree/v0.3.18",
                 "issues": "https://github.com/Samsiani/codeon-plugin-basic-architecture/issues"
             },
             "install-path": "../codeon/framework"
@@ -176,6 +176,6 @@
             "install-path": "../yahnis-elsts/plugin-update-checker"
         }
     ],
-    "dev": true,
+    "dev": false,
     "dev-package-names": []
 }

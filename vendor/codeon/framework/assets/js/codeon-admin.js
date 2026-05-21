@@ -23,21 +23,11 @@
     // --- Conditional show_when ---------------------------------------------
 
     function inputValue(name) {
-        // Prefer the actual checkbox if one is present. Checkboxes are
-        // rendered alongside a leading <input type="hidden" value="0">
-        // with the same name, so a plain querySelector for the name
-        // returns the hidden input first and reads its static "0" —
-        // the checkbox's checked state is never observed. Querying for
-        // [type=checkbox] explicitly fixes that.
-        var checkbox = document.querySelector(
-            '[name="codeon[' + name + ']"][type="checkbox"]'
-        );
-        if (checkbox) return checkbox.checked ? '1' : '0';
-
         var el = document.querySelector(
             '[name="codeon[' + name + ']"], [name="codeon[' + name + '][]"]'
         );
         if (!el) return '';
+        if (el.type === 'checkbox') return el.checked ? '1' : '0';
         if (el.tagName === 'SELECT' && el.multiple) {
             return Array.prototype.map.call(el.selectedOptions, function (o) { return o.value; }).join(',');
         }

@@ -5,7 +5,7 @@ Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 8.1
 Requires Plugins: woocommerce
-Stable tag: 0.3.12
+Stable tag: 0.3.13
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,9 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 3. CodeOn hub menu with installed plugins listed underneath.
 
 == Changelog ==
+
+= 0.3.13 — 2026-05-21 =
+* Hygiene: bump bundled `codeon/framework` from 0.3.16 → 0.3.18 for parity with the rest of the CodeOn plugin suite. No behavioural change — CodeOn Core is free and has no license enforcement to gate.
 
 = 0.3.12 — 2026-05-11 =
 * **Area position survives WC's client-side resort.** The previous releases had Area at the correct DOM position (right after Country) — but `assets/js/frontend/address-i18n.js` (shipped by WooCommerce itself) re-sorts checkout fields by `data-priority` on every `country_to_state_changing` event, reading the priorities from `wc_address_i18n_params.locale.default`. Those localised priorities still carried WC's untouched default `city: 70`, so on every country pick WC's own JS re-tagged Area with priority 70 and moved it to between Address-line-2 (60) and State (80). That's what the merchant kept screenshotting.

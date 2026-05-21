@@ -6,6 +6,22 @@ Shared admin UI + chrome framework for [codeon.ge](https://codeon.ge) WordPress 
 
 ---
 
+## Plugins using this framework
+
+| Plugin | Repo | Description |
+|---|---|---|
+| CodeOn Core | [Samsiani/codeon-core](https://github.com/Samsiani/codeon-core) | Free public plugin (WordPress.org). Adds the Georgian address hierarchy (13 regions / 77 municipalities / 4,394 settlements) as a cascading WooCommerce checkout picker, and bundles this framework into the WP.org ecosystem. |
+| Fina ↔ WooCommerce Sync | [Samsiani/fina-sync](https://github.com/Samsiani/fina-sync) | Keeps WooCommerce products, prices and stock aligned with the **Fina** accounting system on a scheduled sync. |
+| QuickShipper Delivery | [Samsiani/quickshipper-delivery](https://github.com/Samsiani/quickshipper-delivery) | Real-time WooCommerce shipping rates from QuickShipper couriers (Glovo, Wolt, Go Delivery, OnWay, Easy Way, Georgian Post, …). |
+| TBC Card Payments | [Samsiani/codeon-tbc-card-payment](https://github.com/Samsiani/codeon-tbc-card-payment) | TBC Bank Card (TPay) gateway — Visa / Mastercard / Apple Pay / Google Pay, 3DS, pre-auth + capture, refunds. |
+| TBC Online Installments | [Samsiani/codeon-tbc-Installments](https://github.com/Samsiani/codeon-tbc-Installments) | TBC Bank installments gateway for WooCommerce. |
+| BOG Card Payments | [Samsiani/codeon-bog-card-payment](https://github.com/Samsiani/codeon-bog-card-payment) | Bank of Georgia Card (iPay) gateway — Card / Apple Pay / Google Pay / BOG P2P / MR / Gift Card via Business API v1. |
+| BOG Installments | [Samsiani/codeon-bog-Installments](https://github.com/Samsiani/codeon-bog-Installments) | Bank of Georgia monthly-installments gateway for WooCommerce, with checkout estimator and reconcile sweep. |
+| Flitt Payments | [Samsiani/codeon-flitt-payment](https://github.com/Samsiani/codeon-flitt-payment) | Flitt (ex-Fondy) hosted-redirect card gateway with synchronous refunds and signed webhooks. |
+| Credo Installments | [Samsiani/codeon-credo-installments](https://github.com/Samsiani/codeon-credo-installments) | Credo Bank installments gateway for WooCommerce (polling-only, no webhook). |
+
+---
+
 ## What it gives you
 
 - **Standard chrome** — header (logo + name + version + global status pill), tab navigation with health dots, content area, footer with build watermark.

@@ -169,6 +169,20 @@ final class LicenseStore
         if ($serverStatus === 'suspended' || $serverStatus === 'revoked') {
             return 'revoked';
         }
+        // Server's explicit `expired` verdict wins over the local
+        // grace-window calculation. Grace is a "we can't reach
+        // codeon.ge" tolerance built on the expires date; if
+        // codeon.ge itself has already told us the license is
+        // expired, the local grace must NOT mask that. Burned by
+        // this on 2026-05-21 when a license set to `expired` from
+        // /admin/customers still resolved locally to `grace` for
+        // every CodeOn payment plugin because the snapshot's
+        // `expires` was within the grace window. Same fix-class as
+        // balance-sync v0.3.15 / fina-sync v3.14.4 /
+        // quickshipper-delivery v0.5.2.
+        if ($serverStatus === 'expired') {
+            return 'expired';
+        }
 
         $expires = isset($snap['expires']) ? strtotime((string) $snap['expires'] . ' UTC') : false;
         if ($expires === false) {
