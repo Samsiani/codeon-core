@@ -5,7 +5,7 @@ Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 8.1
 Requires Plugins: woocommerce
-Stable tag: 0.3.14
+Stable tag: 0.3.15
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,9 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 3. CodeOn hub menu with installed plugins listed underneath.
 
 == Changelog ==
+
+= 0.3.15 — 2026-05-21 =
+* No-op release to flush WordPress's plugin-card cache so the refreshed v0.3.14 icon + banner artwork shows up immediately on every merchant's Dashboard → Updates and Add New screens instead of after WP's next scheduled metadata refresh.
 
 = 0.3.14 — 2026-05-21 =
 * New: refreshed plugin icon + banner artwork. Glyph is now a stylized "C" with the CodeOn brand-mark dot inside its opening — reads as "the canonical CodeOn plugin" instead of the previous location-pin (which was misleading: CodeOn Core is the free hub for the whole plugin family, Georgian Locations is one feature among several planned). Family-consistent: deep-blue gradient + CodeOn corner mark held invariant per CODEON_PLUGIN_ICON_SYSTEM.md.
