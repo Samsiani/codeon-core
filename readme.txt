@@ -5,7 +5,7 @@ Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 8.1
 Requires Plugins: woocommerce
-Stable tag: 0.3.15
+Stable tag: 0.3.16
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,9 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 3. CodeOn hub menu with installed plugins listed underneath.
 
 == Changelog ==
+
+= 0.3.16 — 2026-05-21 =
+* Second no-op bump to flush WordPress's plugin-card cache. v0.3.15 didn't re-paint the icon on some sites because WP also caches the per-plugin transient that holds the icon URL — bumping the version a second time invalidates that secondary cache layer.
 
 = 0.3.15 — 2026-05-21 =
 * No-op release to flush WordPress's plugin-card cache so the refreshed v0.3.14 icon + banner artwork shows up immediately on every merchant's Dashboard → Updates and Add New screens instead of after WP's next scheduled metadata refresh.
