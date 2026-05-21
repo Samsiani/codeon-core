@@ -5,7 +5,7 @@ Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 8.1
 Requires Plugins: woocommerce
-Stable tag: 0.3.18
+Stable tag: 0.3.19
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,9 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 3. CodeOn hub menu with installed plugins listed underneath.
 
 == Changelog ==
+
+= 0.3.19 — 2026-05-21 =
+* No-op bump so sites already on v0.3.18 see a fresh update line. The v0.3.18 icon-injection fix now propagates on the next force-check.
 
 = 0.3.18 — 2026-05-21 =
 * Fix: plugin icon + banner now actually show on Dashboard → Updates and in the "View details" modal. The artwork has shipped inside the plugin ZIP since v0.3.14, but WordPress couldn't see it — PUC (the GitHub-update bridge) doesn't auto-discover `assets/icon/*` files. Added a `puc_request_info_result-codeon-core` filter that injects the icon + banner URLs into the update payload. Previous attempts (v0.3.15 / 16 / 17) were no-op version bumps that couldn't have fixed this — the URLs weren't in the response at all.
