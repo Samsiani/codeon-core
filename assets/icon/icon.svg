@@ -1,42 +1,68 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="CodeOn Core">
+  <!--
+    CodeOn plugin icon — CodeOn Core (the family hub + Georgian
+    Locations for WooCommerce).
+    Family template: deep-blue rounded square, white central glyph,
+    CodeOn corner mark. Glyph: stylized "C" arc with a brand-blue
+    code-mark dot inside its opening — visually echoes the codeon.ge
+    chevron-dot brand mark at scale, signalling "this is the canonical
+    CodeOn plugin." Different from the other plugins (which use
+    domain-specific glyphs like cards / pins / boxes) so the hub is
+    instantly identifiable as the hub. Specs in
+    CODEON_PLUGIN_ICON_SYSTEM.md.
+  -->
   <defs>
-    <!-- §2 background gradient — invariant across all CodeOn plugins -->
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%"  stop-color="#1e3a8a"/>
-      <stop offset="100%" stop-color="#2563eb"/>
+      <stop offset="0" stop-color="#1e3a8a"/>
+      <stop offset="1" stop-color="#2563eb"/>
     </linearGradient>
-    <!-- §3 central glyph fill — white → light-indigo vertical -->
-    <linearGradient id="pin" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%"  stop-color="#ffffff"/>
-      <stop offset="100%" stop-color="#e0e7ff"/>
+    <linearGradient id="glyph" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#e0e7ff"/>
     </linearGradient>
   </defs>
 
-  <!-- §1 canvas: rounded square, rx=48 (iOS app-icon grid) -->
-  <rect width="256" height="256" rx="48" fill="url(#bg)"/>
+  <rect x="0" y="0" width="256" height="256" rx="48" ry="48" fill="url(#bg)"/>
 
-  <!-- §3 soft under-shadow grounding the glyph -->
-  <ellipse cx="128" cy="200" rx="70" ry="8" fill="#000000" opacity="0.18"/>
-
-  <!-- §3 central glyph: stylized location pin within 192×192 safe zone
-       (32 ≤ x,y ≤ 224). One idea, no composition. The hollow circle in the
-       pin reads cleanly at 40px and ties to the cascade UX (the "selected"
-       point). -->
-  <g>
-    <!-- Pin body -->
-    <path d="M 128 36
-             C 88 36, 56 68, 56 108
-             C 56 156, 128 220, 128 220
-             C 128 220, 200 156, 200 108
-             C 200 68, 168 36, 128 36 Z"
-          fill="url(#pin)"/>
-    <!-- Inner hole — the "selected location" tap target. Brand-blue
-         accent (§3 says #2563eb / #1e40af for accents). -->
-    <circle cx="128" cy="108" r="26" fill="#1e40af"/>
-    <circle cx="128" cy="108" r="14" fill="#ffffff"/>
+  <!--
+    Subtle "code lines" gutter, upper-left. Two short horizontal
+    strokes at low opacity — reads as an IDE / code-editor texture
+    without competing with the glyph. (Replaces the suite's "speed
+    lines" cue, which doesn't apply to a settings / hub plugin.)
+  -->
+  <g opacity="0.16" fill="none" stroke="#ffffff" stroke-linecap="round" stroke-width="6">
+    <line x1="36" y1="78"  x2="78"  y2="78"/>
+    <line x1="22" y1="112" x2="64"  y2="112"/>
   </g>
 
-  <!-- §4 CodeOn corner mark — mandatory, never alter proportions/colours -->
+  <!-- Soft drop shadow grounding the glyph -->
+  <ellipse cx="128" cy="208" rx="64" ry="8" fill="#000000" opacity="0.20"/>
+
+  <!--
+    Stylized "C" — thick stroked arc from top opening counter-
+    clockwise to bottom opening. Centered slightly left of canvas
+    centre (124,128) so the C's opening sits balanced against the
+    code-mark dot to its right. Stroke width 26 reads cleanly down
+    to a 40px favicon.
+  -->
+  <g>
+    <path d="M 180 80
+             A 56 56 0 1 0 180 176"
+          fill="none"
+          stroke="url(#glyph)"
+          stroke-width="26"
+          stroke-linecap="round"/>
+    <!--
+      Code-mark dot inside the C's opening. Brand-blue accent
+      echoes the codeon.ge corner mark's chevron-dot pattern at
+      scale; reads as "CodeOn" without needing literal type.
+    -->
+    <circle cx="174" cy="128" r="12" fill="#1e40af"/>
+    <circle cx="174" cy="128" r="6"  fill="#ffffff"/>
+  </g>
+
+  <!-- CodeOn signature mark, bottom-right corner. Invariant. -->
   <g transform="translate(196 196)" opacity="0.9">
     <rect x="-18" y="-18" width="36" height="36" rx="10" ry="10"
           fill="none" stroke="#ffffff" stroke-width="3"/>

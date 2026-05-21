@@ -1,63 +1,69 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1544 500" width="1544" height="500">
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1544 500" width="1544" height="500" role="img" aria-label="CodeOn Core">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%"  stop-color="#1e3a8a"/>
-      <stop offset="100%" stop-color="#2563eb"/>
+    <linearGradient id="bn-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0f2167"/>
+      <stop offset="0.55" stop-color="#1e3a8a"/>
+      <stop offset="1" stop-color="#2563eb"/>
     </linearGradient>
-    <linearGradient id="pin" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%"  stop-color="#ffffff"/>
-      <stop offset="100%" stop-color="#e0e7ff"/>
+    <linearGradient id="bn-glyph" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#e0e7ff"/>
     </linearGradient>
   </defs>
 
-  <!-- Background — same gradient as icon -->
-  <rect width="1544" height="500" fill="url(#bg)"/>
+  <rect x="0" y="0" width="1544" height="500" fill="url(#bn-bg)"/>
 
-  <!-- Subtle decorative grid lines, 6% opacity, suggesting "structured data".
-       Kept under 20% intensity per spec rule "background is invariant" — these
-       are texture, not branding. -->
-  <g opacity="0.06" stroke="#ffffff" stroke-width="1" fill="none">
-    <line x1="0" y1="125" x2="1544" y2="125"/>
-    <line x1="0" y1="250" x2="1544" y2="250"/>
-    <line x1="0" y1="375" x2="1544" y2="375"/>
+  <!-- Subtle horizontal grid for depth -->
+  <g opacity="0.08" fill="none" stroke="#ffffff" stroke-width="2">
+    <line x1="0" y1="120" x2="1544" y2="120"/>
+    <line x1="0" y1="240" x2="1544" y2="240"/>
+    <line x1="0" y1="360" x2="1544" y2="360"/>
   </g>
 
-  <!-- LEFT 55%: text block. Padding from the left edge = 110.
-       All text stays within left 50% per spec to avoid modal clipping. -->
-  <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif" fill="#ffffff">
-    <!-- Wordmark: 700 / 84px -->
-    <text x="110" y="180" font-size="84" font-weight="700" letter-spacing="-2">CodeOn Core</text>
-    <!-- Subtitle: 500 / 48px, slightly muted -->
-    <text x="110" y="248" font-size="42" font-weight="500" fill="#c7d2fe">Georgian Locations for WooCommerce</text>
-    <!-- Feature strip: 500 / 22px ALL-CAPS, accent color -->
-    <text x="110" y="320" font-size="22" font-weight="500" letter-spacing="3" fill="#fbbf24">13 REGIONS · 77 MUNICIPALITIES · 4,394 SETTLEMENTS</text>
+  <!-- "Code-line" gutter ticks, left edge — matches the icon's same texture -->
+  <g opacity="0.32" fill="none" stroke="#ffffff" stroke-linecap="round" stroke-width="8">
+    <line x1="60" y1="160" x2="200" y2="160"/>
+    <line x1="40" y1="250" x2="180" y2="250"/>
+    <line x1="60" y1="340" x2="200" y2="340"/>
   </g>
 
-  <!-- RIGHT ~35%: oversized version of the central glyph.
-       Centered around x=1240, scaled ~2.4x. Kept ≥48px from every edge. -->
-  <g transform="translate(1240 250) scale(2.4)">
-    <ellipse cx="0" cy="100" rx="70" ry="8" fill="#000000" opacity="0.18"/>
-    <path d="M 0 -64
-             C -40 -64, -72 -32, -72 8
-             C -72 56, 0 120, 0 120
-             C 0 120, 72 56, 72 8
-             C 72 -32, 40 -64, 0 -64 Z"
-          fill="url(#pin)"/>
-    <circle cx="0" cy="8" r="26" fill="#1e40af"/>
-    <circle cx="0" cy="8" r="14" fill="#ffffff"/>
+  <!--
+    Oversized "C" glyph on the right, centred at (1280, 250).
+    Same proportions as the icon (~3.6× scale): radius 200,
+    stroke 80, code-mark dot inside the opening.
+  -->
+  <g transform="translate(1280 250)">
+    <ellipse cx="-30" cy="220" rx="220" ry="22" fill="#000000" opacity="0.28"/>
+    <path d="M 170 -170
+             A 200 200 0 1 0 170 170"
+          fill="none"
+          stroke="url(#bn-glyph)"
+          stroke-width="80"
+          stroke-linecap="round"/>
+    <circle cx="150" cy="0" r="42" fill="#1e40af"/>
+    <circle cx="150" cy="0" r="22" fill="#ffffff"/>
   </g>
 
-  <!-- BOTTOM-LEFT: codeon.ge wordmark + CodeOn corner mark, 88% opacity -->
-  <g transform="translate(110 440)" opacity="0.88">
-    <text font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif"
-          font-size="22" font-weight="500" fill="#ffffff" letter-spacing="0.5">codeon.ge</text>
-    <g transform="translate(160 -10)">
-      <rect x="-18" y="-18" width="36" height="36" rx="10" ry="10"
-            fill="none" stroke="#ffffff" stroke-width="3"/>
-      <path d="M -6 -7 L -11 0 L -6 7"
-            fill="none" stroke="#ffffff" stroke-width="3"
-            stroke-linecap="round" stroke-linejoin="round"/>
-      <circle cx="6" cy="0" r="3" fill="#ffffff"/>
-    </g>
+  <!-- Wordmark, subtitle, feature strip -->
+  <g transform="translate(110 200)" fill="#ffffff"
+     font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif">
+    <text x="0" y="0" font-size="84" font-weight="700" letter-spacing="-2">CodeOn Core</text>
+    <text x="0" y="80" font-size="48" font-weight="500" letter-spacing="-1" opacity="0.92">The canonical hub for the CodeOn plugin family</text>
+    <text x="0" y="140" font-size="22" font-weight="500" letter-spacing="1" opacity="0.7">PLUGIN HUB · GEORGIAN LOCATIONS · CHECKOUT FIELDS · MORE TO COME</text>
+  </g>
+
+  <!-- codeon.ge wordmark + CodeOn mark, bottom-left -->
+  <g transform="translate(110 410)" opacity="0.88">
+    <rect x="0" y="-22" width="44" height="44" rx="12" ry="12"
+          fill="none" stroke="#ffffff" stroke-width="3"/>
+    <path d="M 14 -10 L 8 0 L 14 10"
+          fill="none" stroke="#ffffff" stroke-width="3"
+          stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="30" cy="0" r="3.5" fill="#ffffff"/>
+    <text x="60" y="6" font-size="20" font-weight="600" fill="#ffffff"
+          font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif">
+      codeon<tspan opacity="0.7">.ge</tspan>
+    </text>
   </g>
 </svg>

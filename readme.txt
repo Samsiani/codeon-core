@@ -5,7 +5,7 @@ Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 8.1
 Requires Plugins: woocommerce
-Stable tag: 0.3.13
+Stable tag: 0.3.14
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,10 @@ Yes — Abkhazia and the Tskhinvali region are in the dataset but **hidden by de
 3. CodeOn hub menu with installed plugins listed underneath.
 
 == Changelog ==
+
+= 0.3.14 — 2026-05-21 =
+* New: refreshed plugin icon + banner artwork. Glyph is now a stylized "C" with the CodeOn brand-mark dot inside its opening — reads as "the canonical CodeOn plugin" instead of the previous location-pin (which was misleading: CodeOn Core is the free hub for the whole plugin family, Georgian Locations is one feature among several planned). Family-consistent: deep-blue gradient + CodeOn corner mark held invariant per CODEON_PLUGIN_ICON_SYSTEM.md.
+* Update: banner subtitle now reads "The canonical hub for the CodeOn plugin family" with a feature strip that covers the broader scope ("PLUGIN HUB · GEORGIAN LOCATIONS · CHECKOUT FIELDS · MORE TO COME") rather than implying the plugin is locations-only.
 
 = 0.3.13 — 2026-05-21 =
 * Hygiene: bump bundled `codeon/framework` from 0.3.16 → 0.3.18 for parity with the rest of the CodeOn plugin suite. No behavioural change — CodeOn Core is free and has no license enforcement to gate.
