@@ -3,7 +3,7 @@
  * Plugin Name:       CodeOn Core
  * Plugin URI:        https://wordpress.org/plugins/codeon-core/
  * Description:       Georgian Locations for WooCommerce — replaces the free-text City field with a real cascading Region → Municipality → Settlement picker (4,394 settlements bundled). Also the canonical hub for the CodeOn plugin family.
- * Version:           0.3.17
+ * Version:           0.3.18
  * Requires at least: 6.2
  * Requires PHP:      8.1
  * Requires Plugins:  woocommerce
@@ -31,7 +31,7 @@ if (defined('CODEON_CORE_VERSION')) {
     return;
 }
 
-define('CODEON_CORE_VERSION', '0.3.17');
+define('CODEON_CORE_VERSION', '0.3.18');
 define('CODEON_CORE_FILE', __FILE__);
 define('CODEON_CORE_PATH', plugin_dir_path(__FILE__));
 define('CODEON_CORE_URL', plugin_dir_url(__FILE__));
@@ -99,6 +99,36 @@ if (is_file(CODEON_CORE_PATH . 'vendor/yahnis-elsts/plugin-update-checker/plugin
         if (method_exists($vcsApi, 'enableReleaseAssets')) {
             $vcsApi->enableReleaseAssets();
         }
+
+        // Inject icon + banner URLs into the update payload. Without
+        // these, WordPress shows the default-tile placeholder on
+        // Dashboard → Updates and a blank header in the "View details"
+        // modal — even though the artwork ships inside the plugin
+        // ZIP. PUC doesn't auto-discover assets/icon/*; we have to
+        // hand them to it via the puc_request_info_result-<slug>
+        // filter. The filter fires once per upstream metadata fetch
+        // and the result is cached in the external_updates-codeon-core
+        // option for 12 h, so this isn't a per-request cost.
+        add_filter(
+            'puc_request_info_result-codeon-core',
+            static function ($info) {
+                if (!is_object($info)) {
+                    return $info;
+                }
+                $base = plugins_url('assets/icon/', CODEON_CORE_FILE);
+                $info->icons = [
+                    '1x'      => $base . 'icon-128x128.png',
+                    '2x'      => $base . 'icon-256x256.png',
+                    'svg'     => $base . 'icon.svg',
+                    'default' => $base . 'icon-256x256.png',
+                ];
+                $info->banners = [
+                    'low'  => $base . 'banner-772x250.png',
+                    'high' => $base . 'banner-1544x500.png',
+                ];
+                return $info;
+            }
+        );
     }
 }
 
